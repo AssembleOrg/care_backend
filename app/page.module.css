@@ -242,19 +242,21 @@
 
 .stepNumber {
   position: absolute;
-  top: -15px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
-  width: 30px;
-  height: 30px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-weight: 700;
-  font-size: 0.9rem;
+  font-weight: 800;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+  border: 3px solid white;
 }
 
 .stepIcon {
