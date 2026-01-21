@@ -2,7 +2,7 @@
 
 import { AppShell, NavLink, Group, Text, Avatar, Menu, UnstyledButton, Divider } from '@mantine/core';
 import { useRouter, usePathname } from 'next/navigation';
-import { IconHome, IconUsers, IconUser, IconFileText, IconReceipt, IconChartBar, IconLogout, IconChevronDown, IconCalculator } from '@tabler/icons-react';
+import { IconHome, IconUsers, IconUser, IconFileText, IconReceipt, IconChartBar, IconLogout, IconChevronDown, IconCalculator, IconClipboardText } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/src/infrastructure/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -18,9 +18,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     // Mark as mounted after first render to avoid hydration issues
     setMounted(true);
-    
+
     let isMounted = true;
-    
+
     // Get initial user
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (isMounted) {
@@ -68,6 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Pagos', icon: IconReceipt, href: '/admin/pagos' },
     { label: 'Liquidaciones', icon: IconCalculator, href: '/admin/liquidaciones' },
     { label: 'Reportes', icon: IconChartBar, href: '/admin/reportes' },
+    { label: 'Contratos', icon: IconClipboardText, href: '/admin/contratos' },
   ];
 
   return (
@@ -95,7 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               CareByDani
             </Text>
           </Link>
-          
+
           <Menu shadow="md" width={200}>
             <Menu.Target>
               <UnstyledButton>
@@ -145,7 +146,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             />
           ))}
         </AppShell.Section>
-        
+
         <AppShell.Section>
           <Divider my="sm" />
           <NavLink
@@ -156,7 +157,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           />
         </AppShell.Section>
       </AppShell.Navbar>
-      
+
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>
   );
