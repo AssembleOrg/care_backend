@@ -1,34 +1,39 @@
 'use client';
 
-import { AppShell, NavLink, Group, Text, Avatar, Menu, UnstyledButton, Divider } from '@mantine/core';
 import { useRouter, usePathname } from 'next/navigation';
-import { IconHome, IconUsers, IconUser, IconFileText, IconReceipt, IconChartBar, IconLogout, IconChevronDown, IconCalculator } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/src/infrastructure/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import Link from 'next/link';
+import { Menu, UnstyledButton } from '@mantine/core';
+import styles from './admin.module.css';
+import './admin-globals.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [darkMode, setDarkMode] = useState(true); // Default to dark mode
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
-    // Mark as mounted after first render to avoid hydration issues
+    // Initialize dark mode - only apply to admin container, not html
+    const savedDarkMode = localStorage.getItem('darkMode');
+    const shouldBeDark = savedDarkMode === null ? true : savedDarkMode === 'true';
+    
+    setDarkMode(shouldBeDark);
     setMounted(true);
     
     let isMounted = true;
     
-    // Get initial user
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (isMounted) {
         setUser(user);
       }
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
         setUser(session?.user ?? null);
@@ -39,13 +44,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       isMounted = false;
       subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [supabase]);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('darkMode', darkMode ? 'true' : 'false');
+      // Add/remove class on body for modals/dropdowns that render outside adminContainer
+      if (darkMode) {
+        document.body.classList.add('admin-dark-mode');
+      } else {
+        document.body.classList.remove('admin-dark-mode');
+      }
+    }
+    // Cleanup: remove class when component unmounts or pathname changes
+    return () => {
+      if (pathname?.startsWith('/admin') && pathname !== '/admin/login') {
+        // Only keep class if still in admin area
+        return;
+      }
+      document.body.classList.remove('admin-dark-mode');
+    };
+  }, [darkMode, mounted, pathname]);
 
   if (!mounted) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa' }}>
-        <Text c="dimmed">Cargando...</Text>
+      <div className={styles.loadingContainer}>
+        <p>Cargando...</p>
       </div>
     );
   }
@@ -60,104 +84,140 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.refresh();
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   const navItems = [
-    { label: 'Dashboard', icon: IconHome, href: '/admin' },
-    { label: 'Cuidadores', icon: IconUsers, href: '/admin/cuidadores' },
-    { label: 'Personas Asistidas', icon: IconUser, href: '/admin/personas-asistidas' },
-    { label: 'Asignaciones', icon: IconFileText, href: '/admin/asignaciones' },
-    { label: 'Pagos', icon: IconReceipt, href: '/admin/pagos' },
-    { label: 'Liquidaciones', icon: IconCalculator, href: '/admin/liquidaciones' },
-    { label: 'Reportes', icon: IconChartBar, href: '/admin/reportes' },
+    { label: 'Dashboard', icon: 'dashboard', href: '/admin' },
+    { label: 'Cuidadores', icon: 'people', href: '/admin/cuidadores' },
+    { label: 'Personas Asistidas', icon: 'elderly', href: '/admin/personas-asistidas' },
+    { label: 'Asignaciones', icon: 'assignment', href: '/admin/asignaciones' },
+    { label: 'Pagos', icon: 'receipt_long', href: '/admin/pagos' },
+    { label: 'Liquidaciones', icon: 'calculate', href: '/admin/liquidaciones' },
+    { label: 'Reportes', icon: 'bar_chart', href: '/admin/reportes' },
   ];
 
-  return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 260,
-        breakpoint: 'sm',
-      }}
-      padding="md"
-      styles={{
-        main: {
-          background: '#f8f9fa',
-        },
-      }}
-    >
-      <AppShell.Header style={{ background: 'white', borderBottom: '1px solid #eaeaea' }}>
-        <Group h="100%" px="md" justify="space-between">
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <Text fw={700} size="lg" style={{
-              background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>
-              CareByDani
-            </Text>
-          </Link>
-          
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <UnstyledButton>
-                <Group gap="xs">
-                  <Avatar size="sm" radius="xl" color="pink">
-                    {user?.email?.charAt(0).toUpperCase() || 'A'}
-                  </Avatar>
-                  <Text size="sm" fw={500}>
-                    {user?.email?.split('@')[0] || 'Admin'}
-                  </Text>
-                  <IconChevronDown size={14} />
-                </Group>
-              </UnstyledButton>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>{user?.email || 'admin@example.com'}</Menu.Label>
-              <Menu.Divider />
-              <Menu.Item leftSection={<IconLogout size={14} />} color="red" onClick={handleLogout}>
-                Cerrar sesión
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Group>
-      </AppShell.Header>
+  const currentPageTitle = navItems.find(item => item.href === pathname)?.label || 'Dashboard';
 
-      <AppShell.Navbar p="md" style={{ background: 'white', borderRight: '1px solid #eaeaea' }}>
-        <AppShell.Section grow>
+  return (
+    <div className={`${styles.adminContainer} ${darkMode ? 'dark' : ''}`}>
+      {/* Mobile Menu Overlay */}
+      {sidebarOpen && (
+        <div 
+          className={styles.mobileOverlay}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
+        <div className={styles.sidebarHeader}>
+          <div className={styles.logoContainer}>
+            <span className="material-icons">medical_services</span>
+            <h1 className={styles.logoTitle}>CareByDani</h1>
+          </div>
+        </div>
+
+        <nav className={styles.nav}>
           {navItems.map((item) => (
-            <NavLink
+            <Link
               key={item.href}
-              label={item.label}
-              leftSection={<item.icon size={20} />}
-              active={pathname === item.href}
-              onClick={() => router.push(item.href)}
-              mb="xs"
-              style={{
-                borderRadius: '8px',
-              }}
-              styles={{
-                root: {
-                  '&[data-active="true"]': {
-                    background: 'rgba(255, 107, 157, 0.1)',
-                    color: '#FF6B9D',
-                  },
-                },
-              }}
-            />
+              href={item.href}
+              className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ''}`}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <span className="material-icons-outlined">{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
           ))}
-        </AppShell.Section>
-        
-        <AppShell.Section>
-          <Divider my="sm" />
-          <NavLink
-            label="Volver al inicio"
-            leftSection={<IconHome size={20} />}
-            onClick={() => router.push('/')}
-            style={{ borderRadius: '8px' }}
-          />
-        </AppShell.Section>
-      </AppShell.Navbar>
-      
-      <AppShell.Main>{children}</AppShell.Main>
-    </AppShell>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            <span className="material-icons-outlined">logout</span>
+            <span>Cerrar Sesión</span>
+          </button>
+          <Link href="/" className={styles.homeLink} onClick={() => setSidebarOpen(false)}>
+            <span className="material-icons-outlined">home</span>
+            <span>Volver al inicio</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className={styles.main}>
+        {/* Background Blur */}
+        <div className={styles.backgroundBlur}></div>
+
+        {/* Header */}
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <button 
+              className={styles.mobileMenuButton}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className="material-icons-outlined">menu</span>
+            </button>
+            <h2 className={styles.headerTitle}>{currentPageTitle}</h2>
+          </div>
+          <div className={styles.headerActions}>
+            <button className={styles.notificationButton}>
+              <span className="material-icons-outlined">notifications</span>
+              <span className={styles.notificationBadge}></span>
+            </button>
+            <Menu shadow="md" width={200} position="bottom-end">
+              <Menu.Target>
+                <UnstyledButton className={styles.userMenuButton}>
+                  <div className={styles.userMenu}>
+                    <div className={styles.userAvatar}>
+                      {user?.email?.charAt(0).toUpperCase() || 'A'}
+                    </div>
+                    <div className={styles.userInfo}>
+                      <span className={styles.userName}>Administrador</span>
+                      <span className={styles.userEmail}>{user?.email || 'admin@carebydani.com'}</span>
+                    </div>
+                    <span className="material-icons-outlined">expand_more</span>
+                  </div>
+                </UnstyledButton>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>{user?.email || 'admin@carebydani.com'}</Menu.Label>
+                <Menu.Divider />
+                <Menu.Item 
+                  leftSection={<span className="material-icons-outlined" style={{ fontSize: '18px' }}>logout</span>}
+                  color="red"
+                  onClick={handleLogout}
+                >
+                  Cerrar Sesión
+                </Menu.Item>
+                <Menu.Item 
+                  leftSection={<span className="material-icons-outlined" style={{ fontSize: '18px' }}>home</span>}
+                  component={Link}
+                  href="/"
+                >
+                  Volver al inicio
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className={styles.content}>
+          {children}
+        </div>
+      </main>
+
+      {/* Dark Mode Toggle */}
+      <button onClick={toggleDarkMode} className={styles.darkModeToggle} type="button">
+        {darkMode ? (
+          <span className="material-icons">light_mode</span>
+        ) : (
+          <span className="material-icons">dark_mode</span>
+        )}
+      </button>
+    </div>
   );
 }

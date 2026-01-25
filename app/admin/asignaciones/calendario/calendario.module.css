@@ -1,0 +1,201 @@
+/* Vista Desktop: Tabla de calendario */
+.calendarWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Fuerza anchos uniformes basados en las definiciones */
+}
+
+.hourColumn {
+  width: 100px;
+  padding: 8px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+  background: transparent;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.dayColumn {
+  width: calc((100% - 100px) / 7); /* Distribuye el espacio restante equitativamente entre 7 días */
+  padding: 8px;
+  text-align: center;
+  border-bottom: 2px solid #dee2e6;
+  background: transparent;
+  word-wrap: break-word;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.hourCell {
+  width: 100px;
+  padding: 4px 8px;
+  border-right: 1px solid #dee2e6;
+  font-size: 12px;
+  color: #666;
+  background-color: white;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.dayCell {
+  width: calc((100% - 100px) / 7);
+  padding: 2px;
+  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid #e9ecef;
+  position: relative;
+  height: 60px;
+  background: transparent;
+  vertical-align: top;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Dark Mode para calendario desktop */
+:global(.adminContainer.dark) .hourColumn,
+:global(body.admin-dark-mode) .hourColumn {
+  background-color: #1e293b !important;
+}
+
+:global(.adminContainer.dark) .hourCell,
+:global(body.admin-dark-mode) .hourCell {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+:global(.adminContainer.dark) .dayColumn,
+:global(body.admin-dark-mode) .dayColumn {
+  color: #f1f5f9 !important;
+}
+
+:global(.adminContainer.dark) .calendarTable,
+:global(body.admin-dark-mode) .calendarTable {
+  border-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .dayCell,
+:global(body.admin-dark-mode) .dayCell {
+  border-color: #334155 !important;
+}
+
+/* Vista Mobile: Cards por día */
+.dayCard {
+  background: white;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.dayCardToday {
+  border: 2px solid #ffc107;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.02) 100%);
+}
+
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 12px;
+}
+
+.dayTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dayIcon {
+  color: #0ea5e9;
+  flex-shrink: 0;
+}
+
+.asignacionCard {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.asignacionCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left-width: 6px;
+}
+
+.asignacionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.asignacionInfo {
+  flex: 1;
+}
+
+.asignacionTime {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorIndicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode */
+:global(.adminContainer.dark) .dayCard,
+:global(body.admin-dark-mode) .dayCard {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .dayCardToday,
+:global(body.admin-dark-mode) .dayCardToday {
+  border-color: #ffc107 !important;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
+}
+
+:global(.adminContainer.dark) .dayHeader,
+:global(body.admin-dark-mode) .dayHeader {
+  border-bottom-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .asignacionCard,
+:global(body.admin-dark-mode) .asignacionCard {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .asignacionCard:hover,
+:global(body.admin-dark-mode) .asignacionCard:hover {
+  background: #1e293b !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive: Ocultar vista mobile en desktop */
+@media (min-width: 768px) {
+  .dayCard,
+  .asignacionCard {
+    display: none;
+  }
+}

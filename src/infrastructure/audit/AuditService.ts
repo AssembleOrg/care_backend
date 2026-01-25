@@ -51,21 +51,33 @@ export interface AuditLogData {
 export class AuditService {
   async log(data: AuditLogData): Promise<void> {
     try {
-      await prisma.auditLog.create({
-        data: {
-          actor: data.actor,
-          action: data.action,
-          table: data.table,
-          recordId: data.recordId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          oldData: data.oldData ? (redactPII(data.oldData) as any) : undefined,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          newData: data.newData ? (redactPII(data.newData) as any) : undefined,
-          ip: data.ip,
-          userAgent: data.userAgent,
-        },
-      });
+      const oldDataJson = data.oldData ? JSON.stringify(redactPII(data.oldData)) : null;
+      const newDataJson = data.newData ? JSON.stringify(redactPII(data.newData)) : null;
+      
+      // Insertar directamente - el trigger validará solo la foreign key correcta
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO "AuditLog" (id, actor, action, "table", "recordId", "oldData", "newData", ip, "userAgent", "createdAt")
+         VALUES (gen_random_uuid()::text, $1::text, $2::text, $3::text, $4::text, $5::jsonb, $6::jsonb, $7::text, $8::text, NOW())`,
+        data.actor,
+        data.action,
+        data.table,
+        data.recordId,
+        oldDataJson,
+        newDataJson,
+        data.ip || null,
+        data.userAgent || null
+      );
+      
+      console.log('✅ AuditLog creado:', { table: data.table, action: data.action, recordId: data.recordId });
     } catch (error) {
+      console.error('❌ Error al crear AuditLog:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        // Si es un error de foreign key, ejecuta la migración fix_auditlog_foreign_keys_v2.sql
+        if (error.message.includes('foreign key') || error.message.includes('constraint')) {
+          console.error('⚠️  Ejecuta la migración fix_auditlog_foreign_keys_v2.sql para usar triggers en lugar de foreign keys');
+        }
+      }
       logger.error('Failed to create audit log', error);
       // Don't throw - audit failures shouldn't break the app
     }

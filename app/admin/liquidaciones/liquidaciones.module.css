@@ -1,0 +1,461 @@
+/* Liquidaciones Page */
+.liquidacionesPage {
+  width: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 32px;
+}
+
+.pageTitle {
+  margin-bottom: 12px;
+}
+
+.weekRange {
+  display: flex;
+  align-items: center;
+  color: #64748b;
+}
+
+/* Config Card */
+.configCard {
+  background: white;
+  border-radius: 12px;
+}
+
+.configHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.configIcon {
+  color: #0ea5e9;
+}
+
+/* Schedule Card */
+.scheduleCard {
+  background: white;
+  border-radius: 12px;
+}
+
+.scheduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.scheduleTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.scheduleIcon {
+  color: #0ea5e9;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.scheduleTable {
+  width: 100%;
+  min-width: 600px;
+}
+
+.tableHeader {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+}
+
+.tableRow {
+  transition: all 0.2s;
+}
+
+.tableRowActive {
+  background: rgba(14, 165, 233, 0.05);
+}
+
+.tableRowInactive {
+  opacity: 0.6;
+}
+
+.tableRow:hover {
+  background: rgba(14, 165, 233, 0.08);
+}
+
+.dayCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeInput {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  min-width: 120px;
+  transition: all 0.2s;
+}
+
+.timeInput:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.timeInputDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+/* Summary Card */
+.summaryCard {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(255, 107, 157, 0.05) 100%);
+  border: 2px solid rgba(14, 165, 233, 0.1);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.summaryIcon {
+  color: #0ea5e9;
+}
+
+.summaryGrid {
+  margin: 16px 0;
+}
+
+.summaryItem {
+  text-align: center;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.summaryValue {
+  line-height: 1.2;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
+  border: none;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Dark Mode */
+:global(.adminContainer.dark) .configCard,
+:global(body.admin-dark-mode) .configCard,
+:global(.adminContainer.dark) .scheduleCard,
+:global(body.admin-dark-mode) .scheduleCard {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .summaryCard,
+:global(body.admin-dark-mode) .summaryCard {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(255, 107, 157, 0.1) 100%);
+  border-color: rgba(14, 165, 233, 0.2);
+}
+
+:global(.adminContainer.dark) .summaryItem,
+:global(body.admin-dark-mode) .summaryItem {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .timeInput,
+:global(body.admin-dark-mode) .timeInput {
+  background: #0f172a;
+  border-color: #334155;
+  color: white;
+}
+
+:global(.adminContainer.dark) .timeInput:focus,
+:global(body.admin-dark-mode) .timeInput:focus {
+  border-color: #0ea5e9;
+}
+
+:global(.adminContainer.dark) .timeInputDisabled,
+:global(body.admin-dark-mode) .timeInputDisabled {
+  background: #1e293b;
+}
+
+:global(.adminContainer.dark) .weekRange,
+:global(body.admin-dark-mode) .weekRange {
+  color: #94a3b8;
+}
+
+/* Mobile Cards */
+.mobileCards {
+  display: none;
+}
+
+.mobileCard {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}
+
+.mobileCardActive {
+  background: rgba(14, 165, 233, 0.05);
+  border-color: #0ea5e9;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+}
+
+.mobileCardInactive {
+  opacity: 0.7;
+  background: #f9fafb;
+}
+
+.mobileCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mobileCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  min-height: 48px;
+}
+
+.mobileCardDay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.mobileCheckbox {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin-top: 4px; /* Ajuste para alinear con el centro del bloque de texto */
+}
+
+.mobileDayInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.3;
+  min-height: 44px; /* Altura mínima para alinear mejor con el checkbox */
+}
+
+.mobileHoursBadge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: fit-content;
+}
+
+.mobileCardBody {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobileTimeInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobileTimeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* Permite que el grid item se reduzca */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobileTimeGroup label {
+  text-align: center;
+  font-weight: 500;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.mobileTimeInput {
+  padding: 12px 8px;
+  border: 2px solid #ced4da;
+  border-radius: 8px;
+  font-size: 16px;
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  min-height: 48px;
+  text-align: center;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.mobileTimeInput:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.mobileSubtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 107, 157, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 157, 0.2);
+}
+
+.toggleButtons {
+  width: 100%;
+  justify-content: center;
+}
+
+.toggleButton {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scheduleHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .toggleButtons {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .toggleButton {
+    flex: 1;
+  }
+
+  /* Ocultar tabla en mobile */
+  .tableWrapper {
+    display: none;
+  }
+
+  /* Mostrar cards en mobile */
+  .mobileCards {
+    display: block;
+  }
+
+  .scheduleCard {
+    padding: 16px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryItem {
+    padding: 12px;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Ocultar cards en desktop */
+  .mobileCards {
+    display: none;
+  }
+
+  .tableWrapper {
+    display: block;
+  }
+}
+
+/* Dark Mode para Mobile Cards */
+:global(.adminContainer.dark) .mobileCard,
+:global(body.admin-dark-mode) .mobileCard {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .mobileCardActive,
+:global(body.admin-dark-mode) .mobileCardActive {
+  background: rgba(14, 165, 233, 0.15) !important;
+  border-color: #0ea5e9 !important;
+}
+
+:global(.adminContainer.dark) .mobileCardInactive,
+:global(body.admin-dark-mode) .mobileCardInactive {
+  background: #0f172a !important;
+  opacity: 0.6;
+}
+
+:global(.adminContainer.dark) .mobileCardBody,
+:global(body.admin-dark-mode) .mobileCardBody {
+  border-top-color: #334155 !important;
+}
+
+:global(.adminContainer.dark) .mobileTimeInput,
+:global(body.admin-dark-mode) .mobileTimeInput {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: white !important;
+}
+
+:global(.adminContainer.dark) .mobileTimeInput:focus,
+:global(body.admin-dark-mode) .mobileTimeInput:focus {
+  border-color: #0ea5e9 !important;
+}
+
+:global(.adminContainer.dark) .mobileSubtotal,
+:global(body.admin-dark-mode) .mobileSubtotal {
+  background: rgba(255, 107, 157, 0.15) !important;
+  border-color: rgba(255, 107, 157, 0.3) !important;
+}

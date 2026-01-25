@@ -1,0 +1,46 @@
+/* Estilos para inputs de tiempo en mobile */
+@media (max-width: 768px) {
+  .timeInputGroup {
+    flex-wrap: wrap !important;
+  }
+
+  .timeInputGroup :global(.mantine-Checkbox-root) {
+    min-width: 90px !important;
+    max-width: 100px !important;
+    flex-shrink: 1;
+  }
+
+  .timeInputGroup :global(input[type="time"]) {
+    min-width: 110px !important;
+    flex: 1 1 auto !important;
+    font-size: 16px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+/* Asegurar que los inputs de tiempo muestren todo el contenido */
+.timeInput {
+  min-width: 110px;
+  font-size: 16px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+/* Dark mode para inputs de tiempo */
+:global(.adminContainer.dark) .timeInput,
+:global(body.admin-dark-mode) .timeInput {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: white !important;
+}
+
+:global(.adminContainer.dark) .timeInput:focus,
+:global(body.admin-dark-mode) .timeInput:focus {
+  border-color: #0ea5e9 !important;
+}
+
+:global(.adminContainer.dark) .timeInput:disabled,
+:global(body.admin-dark-mode) .timeInput:disabled {
+  background: #1e293b !important;
+  opacity: 0.5;
+}

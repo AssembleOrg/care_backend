@@ -6,6 +6,10 @@ import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye } from '@tabler/icons-react';
+import { ViewToggle, useViewMode } from '../components/ViewToggle';
+import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
+import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
+import cardStyles from '../components/card-view.module.css';
 
 interface PersonaAsistida {
   id: string;
@@ -35,6 +39,14 @@ export default function PersonasAsistidasPage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [viewMode, setViewMode] = useViewMode('list');
+  const [submitting, setSubmitting] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -66,9 +78,10 @@ export default function PersonasAsistidasPage() {
         setPage(result.page);
       }
     } catch (error) {
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
-        message: 'Error al cargar personas asistidas',
+        message: message || 'Error al cargar personas asistidas',
         color: 'red',
       });
     } finally {
@@ -80,9 +93,11 @@ export default function PersonasAsistidasPage() {
     fetchPersonas(1, search);
   }, [search]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    setSearching(true);
     setSearch(searchInput);
     setPage(1);
+    setTimeout(() => setSearching(false), 500);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -93,6 +108,7 @@ export default function PersonasAsistidasPage() {
   const totalPages = useMemo(() => Math.ceil(total / 20), [total]);
 
   const handleSubmit = async (values: typeof form.values) => {
+    setSubmitting(true);
     try {
       const response = await fetch('/api/v1/personas-asistidas', {
         method: 'POST',
@@ -103,7 +119,7 @@ export default function PersonasAsistidasPage() {
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Error al crear persona asistida');
+        throw new Error(extractApiErrorMessage(data) || 'Error al crear persona asistida');
       }
 
       notifications.show({
@@ -116,12 +132,14 @@ export default function PersonasAsistidasPage() {
       close();
       fetchPersonas(page, search);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
         color: 'red',
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -138,26 +156,32 @@ export default function PersonasAsistidasPage() {
   };
 
   const handleView = async (id: string) => {
+    setViewing(id);
     try {
       const response = await fetch(`/api/v1/personas-asistidas/${id}`);
       const data = await response.json();
       if (data.ok) {
         setSelectedPersona(data.data);
         openView();
+      } else {
+        throw new Error(extractApiErrorMessage(data) || 'Error al cargar datos de la persona asistida');
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
-        message: 'Error al cargar datos de la persona asistida',
+        message: message || 'Error al cargar datos de la persona asistida',
         color: 'red',
       });
+    } finally {
+      setViewing(null);
     }
   };
 
   const handleUpdate = async (values: typeof form.values) => {
     if (!selectedPersona) return;
 
+    setUpdating(true);
     try {
       const response = await fetch(`/api/v1/personas-asistidas/${selectedPersona.id}`, {
         method: 'PUT',
@@ -182,27 +206,35 @@ export default function PersonasAsistidasPage() {
       closeEdit();
       fetchPersonas(page, search);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
         color: 'red',
       });
+    } finally {
+      setUpdating(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta persona asistida?')) return;
+  const handleDeleteClick = (id: string, nombre: string) => {
+    setItemToDelete({ id, name: nombre });
+    openDeleteModal();
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    setDeleting(itemToDelete.id);
     try {
-      const response = await fetch(`/api/v1/personas-asistidas/${id}`, {
+      const response = await fetch(`/api/v1/personas-asistidas/${itemToDelete.id}`, {
         method: 'DELETE',
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Error al eliminar persona asistida');
+        throw new Error(extractApiErrorMessage(data) || 'Error al eliminar persona asistida');
       }
 
       notifications.show({
@@ -211,14 +243,18 @@ export default function PersonasAsistidasPage() {
         color: 'green',
       });
 
+      closeDeleteModal();
+      setItemToDelete(null);
       fetchPersonas(page, search);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
         color: 'red',
       });
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -241,7 +277,7 @@ export default function PersonasAsistidasPage() {
             style={{ flex: 1 }}
             leftSection={<IconSearch size={16} />}
           />
-          <Button onClick={handleSearch}>Buscar</Button>
+          <Button onClick={handleSearch} loading={searching}>Buscar</Button>
           {search && (
             <Button variant="subtle" onClick={() => {
               setSearch('');
@@ -251,43 +287,132 @@ export default function PersonasAsistidasPage() {
               Limpiar
             </Button>
           )}
+          <ViewToggle value={viewMode} onChange={setViewMode} />
         </Group>
       </Paper>
 
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Nombre</Table.Th>
-            <Table.Th>DNI</Table.Th>
-            <Table.Th>Teléfono</Table.Th>
-            <Table.Th>Dirección</Table.Th>
-            <Table.Th>Acciones</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {personas.map((persona) => (
-            <Table.Tr key={persona.id}>
-              <Table.Td>{persona.nombreCompleto}</Table.Td>
-              <Table.Td>{persona.dni || '-'}</Table.Td>
-              <Table.Td>{persona.telefono || '-'}</Table.Td>
-              <Table.Td>{persona.direccion || '-'}</Table.Td>
-              <Table.Td>
-                <Group gap="xs">
-                  <ActionIcon color="blue" variant="light" onClick={() => handleView(persona.id)}>
+      {viewMode === 'list' ? (
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Nombre</Table.Th>
+              <Table.Th>DNI</Table.Th>
+              <Table.Th>Teléfono</Table.Th>
+              <Table.Th>Dirección</Table.Th>
+              <Table.Th>Acciones</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {personas.map((persona) => (
+              <Table.Tr key={persona.id}>
+                <Table.Td>{persona.nombreCompleto}</Table.Td>
+                <Table.Td>{persona.dni || '-'}</Table.Td>
+                <Table.Td>{persona.telefono || '-'}</Table.Td>
+                <Table.Td>{persona.direccion || '-'}</Table.Td>
+                <Table.Td>
+                  <Group gap="xs">
+                  <ActionIcon 
+                    color="blue" 
+                    variant="light" 
+                    onClick={() => handleView(persona.id)}
+                    loading={viewing === persona.id}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                  >
                     <IconEye size={16} />
                   </ActionIcon>
-                  <ActionIcon color="orange" variant="light" onClick={() => handleEdit(persona)}>
+                  <ActionIcon 
+                    color="orange" 
+                    variant="light" 
+                    onClick={() => handleEdit(persona)}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                  >
                     <IconEdit size={16} />
                   </ActionIcon>
-                  <ActionIcon color="red" variant="light" onClick={() => handleDelete(persona.id)}>
+                  <ActionIcon 
+                    color="red" 
+                    variant="light" 
+                    onClick={() => handleDeleteClick(persona.id, persona.nombreCompleto)}
+                    loading={deleting === persona.id}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                  </Group>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <div className={cardStyles.cardGrid}>
+          {personas.map((persona) => (
+            <div key={persona.id} className={cardStyles.cardItem}>
+              <div className={cardStyles.cardHeader}>
+                <h3 className={cardStyles.cardTitle}>{persona.nombreCompleto}</h3>
+                <Group gap="xs" className={cardStyles.cardActions}>
+                  <ActionIcon 
+                    color="blue" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleView(persona.id)}
+                    loading={viewing === persona.id}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                  >
+                    <IconEye size={16} />
+                  </ActionIcon>
+                  <ActionIcon 
+                    color="orange" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleEdit(persona)}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                  >
+                    <IconEdit size={16} />
+                  </ActionIcon>
+                  <ActionIcon 
+                    color="red" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleDeleteClick(persona.id, persona.nombreCompleto)}
+                    loading={deleting === persona.id}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                  >
                     <IconTrash size={16} />
                   </ActionIcon>
                 </Group>
-              </Table.Td>
-            </Table.Tr>
+              </div>
+              <div className={cardStyles.cardBody}>
+                <div className={cardStyles.cardField}>
+                  <span className={cardStyles.cardFieldLabel}>DNI</span>
+                  <span className={persona.dni ? cardStyles.cardFieldValue : cardStyles.cardFieldValueEmpty}>
+                    {persona.dni || 'No especificado'}
+                  </span>
+                </div>
+                <div className={cardStyles.cardField}>
+                  <span className={cardStyles.cardFieldLabel}>Teléfono</span>
+                  <span className={persona.telefono ? cardStyles.cardFieldValue : cardStyles.cardFieldValueEmpty}>
+                    {persona.telefono || 'No especificado'}
+                  </span>
+                </div>
+                <div className={cardStyles.cardField}>
+                  <span className={cardStyles.cardFieldLabel}>Dirección</span>
+                  <span className={persona.direccion ? cardStyles.cardFieldValue : cardStyles.cardFieldValueEmpty}>
+                    {persona.direccion || 'No especificado'}
+                  </span>
+                </div>
+                {persona.telefonoContactoEmergencia && (
+                  <div className={cardStyles.cardField}>
+                    <span className={cardStyles.cardFieldLabel}>Teléfono Emergencia</span>
+                    <span className={cardStyles.cardFieldValue}>
+                      {persona.telefonoContactoEmergencia}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           ))}
-        </Table.Tbody>
-      </Table>
+        </div>
+      )}
 
       <Group justify="center" mt="xl">
         <Pagination value={page} onChange={handlePageChange} total={Math.max(totalPages, 1)} />
@@ -305,7 +430,7 @@ export default function PersonasAsistidasPage() {
               <Button variant="subtle" onClick={close}>
                 Cancelar
               </Button>
-              <Button type="submit" color="fucsia">
+              <Button type="submit" color="fucsia" loading={submitting} disabled={submitting}>
                 Crear
               </Button>
             </Group>
@@ -325,7 +450,7 @@ export default function PersonasAsistidasPage() {
               <Button variant="subtle" onClick={closeEdit}>
                 Cancelar
               </Button>
-              <Button type="submit" color="fucsia">
+              <Button type="submit" color="fucsia" loading={updating} disabled={updating}>
                 Guardar
               </Button>
             </Group>
@@ -349,6 +474,16 @@ export default function PersonasAsistidasPage() {
           </Stack>
         )}
       </Modal>
+
+      <ConfirmDeleteModal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar Persona Asistida"
+        message="¿Estás seguro de que deseas eliminar esta persona asistida?"
+        itemName={itemToDelete?.name}
+        loading={deleting !== null}
+      />
     </Container>
   );
 }

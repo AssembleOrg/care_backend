@@ -1,40 +1,53 @@
 'use client';
 
-import { Container, Title, Text, Grid, Card, Button, Stack, Group, Badge, Table, Paper, Box, Anchor, SimpleGrid, Divider, Accordion } from '@mantine/core';
-import { IconReceipt, IconShield, IconHistory, IconChartBar, IconFileText, IconCheck, IconArrowRight, IconLock, IconClock, IconUser } from '@tabler/icons-react';
+import { Container, Title, Text, Grid, Card, Button, Stack, Group, Badge, Paper, Box, Anchor, SimpleGrid, Divider } from '@mantine/core';
+import { IconCheck, IconArrowRight, IconHeart, IconShieldCheck, IconCalendar, IconMedicalCross, IconHome, IconUserCircle, IconUsers, IconUser } from '@tabler/icons-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './page.module.css';
 
-const mockPagos = [
-  { id: '1', cuidador: 'María González', monto: 85000, fecha: '15 Ene 2024', metodo: 'Transferencia' },
-  { id: '2', cuidador: 'Juan Pérez', monto: 72000, fecha: '20 Ene 2024', metodo: 'Efectivo' },
-  { id: '3', cuidador: 'Ana Martínez', monto: 91000, fecha: '25 Ene 2024', metodo: 'Transferencia' },
-];
 
 export default function HomePage() {
   return (
     <div className={styles.page}>
       {/* Navbar */}
       <header className={styles.navbar}>
-        <Container size="xl">
-          <Group justify="space-between" h={70} wrap="nowrap">
-            <Text fw={700} size="xl" className={styles.logo} style={{ whiteSpace: 'nowrap' }}>
-              CareByDani
-            </Text>
-            <Group gap="lg" visibleFrom="sm" wrap="nowrap">
-              <Anchor href="#funciones" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Funciones</Anchor>
-              <Anchor href="#seguridad" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Seguridad</Anchor>
-              <Anchor href="#faq" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>FAQ</Anchor>
+        <Container size="xl" className={styles.navbarContainer}>
+          <Group justify="space-between" h={80} wrap="nowrap" gap="xs" className={styles.navbarGroup}>
+            <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: 0, flexShrink: 1 }}>
+              <Image 
+                src="/image.png" 
+                alt="Care By Dani Logo" 
+                width={108} 
+                height={108}
+                className={styles.navbarLogo}
+                style={{ objectFit: 'contain' }}
+              />
+              <Text 
+                fw={600} 
+                size="xl" 
+                className={styles.logo} 
+                visibleFrom="sm" 
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                Care By Dani
+              </Text>
+            </Group>
+            <Group gap="lg" visibleFrom="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
+              <Anchor href="#inicio" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Inicio</Anchor>
+              <Anchor href="#servicios" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Servicios</Anchor>
+              <Anchor href="#nosotros" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Nosotros</Anchor>
+              <Anchor href="#contacto" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Contacto</Anchor>
               <Link href="/admin/login">
-                <Button variant="filled" className={styles.ctaButton} size="sm">
-                  Acceder al Panel
+                <Button variant="outline" color="primary" size="sm" radius="xl">
+                  Iniciar sesión
                 </Button>
               </Link>
             </Group>
-            <Group hiddenFrom="sm">
-              <Link href="/admin/login">
-                <Button variant="filled" className={styles.ctaButton} size="xs">
-                  Panel
+            <Group hiddenFrom="sm" style={{ flexShrink: 0, display: 'flex' }} className={styles.mobileLoginGroup}>
+              <Link href="/admin/login" style={{ display: 'flex', textDecoration: 'none' }}>
+                <Button variant="outline" color="primary" size="sm" radius="xl" className={styles.mobileLoginButton}>
+                  Login
                 </Button>
               </Link>
             </Group>
@@ -43,259 +56,122 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className={styles.hero}>
-        <Container size="xl" py={120}>
+      <section id="inicio" className={styles.hero}>
+        <Container size="xl" className={styles.heroContainer}>
           <Grid gutter={60} align="center">
-            <Grid.Col span={{ base: 12, md: 7 }}>
-              <Stack gap="xl">
-                <Badge size="lg" variant="light" className={styles.heroBadge}>
-                  Sistema de gestión para cuidadores
+            <Grid.Col span={{ base: 12, lg: 6 }}>
+              <Stack gap="xl" ta={{ base: 'center', lg: 'left' }}>
+                <Badge size="lg" variant="light" color="primary" radius="xl" style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Cuidado Profesional & Empático
                 </Badge>
                 <Title order={1} className={styles.heroTitle}>
-                  Pagos claros.<br />
-                  <span className={styles.heroAccent}>Historial completo.</span>
+                  Cuidado con <span className={styles.heroAccent}>corazón</span> en la comodidad de su hogar
                 </Title>
-                <Text size="xl" className={styles.heroSubtitle}>
-                  Gestioná los pagos a cuidadores con un sistema simple, seguro y auditable. 
-                  Recibos en un clic, cuando los necesitás.
+                <Text size="lg" className={styles.heroSubtitle}>
+                  Brindamos asistencia personalizada y compañía a adultos mayores, asegurando su bienestar y tranquilidad con un equipo profesional y humano.
                 </Text>
-                <Group gap="md" wrap="wrap">
-                  <Link href="/admin/login">
-                    <Button size="xl" className={styles.ctaButton} rightSection={<IconArrowRight size={20} />} fullWidth>
-                      Comenzar ahora
+                <Group gap="md" justify="flex-start" wrap="wrap" className={styles.heroButtons}>
+                  <Link href="#contacto">
+                    <Button size="lg" color="primary" radius="xl" rightSection={<IconArrowRight size={20} />} className={styles.heroButton}>
+                      Solicitar información
                     </Button>
                   </Link>
-                  <Button size="xl" variant="outline" className={styles.secondaryButton} fullWidth>
-                    Ver demo
-                  </Button>
+                  <Link href="#servicios">
+                    <Button size="lg" variant="outline" color="primary" radius="xl" className={styles.heroButton}>
+                      Conocer servicios
+                    </Button>
+                  </Link>
+                </Group>
+                <Group gap="md" justify="flex-start" mt="xl">
+                  <Group gap="xs">
+                    <Group gap={-8}>
+                      <Box w={32} h={32} style={{ borderRadius: '50%', border: '2px solid white', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <IconUser size={18} color="#2C8894" />
+                      </Box>
+                      <Box w={32} h={32} style={{ borderRadius: '50%', border: '2px solid white', background: '#d0d0d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <IconUser size={18} color="#2C8894" />
+                      </Box>
+                      <Box w={32} h={32} style={{ borderRadius: '50%', border: '2px solid white', background: '#c0c0c0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <IconUser size={18} color="#2C8894" />
+                      </Box>
+                    </Group>
+                    <Text size="sm" c="dimmed">
+                      Más de <Text component="span" fw={700} c="primary">500 familias</Text> confían en nosotros
+                    </Text>
+                  </Group>
                 </Group>
               </Stack>
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 5 }}>
-              {/* Placeholder para imagen/ilustración */}
-              <div className={styles.heroImagePlaceholder}>
-                <Text c="dimmed" ta="center">Ilustración del dashboard</Text>
-              </div>
+            <Grid.Col span={{ base: 12, lg: 6 }}>
+              <Box className={styles.heroImageWrapper}>
+                <Image 
+                  src="/cuidadora1.png" 
+                  alt="Cuidadora ayudando a una persona mayor" 
+                  width={600}
+                  height={500}
+                  style={{ 
+                    objectFit: 'cover',
+                    borderRadius: '1rem',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
+                    width: '100%',
+                    height: 'auto',
+                    maxWidth: '100%',
+                  }}
+                  priority
+                />
+                <Paper className={styles.heroRatingCard} p="md" radius="xl" withBorder>
+                  <Group gap="sm">
+                    <IconCheck size={32} color="#D4AF37" />
+                    <div>
+                      <Text fw={700} size="lg">4.9/5</Text>
+                      <Text size="xs" c="dimmed">Valoración de clientes</Text>
+                    </div>
+                  </Group>
+                </Paper>
+              </Box>
             </Grid.Col>
           </Grid>
         </Container>
       </section>
 
-      {/* Bento Grid - Funciones */}
-      <section id="funciones" className={styles.bentoSection}>
-        <Container size="xl" py={100}>
-          <Stack gap={60}>
-            <div>
-              <Text className={styles.sectionLabel}>FUNCIONES</Text>
-              <Title order={2} className={styles.sectionTitle}>
-                Todo lo que necesitás,<br />nada que no.
-              </Title>
-            </div>
-
-            <div className={styles.bentoGrid}>
-              {/* Card grande - Saldo por cuidador */}
-              <Card className={`${styles.bentoCard} ${styles.bentoLarge}`}>
-                <Stack gap="md" h="100%" justify="space-between">
-                  <div>
-                    <Badge className={styles.cardBadge} mb="md">Principal</Badge>
-                    <Title order={3} className={styles.cardTitle}>Saldo por cuidador</Title>
-                    <Text c="dimmed" mt="sm">
-                      Visualizá el total pagado a cada cuidador, filtrado por período. 
-                      Agrupaciones mensuales automáticas.
-                    </Text>
-                  </div>
-                  <div className={styles.cardStats}>
-                    <div>
-                      <Text size="sm" c="dimmed">Este mes</Text>
-                      <Text fw={700} size="xl" className={styles.statNumber}>$248.000</Text>
-                    </div>
-                    <Divider orientation="vertical" />
-                    <div>
-                      <Text size="sm" c="dimmed">Pagos</Text>
-                      <Text fw={700} size="xl">12</Text>
-                    </div>
-                    <Divider orientation="vertical" />
-                    <div>
-                      <Text size="sm" c="dimmed">Cuidadores</Text>
-                      <Text fw={700} size="xl">3</Text>
-                    </div>
-                  </div>
-                </Stack>
-              </Card>
-
-              {/* Card mediana - Recibos */}
-              <Card className={`${styles.bentoCard} ${styles.bentoMedium}`}>
-                <IconReceipt size={32} className={styles.cardIcon} />
-                <Title order={4} mt="md">Recibos on-demand</Title>
-                <Text size="sm" c="dimmed" mt="xs">
-                  Generá PDFs cuando los necesites. No se guardan, se crean al instante.
-                </Text>
-              </Card>
-
-              {/* Card pequeña - Historial */}
-              <Card className={`${styles.bentoCard} ${styles.bentoSmall}`}>
-                <IconHistory size={28} className={styles.cardIcon} />
-                <Title order={5} mt="sm">Historial auditable</Title>
-                <Text size="xs" c="dimmed" mt={4}>
-                  Cada operación registrada
-                </Text>
-              </Card>
-
-              {/* Card pequeña - Filtros */}
-              <Card className={`${styles.bentoCard} ${styles.bentoSmall}`}>
-                <IconChartBar size={28} className={styles.cardIcon} />
-                <Title order={5} mt="sm">Filtros avanzados</Title>
-                <Text size="xs" c="dimmed" mt={4}>
-                  Por cuidador, fechas, método
-                </Text>
-              </Card>
-
-              {/* Card mediana - Seguridad */}
-              <Card className={`${styles.bentoCard} ${styles.bentoMedium} ${styles.bentoAccent}`}>
-                <IconShield size={32} style={{ color: '#FFD93D' }} />
-                <Title order={4} mt="md" c="white">Datos protegidos</Title>
-                <Text size="sm" c="white" opacity={0.8} mt="xs">
-                  Cifrado AES-256-GCM para toda información personal.
-                </Text>
-              </Card>
-
-              {/* Card mediana horizontal - Asignaciones */}
-              <Card className={`${styles.bentoCard} ${styles.bentoWide}`}>
-                <Group justify="space-between" align="flex-start">
-                  <div>
-                    <Title order={4}>Asignaciones flexibles</Title>
-                    <Text size="sm" c="dimmed" mt="xs">
-                      Vinculá cuidadores con personas asistidas. Definí tarifas, fechas y notas.
-                    </Text>
-                  </div>
-                  <Badge size="lg" variant="light">Nuevo</Badge>
-                </Group>
-              </Card>
-            </div>
-          </Stack>
-        </Container>
-      </section>
-
-      {/* Preview UI Section */}
-      <section className={styles.previewSection}>
-        <Container size="xl" py={100}>
-          <Grid gutter={60}>
-            <Grid.Col span={{ base: 12, md: 5 }}>
-              <Stack gap="xl">
-                <div>
-                  <Text className={styles.sectionLabel}>VISTA PREVIA</Text>
-                  <Title order={2} className={styles.sectionTitle}>
-                    Interfaz clara y directa
-                  </Title>
-                </div>
-                <Text size="lg" c="dimmed">
-                  Sin complicaciones. Registrá pagos, generá recibos y consultá saldos 
-                  en segundos. Todo desde un panel intuitivo.
-                </Text>
-                <Stack gap="sm">
-                  <Group gap="sm">
-                    <IconCheck size={20} className={styles.checkIcon} />
-                    <Text>Tabla de pagos con búsqueda</Text>
-                  </Group>
-                  <Group gap="sm">
-                    <IconCheck size={20} className={styles.checkIcon} />
-                    <Text>Filtros por cuidador y fechas</Text>
-                  </Group>
-                  <Group gap="sm">
-                    <IconCheck size={20} className={styles.checkIcon} />
-                    <Text>Generación de PDF con un clic</Text>
-                  </Group>
-                </Stack>
-              </Stack>
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 7 }}>
-              <Paper className={styles.previewCard}>
-                <div className={styles.previewHeader}>
-                  <Group justify="space-between">
-                    <Text fw={600}>Últimos pagos</Text>
-                    <Badge>3 registros</Badge>
-                  </Group>
-                </div>
-                <Table className={styles.previewTable}>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Cuidador</Table.Th>
-                      <Table.Th>Monto</Table.Th>
-                      <Table.Th>Fecha</Table.Th>
-                      <Table.Th>Acción</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {mockPagos.map((pago) => (
-                      <Table.Tr key={pago.id}>
-                        <Table.Td>{pago.cuidador}</Table.Td>
-                        <Table.Td fw={600}>${pago.monto.toLocaleString()}</Table.Td>
-                        <Table.Td c="dimmed">{pago.fecha}</Table.Td>
-                        <Table.Td>
-                          <Button size="xs" variant="light" leftSection={<IconFileText size={14} />}>
-                            PDF
-                          </Button>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-                <Divider my="md" />
-                <Group justify="space-between">
-                  <Text size="sm" c="dimmed">Total del período</Text>
-                  <Text fw={700} size="lg" className={styles.totalAmount}>$248.000</Text>
-                </Group>
-              </Paper>
-            </Grid.Col>
-          </Grid>
-        </Container>
-      </section>
-
-      {/* Timeline / Cómo funciona */}
-      <section className={styles.timelineSection}>
-        <Container size="xl" py={100}>
+      {/* Por qué elegirnos */}
+      <section id="nosotros" className={styles.whySection}>
+        <Container size="xl" className={styles.sectionContainer}>
           <Stack gap={60}>
             <div style={{ textAlign: 'center' }}>
-              <Text className={styles.sectionLabel}>CÓMO FUNCIONA</Text>
-              <Title order={2} className={styles.sectionTitle}>
-                Tres pasos. Sin vueltas.
+              <Title order={2} className={styles.sectionTitle} mb="md">
+                ¿Por qué elegirnos?
               </Title>
+              <Text size="lg" c="dimmed" maw={600} mx="auto">
+                Entendemos que el cuidado de sus seres queridos es una prioridad. Nuestro enfoque se basa en la confianza, la empatía y la excelencia.
+              </Text>
             </div>
-
-            <SimpleGrid cols={{ base: 1, md: 3 }} spacing={40}>
-              <Card className={styles.timelineCard}>
-                <div className={styles.stepNumber}>1</div>
-                <IconUser size={32} className={styles.stepIcon} />
-                <Title order={4} mt="md">Registrá cuidadores</Title>
-                <Text size="sm" c="dimmed" mt="xs">
-                  Cargá nombre, DNI, teléfono y email. Los datos personales se cifran automáticamente.
-                </Text>
-                <Text size="xs" c="dimmed" mt="md" fs="italic">
-                  Ej: María González, DNI cifrado con hash único para búsquedas.
+            <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl">
+              <Card className={styles.featureCard} p="xl" radius="xl" withBorder>
+                <Box className={styles.featureIcon} mb="lg">
+                  <IconHeart size={48} />
+                </Box>
+                <Title order={3} mb="md">Cuidado Compasivo</Title>
+                <Text c="dimmed" lh={1.7}>
+                  Tratamos a cada persona como si fuera de nuestra propia familia, priorizando su dignidad y respeto en todo momento.
                 </Text>
               </Card>
-
-              <Card className={styles.timelineCard}>
-                <div className={styles.stepNumber}>2</div>
-                <IconReceipt size={32} className={styles.stepIcon} />
-                <Title order={4} mt="md">Registrá pagos</Title>
-                <Text size="sm" c="dimmed" mt="xs">
-                  Monto, fecha, método y notas. Podés filtrar por cuidador y rango de fechas.
-                </Text>
-                <Text size="xs" c="dimmed" mt="md" fs="italic">
-                  Ej: $85.000 a María González el 15/01 por transferencia.
+              <Card className={styles.featureCard} p="xl" radius="xl" withBorder>
+                <Box className={styles.featureIcon} mb="lg">
+                  <IconShieldCheck size={48} />
+                </Box>
+                <Title order={3} mb="md">Personal Verificado</Title>
+                <Text c="dimmed" lh={1.7}>
+                  Todos nuestros cuidadores pasan por rigurosos procesos de selección y antecedentes para garantizar su seguridad.
                 </Text>
               </Card>
-
-              <Card className={styles.timelineCard}>
-                <div className={styles.stepNumber}>3</div>
-                <IconFileText size={32} className={styles.stepIcon} />
-                <Title order={4} mt="md">Generá recibos</Title>
-                <Text size="sm" c="dimmed" mt="xs">
-                  PDFs bajo demanda. No se guardan, se crean al instante con todos los datos.
-                </Text>
-                <Text size="xs" c="dimmed" mt="md" fs="italic">
-                  Ej: Click en "Generar PDF" y descargás el recibo en segundos.
+              <Card className={styles.featureCard} p="xl" radius="xl" withBorder>
+                <Box className={styles.featureIcon} mb="lg">
+                  <IconCalendar size={48} />
+                </Box>
+                <Title order={3} mb="md">Flexibilidad Total</Title>
+                <Text c="dimmed" lh={1.7}>
+                  Adaptamos nuestros horarios y servicios a sus necesidades específicas, desde unas horas hasta cuidado 24/7.
                 </Text>
               </Card>
             </SimpleGrid>
@@ -303,151 +179,240 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Seguridad Section */}
-      <section id="seguridad" className={styles.securitySection}>
-        <Container size="xl" py={100}>
+      {/* Servicios */}
+      <section id="servicios" className={styles.servicesSection}>
+        <Container size="xl" className={styles.sectionContainer}>
           <Grid gutter={60} align="center">
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              {/* Placeholder para ilustración de seguridad */}
-              <div className={styles.securityImagePlaceholder}>
-                <IconLock size={80} style={{ opacity: 0.3 }} />
-                <Text c="dimmed" mt="md">Ilustración de seguridad</Text>
-              </div>
+            <Grid.Col span={{ base: 12, lg: 6 }} order={{ base: 2, lg: 1 }}>
+              <Box className={styles.serviceImageWrapper}>
+                <Image 
+                  src="/cuidadora2.png" 
+                  alt="Cuidadora ayudando a una señora a caminar en el parque" 
+                  width={600}
+                  height={500}
+                  style={{ 
+                    objectFit: 'cover',
+                    borderRadius: '1rem',
+                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+                    width: '100%',
+                    height: 'auto',
+                    maxWidth: '100%',
+                  }}
+                />
+              </Box>
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 6 }}>
+            <Grid.Col span={{ base: 12, lg: 6 }} order={{ base: 1, lg: 2 }}>
               <Stack gap="xl">
-                <div>
-                  <Text className={styles.sectionLabel}>SEGURIDAD</Text>
-                  <Title order={2} className={styles.sectionTitle}>
-                    Tus datos, protegidos
-                  </Title>
-                </div>
-                <Text size="lg" c="dimmed">
-                  La privacidad no es negociable. Toda información personal está cifrada 
-                  con estándares de nivel bancario.
-                </Text>
-                <Stack gap="md">
-                  <Group gap="md" className={styles.securityItem}>
-                    <div className={styles.securityIcon}>
-                      <IconShield size={24} />
-                    </div>
+                <Badge color="primary" variant="light" size="lg" radius="xl" style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Nuestros Servicios
+                </Badge>
+                <Title order={2} className={styles.sectionTitle}>
+                  Asistencia integral para una vida plena
+                </Title>
+                <Stack gap="lg">
+                  <Group gap="md" align="flex-start">
+                    <Box className={styles.serviceIcon}>
+                      <IconMedicalCross size={32} />
+                    </Box>
                     <div>
-                      <Text fw={600}>Cifrado AES-256-GCM</Text>
-                      <Text size="sm" c="dimmed">DNI, teléfono, email y dirección siempre cifrados</Text>
+                      <Title order={4} mb={4}>Acompañamiento Médico</Title>
+                      <Text c="dimmed" size="sm">Supervisión de medicación y acompañamiento a citas médicas.</Text>
                     </div>
                   </Group>
-                  <Group gap="md" className={styles.securityItem}>
-                    <div className={styles.securityIcon}>
-                      <IconHistory size={24} />
-                    </div>
+                  <Group gap="md" align="flex-start">
+                    <Box className={styles.serviceIcon}>
+                      <IconHome size={32} />
+                    </Box>
                     <div>
-                      <Text fw={600}>Auditoría completa</Text>
-                      <Text size="sm" c="dimmed">Cada operación queda registrada sin datos personales</Text>
+                      <Title order={4} mb={4}>Ayuda en el Hogar</Title>
+                      <Text c="dimmed" size="sm">Apoyo con tareas domésticas ligeras, preparación de comidas y organización.</Text>
                     </div>
                   </Group>
-                  <Group gap="md" className={styles.securityItem}>
-                    <div className={styles.securityIcon}>
-                      <IconLock size={24} />
-                    </div>
+                  <Group gap="md" align="flex-start">
+                    <Box className={styles.serviceIcon}>
+                      <IconUserCircle size={32} />
+                    </Box>
                     <div>
-                      <Text fw={600}>Autenticación segura</Text>
-                      <Text size="sm" c="dimmed">Supabase Auth con sesiones protegidas</Text>
+                      <Title order={4} mb={4}>Higiene Personal</Title>
+                      <Text c="dimmed" size="sm">Asistencia digna y respetuosa con el aseo personal y la vestimenta.</Text>
+                    </div>
+                  </Group>
+                  <Group gap="md" align="flex-start">
+                    <Box className={styles.serviceIcon}>
+                      <IconUsers size={32} />
+                    </Box>
+                    <div>
+                      <Title order={4} mb={4}>Compañía y Recreación</Title>
+                      <Text c="dimmed" size="sm">Conversación, paseos, juegos y actividades para mantener la mente activa.</Text>
                     </div>
                   </Group>
                 </Stack>
+                <Anchor href="#contacto" c="primary" fw={500} size="lg">
+                  Ver todos los detalles <IconArrowRight size={18} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }} />
+                </Anchor>
               </Stack>
             </Grid.Col>
           </Grid>
         </Container>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className={styles.faqSection}>
-        <Container size="md" py={100}>
-          <Stack gap={60}>
-            <div style={{ textAlign: 'center' }}>
-              <Text className={styles.sectionLabel}>FAQ</Text>
-              <Title order={2} className={styles.sectionTitle}>
-                Preguntas frecuentes
-              </Title>
-            </div>
-
-            <Accordion variant="separated" radius="md" className={styles.accordion}>
-              <Accordion.Item value="pdf">
-                <Accordion.Control>¿Se guarda el PDF en algún lado?</Accordion.Control>
-                <Accordion.Panel>
-                  No, los PDFs se generan bajo demanda. Cada vez que necesitás un recibo, 
-                  se crea al instante con los datos actuales. No ocupan espacio ni quedan almacenados.
-                </Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item value="saldo">
-                <Accordion.Control>¿Cómo se calcula el saldo?</Accordion.Control>
-                <Accordion.Panel>
-                  El saldo se calcula sumando todos los pagos registrados para un cuidador 
-                  en el período seleccionado. Podés ver totales mensuales y agrupaciones automáticas.
-                </Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item value="datos">
-                <Accordion.Control>¿Qué datos se protegen?</Accordion.Control>
-                <Accordion.Panel>
-                  DNI, teléfono, email y dirección se cifran con AES-256-GCM. 
-                  Nunca aparecen en logs ni en respuestas de la API sin descifrar. 
-                  Solo vos podés ver la información real.
-                </Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item value="filtros">
-                <Accordion.Control>¿Puedo filtrar por fechas?</Accordion.Control>
-                <Accordion.Panel>
-                  Sí, en la vista de pagos y reportes podés filtrar por rango de fechas, 
-                  cuidador específico y método de pago. Los filtros se combinan para búsquedas precisas.
-                </Accordion.Panel>
-              </Accordion.Item>
-
-              <Accordion.Item value="pagos">
-                <Accordion.Control>¿Integran pasarelas de pago?</Accordion.Control>
-                <Accordion.Panel>
-                  No, CareByDani es un sistema de registro interno. No procesamos pagos, 
-                  solo los registrás para llevar el control. Sin comisiones ni integraciones externas.
-                </Accordion.Panel>
-              </Accordion.Item>
-            </Accordion>
+      {/* Testimonios */}
+      <section className={styles.testimonialSection}>
+        <Container size="md" className={styles.sectionContainer}>
+          <Stack gap="lg" align="center" ta="center" maw={800} mx="auto">
+            <Text size="xl" c="white" opacity={0.3} style={{ fontFamily: 'serif', lineHeight: 1, fontSize: '40px' }}>❝</Text>
+            <Text size="md" c="white" fw={500} fz={{ base: 'md', md: 'lg' }} lh={1.6} style={{ fontStyle: 'italic' }} maw={700}>
+              "Dani y su equipo no solo cuidaron a mi padre, sino que le devolvieron la alegría. Sentimos una paz inmensa sabiendo que estaba en las mejores manos."
+            </Text>
+            <Group gap="md" mt="md">
+              <Box w={56} h={56} style={{ borderRadius: '50%', border: '3px solid rgba(255,255,255,0.2)', background: '#e0e0e0' }} />
+              <Stack gap={2}>
+                <Text fw={600} c="white" size="md">María González</Text>
+                <Text c="white" opacity={0.7} size="xs">Hija de paciente</Text>
+              </Stack>
+            </Group>
           </Stack>
         </Container>
       </section>
 
-      {/* CTA Final */}
-      <section className={styles.ctaSection}>
-        <Container size="md" py={100}>
-          <Paper className={styles.ctaCard}>
-            <Stack gap="xl" align="center" ta="center">
-              <Title order={2} c="white">
-                Empezá a ordenar tus pagos hoy
-              </Title>
-              <Text size="lg" c="white" opacity={0.9} maw={500}>
-                Sin complicaciones, sin pasarelas de pago, sin suscripciones. 
-                Solo un sistema simple para llevar el control.
-              </Text>
-              <Link href="/admin/login">
-                <Button size="xl" variant="white" color="dark" rightSection={<IconArrowRight size={20} />}>
-                  Acceder al panel
-                </Button>
-              </Link>
-            </Stack>
+      {/* Contacto */}
+      <section id="contacto" className={styles.contactSection}>
+        <Container size="xl" className={styles.sectionContainer}>
+          <Paper className={styles.contactCard} p="xl" radius="2xl">
+            <Grid gutter={60} align="center">
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Box style={{ width: '100%', overflow: 'hidden' }}>
+                  <Image 
+                    src="/cuidadora3.png" 
+                    alt="Cuidadora ayudando a una persona mayor" 
+                    width={600}
+                    height={400}
+                    style={{ 
+                      objectFit: 'cover',
+                      borderRadius: '1rem',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+                      width: '100%',
+                      height: 'auto',
+                      maxWidth: '100%',
+                    }}
+                  />
+                </Box>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="xl">
+                  <Title order={2} className={styles.sectionTitle}>
+                    ¿Listo para mejorar la calidad de vida de su ser querido?
+                  </Title>
+                  <Text size="lg" c="dimmed">
+                    Contáctenos hoy para una consulta gratuita. Evaluaremos sus necesidades y diseñaremos un plan de cuidado personalizado.
+                  </Text>
+                  <Stack gap="md">
+                    <Group grow>
+                      <input 
+                        type="text" 
+                        placeholder="Nombre completo" 
+                        className={styles.contactInput}
+                      />
+                      <input 
+                        type="tel" 
+                        placeholder="Teléfono" 
+                        className={styles.contactInput}
+                      />
+                    </Group>
+                    <input 
+                      type="email" 
+                      placeholder="Correo electrónico" 
+                      className={styles.contactInput}
+                    />
+                    <textarea 
+                      placeholder="¿Cómo podemos ayudarle?" 
+                      rows={3}
+                      className={styles.contactInput}
+                    />
+                    <Button size="lg" color="secondary" radius="md" rightSection={<IconArrowRight size={18} />}>
+                      Enviar mensaje
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Grid.Col>
+            </Grid>
           </Paper>
         </Container>
       </section>
 
       {/* Footer */}
       <footer className={styles.footer}>
-        <Container size="xl" py={40}>
-          <Group justify="space-between">
-            <Text fw={600}>CareByDani</Text>
+        <Container size="xl" className={styles.footerContainer}>
+          <Grid gutter="xl" mb="xl">
+            <Grid.Col span={{ base: 12, md: 4 }}>
+              <Box mb="md" style={{ width: '100%', overflow: 'hidden' }}>
+                <Image 
+                  src="/image.png" 
+                  alt="Care By Dani Logo" 
+                  width={300} 
+                  height={300}
+                  style={{ 
+                    objectFit: 'contain',
+                    width: 'clamp(120px, 30vw, 300px)',
+                    height: 'auto',
+                    maxWidth: '100%',
+                  }}
+                />
+              </Box>
+              <Text size="sm" c="dimmed" mb="md">
+                Dedicados a brindar cuidado humano, cálido y profesional. Su bienestar es nuestra misión.
+              </Text>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 2 }}>
+              <Text fw={600} size="sm" mb="md" style={{ textTransform: 'uppercase', letterSpacing: '1px' }}>
+                Enlaces Rápidos
+              </Text>
+              <Stack gap="xs">
+                <Anchor href="#inicio" c="dimmed" size="sm" underline="never">Inicio</Anchor>
+                <Anchor href="#servicios" c="dimmed" size="sm" underline="never">Nuestros Servicios</Anchor>
+                <Anchor href="#nosotros" c="dimmed" size="sm" underline="never">Sobre Nosotros</Anchor>
+                <Anchor href="#contacto" c="dimmed" size="sm" underline="never">Contáctenos</Anchor>
+              </Stack>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 3 }}>
+              <Text fw={600} size="sm" mb="md" style={{ textTransform: 'uppercase', letterSpacing: '1px' }}>
+                Contacto
+              </Text>
+              <Stack gap="xs">
+                <Text size="sm" c="dimmed">Calle Principal 123, Ciudad, País</Text>
+                <Text size="sm" c="dimmed">+1 234 567 890</Text>
+                <Text size="sm" c="dimmed">contacto@carebydani.com</Text>
+              </Stack>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 3 }}>
+              <Text fw={600} size="sm" mb="md" style={{ textTransform: 'uppercase', letterSpacing: '1px' }}>
+                Horario de Atención
+              </Text>
+              <Stack gap="xs">
+                <Group justify="space-between">
+                  <Text size="sm" c="dimmed">Lunes - Viernes:</Text>
+                  <Text size="sm" c="dimmed">9:00 - 18:00</Text>
+                </Group>
+                <Group justify="space-between">
+                  <Text size="sm" c="dimmed">Sábado:</Text>
+                  <Text size="sm" c="dimmed">10:00 - 14:00</Text>
+                </Group>
+                <Group justify="space-between">
+                  <Text size="sm" c="dimmed">Domingo:</Text>
+                  <Text size="sm" c="dimmed">Cerrado</Text>
+                </Group>
+              </Stack>
+            </Grid.Col>
+          </Grid>
+          <Divider my="xl" />
+          <Group justify="space-between" wrap="wrap">
             <Text size="sm" c="dimmed">
-              Tus datos, protegidos. © {new Date().getFullYear()}
+              © {new Date().getFullYear()} Care By Dani. Todos los derechos reservados.
             </Text>
+            <Group gap="lg">
+              <Anchor href="#" c="dimmed" size="sm" underline="never">Privacidad</Anchor>
+              <Anchor href="#" c="dimmed" size="sm" underline="never">Términos</Anchor>
+            </Group>
           </Group>
         </Container>
       </footer>
