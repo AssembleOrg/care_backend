@@ -34,10 +34,10 @@ export default function HomePage() {
               </Text>
             </Group>
             <Group gap="lg" visibleFrom="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
-              <Anchor href="#inicio" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Inicio</Anchor>
-              <Anchor href="#servicios" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Servicios</Anchor>
-              <Anchor href="#nosotros" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Nosotros</Anchor>
-              <Anchor href="#contacto" c="inherit" underline="never" style={{ whiteSpace: 'nowrap' }}>Contacto</Anchor>
+              <Anchor href="#inicio" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Inicio</Anchor>
+              <Anchor href="#servicios" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Servicios</Anchor>
+              <Anchor href="#nosotros" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Nosotros</Anchor>
+              <Anchor href="#contacto" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Contacto</Anchor>
               <Link href="/admin/login">
                 <Button variant="outline" color="primary" size="sm" radius="xl">
                   Iniciar sesión

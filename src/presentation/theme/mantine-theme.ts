@@ -74,4 +74,7 @@ export const theme = createTheme({
     lg: '1.5rem',
     xl: '2rem',
   },
+  other: {
+    dimmed: '#4a5568', // Color más oscuro para mejor legibilidad (antes era muy claro)
+  },
 });

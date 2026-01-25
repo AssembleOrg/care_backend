@@ -60,8 +60,17 @@
 }
 
 .logo {
-  color: #2C8894;
+  color: #2C8894 !important;
   font-weight: 700;
+}
+
+/* Asegurar que los enlaces del navbar sean legibles */
+.navbar a:not(.ctaButton) {
+  color: #1a1a2e !important;
+}
+
+.navbar a:not(.ctaButton):hover {
+  color: #2C8894 !important;
 }
 
 .ctaButton {
@@ -77,13 +86,24 @@
 }
 
 .secondaryButton {
-  border-color: #1a1a2e;
-  color: #1a1a2e;
+  border-color: #2C8894 !important;
+  color: #2C8894 !important;
 }
 
 .secondaryButton:hover {
-  background: #1a1a2e;
-  color: white;
+  background: #2C8894 !important;
+  color: white !important;
+}
+
+/* Botón outline en navbar - mejor contraste */
+.navbar .mantine-Button-root[data-variant="outline"] {
+  color: #2C8894 !important;
+  border-color: #2C8894 !important;
+}
+
+.navbar .mantine-Button-root[data-variant="outline"]:hover {
+  background-color: #2C8894 !important;
+  color: white !important;
 }
 
 /* Hero */
@@ -161,7 +181,7 @@
 }
 
 .heroSubtitle {
-  color: #666;
+  color: #4a5568 !important;
   line-height: 1.7;
   max-width: 500px;
 }
