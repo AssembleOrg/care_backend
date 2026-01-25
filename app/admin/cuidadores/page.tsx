@@ -369,7 +369,7 @@ export default function CuidadoresPage() {
                     color="red" 
                     variant="light" 
                     size="sm" 
-                    onClick={() => handleDelete(cuidador.id)}
+                    onClick={() => handleDeleteClick(cuidador.id, cuidador.nombreCompleto)}
                     loading={deleting === cuidador.id}
                     disabled={viewing === cuidador.id || deleting === cuidador.id}
                   >

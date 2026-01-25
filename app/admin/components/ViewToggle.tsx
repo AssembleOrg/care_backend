@@ -17,8 +17,24 @@ export function ViewToggle({ value, onChange }: ViewToggleProps) {
       value={value}
       onChange={(val) => onChange(val as ViewMode)}
       data={[
-        { label: 'Lista', value: 'list', icon: <IconLayoutList size={16} /> },
-        { label: 'Tarjetas', value: 'cards', icon: <IconLayoutGrid size={16} /> },
+        { 
+          label: (
+            <>
+              <IconLayoutList size={16} style={{ marginRight: 4 }} />
+              Lista
+            </>
+          ), 
+          value: 'list' 
+        },
+        { 
+          label: (
+            <>
+              <IconLayoutGrid size={16} style={{ marginRight: 4 }} />
+              Tarjetas
+            </>
+          ), 
+          value: 'cards' 
+        },
       ]}
       size="sm"
     />
