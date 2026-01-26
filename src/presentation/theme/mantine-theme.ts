@@ -1,5 +1,32 @@
 import { createTheme, MantineColorsTuple } from '@mantine/core';
 
+// Colores del logo: Teal (#2C8894) y Gold (#D4AF37)
+const primary: MantineColorsTuple = [
+  '#e0f2f4',
+  '#b3dde2',
+  '#80c8d0',
+  '#4db3be',
+  '#2C8894', // Primary teal
+  '#1E5F66',
+  '#1a5560',
+  '#154a55',
+  '#103f4a',
+  '#0b343f',
+];
+
+const secondary: MantineColorsTuple = [
+  '#faf7e8',
+  '#f5ecc5',
+  '#f0e1a2',
+  '#ebd67f',
+  '#D4AF37', // Gold/Yellow
+  '#B5952F',
+  '#a68a2a',
+  '#967f25',
+  '#867420',
+  '#76691b',
+];
+
 const fucsia: MantineColorsTuple = [
   '#ffeef5',
   '#ffd9e8',
@@ -26,25 +53,13 @@ const cian: MantineColorsTuple = [
   '#008fb3',
 ];
 
-const amarillo: MantineColorsTuple = [
-  '#fff9e6',
-  '#fff2cc',
-  '#ffeb99',
-  '#ffe466',
-  '#ffdd33',
-  '#ffd93d',
-  '#ffd11a',
-  '#e6c200',
-  '#ccad00',
-  '#b39900',
-];
-
 export const theme = createTheme({
-  primaryColor: 'fucsia',
+  primaryColor: 'primary',
   colors: {
+    primary,
+    secondary,
     fucsia,
     cian,
-    amarillo,
   },
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   headings: {
@@ -58,5 +73,8 @@ export const theme = createTheme({
     md: '1rem',
     lg: '1.5rem',
     xl: '2rem',
+  },
+  other: {
+    dimmed: '#4a5568', // Color más oscuro para mejor legibilidad (antes era muy claro)
   },
 });

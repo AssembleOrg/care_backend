@@ -12,6 +12,9 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 a {
@@ -36,4 +39,82 @@ a {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* Loading cursor for buttons and interactive elements */
+button:disabled,
+.mantine-Button-root[data-loading],
+.mantine-ActionIcon-root[data-loading],
+button[data-loading] {
+  cursor: wait !important;
+}
+
+button:disabled:hover,
+.mantine-Button-root[data-loading]:hover,
+.mantine-ActionIcon-root[data-loading]:hover,
+button[data-loading]:hover {
+  cursor: wait !important;
+}
+
+/* Loading cursor for form submissions */
+form:has(button[type="submit"]:disabled) {
+  cursor: wait;
+}
+
+/* Loading cursor for buttons with loading state */
+.mantine-Button-root[data-loading="true"],
+.mantine-ActionIcon-root[data-loading="true"] {
+  cursor: wait !important;
+  pointer-events: none;
+}
+
+/* Mejorar contraste de textos en la landing page */
+:root {
+  --mantine-color-dimmed: #4a5568 !important;
+  --mantine-color-text: #1a1a2e !important;
+}
+
+/* Asegurar que todos los textos tengan buen contraste */
+.mantine-Text-root[data-c="dimmed"] {
+  color: #4a5568 !important;
+}
+
+.mantine-Anchor-root[data-c="dimmed"] {
+  color: #4a5568 !important;
+}
+
+.mantine-Anchor-root[data-c="dimmed"]:hover {
+  color: #2C8894 !important;
+}
+
+/* Textos en la landing page - asegurar contraste */
+.page .mantine-Text-root {
+  color: #1a1a2e !important;
+}
+
+.page .mantine-Text-root[data-c="dimmed"] {
+  color: #4a5568 !important;
+}
+
+.page .mantine-Anchor-root {
+  color: #1a1a2e !important;
+}
+
+.page .mantine-Anchor-root[data-c="dimmed"] {
+  color: #4a5568 !important;
+}
+
+.page .mantine-Anchor-root:hover {
+  color: #2C8894 !important;
+}
+
+/* Botones outline - mejor contraste */
+.page .mantine-Button-root[data-variant="outline"] {
+  color: #1a1a2e !important;
+  border-color: #2C8894 !important;
+}
+
+.page .mantine-Button-root[data-variant="outline"]:hover {
+  background-color: #2C8894 !important;
+  color: white !important;
 }

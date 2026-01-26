@@ -1,38 +1,43 @@
 'use client';
 
-import { Container, Paper, Title, TextInput, PasswordInput, Button, Stack, Alert, Text, Anchor } from '@mantine/core';
-import { useForm } from '@mantine/form';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { notifications } from '@mantine/notifications';
 import { createClient } from '@/src/infrastructure/supabase/client';
 import Link from 'next/link';
+import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const supabase = createClient();
 
-  const form = useForm({
-    initialValues: {
-      email: '',
-      password: '',
-    },
-    validate: {
-      email: (value) => (!value ? 'Email requerido' : /^\S+@\S+$/.test(value) ? null : 'Email inválido'),
-      password: (value) => (!value ? 'Contraseña requerida' : null),
-    },
-  });
-
-  const handleSubmit = async (values: typeof form.values) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
 
+    // Validación básica
+    if (!email || !password) {
+      setError('Por favor completa todos los campos');
+      setLoading(false);
+      return;
+    }
+
+    if (!/^\S+@\S+$/.test(email)) {
+      setError('Email inválido');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
+        email,
+        password,
       });
 
       if (error) {
@@ -57,48 +62,120 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', display: 'flex', alignItems: 'center' }}>
-      <Container size={420}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <Text ta="center" size="sm" c="dimmed" mb="md" style={{ cursor: 'pointer' }}>
-            ← Volver al inicio
-          </Text>
-        </Link>
-        <Paper withBorder shadow="xl" p={40} radius="lg" style={{ background: 'white' }}>
-          <Title ta="center" mb="xs" order={2} style={{ color: '#1a1a2e' }}>
-            CareByDani
-          </Title>
-          <Text ta="center" c="dimmed" size="sm" mb="xl">
-            Panel de Administración
-          </Text>
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <Stack>
-              {error && (
-                <Alert color="red" title="Error">
-                  {error}
-                </Alert>
-              )}
-              <TextInput
-                label="Email"
-                placeholder="admin@example.com"
-                required
-                size="md"
-                {...form.getInputProps('email')}
-              />
-              <PasswordInput
-                label="Contraseña"
-                placeholder="Tu contraseña"
-                required
-                size="md"
-                {...form.getInputProps('password')}
-              />
-              <Button type="submit" fullWidth loading={loading} size="md" style={{ background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%)' }}>
-                Iniciar sesión
-              </Button>
-            </Stack>
+    <div className={styles.page}>
+      {/* Ambient Animated Background */}
+      <div className={styles.backgroundBlobs}>
+        <div className={`${styles.blob} ${styles.blob1}`}></div>
+        <div className={`${styles.blob} ${styles.blob2}`}></div>
+        <div className={`${styles.blob} ${styles.blob3}`}></div>
+        <div className={`${styles.blob} ${styles.blob4}`}></div>
+      </div>
+
+      {/* Main Content Area */}
+      <main className={styles.main}>
+        {/* Glassmorphism Login Card */}
+        <div className={styles.glassPanel}>
+          {/* Logo Section */}
+          <div className={styles.logoSection}>
+            <div className={styles.logoIcon}>
+              <span className="material-symbols-outlined">medical_services</span>
+            </div>
+            <h1 className={styles.logoTitle}>Care By Dani</h1>
+          </div>
+
+          {/* Headlines */}
+          <div className={styles.headlines}>
+            <h2 className={styles.title}>Bienvenido de nuevo</h2>
+            <p className={styles.subtitle}>Portal de Administración</p>
+          </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className={styles.errorAlert}>
+              <span className="material-symbols-outlined">error</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {/* Email Field */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="email">
+                Correo electrónico
+              </label>
+              <div className={styles.inputWrapper}>
+                <div className={styles.inputIcon}>
+                  <span className="material-symbols-outlined">mail</span>
+                </div>
+                <input
+                  className={styles.input}
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="admin@carebydani.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className={styles.fieldGroup}>
+              <div className={styles.labelRow}>
+                <label className={styles.label} htmlFor="password">
+                  Contraseña
+                </label>
+              </div>
+              <div className={styles.inputWrapper}>
+                <div className={styles.inputIcon}>
+                  <span className="material-symbols-outlined">lock</span>
+                </div>
+                <input
+                  className={styles.input}
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={loading}
+            >
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
           </form>
-        </Paper>
-      </Container>
+
+          {/* Back Link */}
+          <Link href="/" className={styles.backLink}>
+            ← Volver al inicio
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <footer className={styles.footer}>
+          <p>© {new Date().getFullYear()} Care By Dani. Todos los derechos reservados.</p>
+        </footer>
+      </main>
     </div>
   );
 }

@@ -37,6 +37,7 @@ async function handleGET(request: NextRequest) {
   const requestId = getRequestId(request);
   const searchParams = request.nextUrl.searchParams;
   const all = searchParams.get('all') === 'true';
+  const cuidadorId = searchParams.get('cuidadorId');
 
   try {
     // Obtener cuidadores y personas para incluir nombres
@@ -49,7 +50,13 @@ async function handleGET(request: NextRequest) {
     const personasMap = new Map(personasData.map(p => [p.id, p.nombreCompleto]));
 
     if (all) {
-      const asignaciones = await asignacionRepository.findAll();
+      let asignaciones = await asignacionRepository.findAll();
+      
+      // Filtrar por cuidador si se proporciona
+      if (cuidadorId) {
+        asignaciones = asignaciones.filter(a => a.cuidadorId === cuidadorId);
+      }
+      
       const dtos = asignaciones.map(a => {
         const dto = plainToInstance(AsignacionDTO, a, { excludeExtraneousValues: true });
         return {
@@ -64,12 +71,20 @@ async function handleGET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get('page') || String(PAGINATION_DEFAULT_PAGE), 10));
     const limit = Math.min(PAGINATION_MAX_LIMIT, Math.max(1, parseInt(searchParams.get('limit') || String(PAGINATION_DEFAULT_LIMIT), 10)));
 
-    const [asignaciones, total] = await Promise.all([
-      asignacionRepository.findAll((page - 1) * limit, limit),
-      asignacionRepository.count(),
-    ]);
+    // Obtener todas las asignaciones para filtrar
+    let asignaciones = await asignacionRepository.findAll();
+    
+    // Filtrar por cuidador si se proporciona
+    if (cuidadorId) {
+      asignaciones = asignaciones.filter(a => a.cuidadorId === cuidadorId);
+    }
+    
+    // Aplicar paginación después del filtro
+    const total = asignaciones.length;
+    const start = (page - 1) * limit;
+    const asignacionesPaginated = asignaciones.slice(start, start + limit);
 
-    const dtos = asignaciones.map(a => {
+    const dtos = asignacionesPaginated.map(a => {
       const dto = plainToInstance(AsignacionDTO, a, { excludeExtraneousValues: true });
       return {
         ...dto,

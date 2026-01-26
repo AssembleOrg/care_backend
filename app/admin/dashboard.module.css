@@ -1,0 +1,461 @@
+/* Dashboard Container */
+.dashboard {
+  width: 100%;
+}
+
+/* Welcome Section */
+.welcomeSection {
+  margin-bottom: 32px;
+}
+
+.welcomeTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.welcomeSubtitle {
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Stat Card */
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.statCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.statIcon {
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s;
+}
+
+.statCard:hover .statIcon {
+  transform: scale(1.1);
+}
+
+.statIconPink {
+  background: #fce7f3;
+}
+
+.statIconPrimary {
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.statIconGold {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.statIcon .material-icons-outlined {
+  font-size: 24px;
+}
+
+.statIconPink .material-icons-outlined {
+  color: #ec4899;
+}
+
+.statIconPrimary .material-icons-outlined {
+  color: #0ea5e9;
+}
+
+.statIconGold .material-icons-outlined {
+  color: #fbbf24;
+}
+
+.statTrend {
+  display: flex;
+  align-items: center;
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 500;
+  background: #d1fae5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  gap: 4px;
+}
+
+.statTrendNeutral {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.statTrend .material-icons {
+  font-size: 16px;
+}
+
+.statContent {
+  margin-bottom: 16px;
+}
+
+.statLabel {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+}
+
+.statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.statNumber {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.statSubtext {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.statProgress {
+  height: 4px;
+  width: 100%;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.statProgressBar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s;
+}
+
+.statProgressPink {
+  background: #ec4899;
+}
+
+.statProgressPrimary {
+  background: #0ea5e9;
+}
+
+.statProgressGold {
+  background: #fbbf24;
+}
+
+.loading,
+.error {
+  padding: 16px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.error {
+  color: #ef4444;
+}
+
+/* Activity Section */
+.activitySection {
+  margin-top: 32px;
+}
+
+.activityCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.activityHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activityTitle {
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  font-size: 16px;
+}
+
+.activityViewAll {
+  font-size: 14px;
+  color: #0ea5e9;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.activityViewAll:hover {
+  color: #0284c7;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+}
+
+.activityItem {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityItem:hover {
+  background: #f9fafb;
+}
+
+.activityIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.activityIconperson_add {
+  background: #dbeafe;
+}
+
+.activityIconpayment {
+  background: #d1fae5;
+}
+
+.activityIconwarning {
+  background: #fed7aa;
+}
+
+.activityIconassignment {
+  background: #e0e7ff;
+}
+
+.activityIcon .material-icons {
+  font-size: 16px;
+}
+
+.activityIconperson_add .material-icons {
+  color: #2563eb;
+}
+
+.activityIconpayment .material-icons {
+  color: #10b981;
+}
+
+.activityIconwarning .material-icons {
+  color: #f97316;
+}
+
+.activityIconassignment .material-icons {
+  color: #6366f1;
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityItemTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.activityItemDescription {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.activityTime {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-left: 16px;
+  flex-shrink: 0;
+}
+
+/* Dark Mode Styles */
+:global(.adminContainer.dark) .welcomeTitle,
+:global(body.admin-dark-mode) .welcomeTitle {
+  color: white;
+}
+
+:global(.adminContainer.dark) .welcomeSubtitle,
+:global(body.admin-dark-mode) .welcomeSubtitle {
+  color: #94a3b8;
+}
+
+:global(.adminContainer.dark) .statCard,
+:global(body.admin-dark-mode) .statCard {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  box-shadow: none !important;
+}
+
+:global(.adminContainer.dark) .statCard:hover,
+:global(body.admin-dark-mode) .statCard:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+:global(.adminContainer.dark) .statIconPink,
+:global(body.admin-dark-mode) .statIconPink {
+  background: rgba(236, 72, 153, 0.2);
+}
+
+:global(.adminContainer.dark) .statIconPrimary,
+:global(body.admin-dark-mode) .statIconPrimary {
+  background: rgba(14, 165, 233, 0.2);
+}
+
+:global(.adminContainer.dark) .statIconGold,
+:global(body.admin-dark-mode) .statIconGold {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+:global(.adminContainer.dark) .statTrend,
+:global(body.admin-dark-mode) .statTrend {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+:global(.adminContainer.dark) .statTrendNeutral,
+:global(body.admin-dark-mode) .statTrendNeutral {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+:global(.adminContainer.dark) .statLabel,
+:global(body.admin-dark-mode) .statLabel {
+  color: #94a3b8;
+}
+
+:global(.adminContainer.dark) .statNumber,
+:global(body.admin-dark-mode) .statNumber {
+  color: white;
+}
+
+:global(.adminContainer.dark) .statSubtext,
+:global(body.admin-dark-mode) .statSubtext {
+  color: #64748b;
+}
+
+:global(.adminContainer.dark) .statProgress,
+:global(body.admin-dark-mode) .statProgress {
+  background: #334155;
+}
+
+:global(.adminContainer.dark) .activityCard,
+:global(body.admin-dark-mode) .activityCard {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  box-shadow: none !important;
+}
+
+:global(.adminContainer.dark) .activityHeader,
+:global(body.admin-dark-mode) .activityHeader {
+  border-bottom-color: #334155;
+}
+
+:global(.adminContainer.dark) .activityTitle,
+:global(body.admin-dark-mode) .activityTitle {
+  color: white;
+}
+
+:global(.adminContainer.dark) .activityItem,
+:global(body.admin-dark-mode) .activityItem {
+  border-bottom-color: #334155;
+}
+
+:global(.adminContainer.dark) .activityItem:hover,
+:global(body.admin-dark-mode) .activityItem:hover {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+:global(.adminContainer.dark) .activityIconperson_add,
+:global(body.admin-dark-mode) .activityIconperson_add {
+  background: rgba(37, 99, 235, 0.3);
+}
+
+:global(.adminContainer.dark) .activityIconpayment,
+:global(body.admin-dark-mode) .activityIconpayment {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+:global(.adminContainer.dark) .activityIconwarning,
+:global(body.admin-dark-mode) .activityIconwarning {
+  background: rgba(249, 115, 22, 0.3);
+}
+
+:global(.adminContainer.dark) .activityIconassignment,
+:global(body.admin-dark-mode) .activityIconassignment {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+:global(.adminContainer.dark) .activityItemTitle,
+:global(body.admin-dark-mode) .activityItemTitle {
+  color: white;
+}
+
+:global(.adminContainer.dark) .activityItemDescription,
+:global(body.admin-dark-mode) .activityItemDescription {
+  color: #94a3b8;
+}
+
+:global(.adminContainer.dark) .activityTime,
+:global(body.admin-dark-mode) .activityTime {
+  color: #64748b;
+}

@@ -29,52 +29,63 @@ async function handleGET(request: NextRequest) {
     const cuidadoresData = await cuidadorRepository.findAll();
     const cuidadoresMap = new Map(cuidadoresData.map(c => [c.id, c.nombreCompleto]));
 
-    let pagos;
-    
-    if (cuidadorId) {
-      // Filtrar por cuidador (y opcionalmente por fechas)
-      const fromDate = from ? new Date(from) : undefined;
-      const toDate = to ? new Date(to) : undefined;
-      pagos = await pagoRepository.findByCuidadorId(cuidadorId, fromDate, toDate);
-    } else if (all) {
-      pagos = await pagoRepository.findAll();
-    } else {
-      const [pagosPaginated, total] = await Promise.all([
-        pagoRepository.findAll((page - 1) * limit, limit),
-        pagoRepository.count(),
-      ]);
-
-      const dtos = pagosPaginated.map(p => ({
+    // Si se solicita 'all', devolver todos (solo para compatibilidad, no recomendado)
+    if (all && !cuidadorId && !from && !to) {
+      const pagos = await pagoRepository.findAll();
+      const dtos = pagos.map(p => ({
         ...plainToInstance(PagoDTO, p, { excludeExtraneousValues: true }),
         cuidadorNombre: cuidadoresMap.get(p.cuidadorId) || '',
       }));
-
-      return createSuccessResponse({
-        data: dtos,
-        total,
-        page,
-        limit,
-      }, requestId);
+      return createSuccessResponse(dtos, requestId);
     }
 
-    // Filtrar por fechas si se proporcionaron (para el caso de all=true sin cuidadorId)
-    if (!cuidadorId && (from || to)) {
-      const fromDate = from ? new Date(from) : null;
-      const toDate = to ? new Date(to) : null;
-      pagos = pagos.filter(p => {
-        const fecha = new Date(p.fecha);
-        if (fromDate && fecha < fromDate) return false;
-        if (toDate && fecha > toDate) return false;
-        return true;
-      });
+    // Usar paginación cuando hay filtros o cuando no se especifica 'all'
+    const fromDate = from ? new Date(from) : undefined;
+    const toDate = to ? new Date(to) : undefined;
+
+    let pagosPaginated;
+    let total;
+
+    if (cuidadorId) {
+      // Filtrar por cuidador con paginación
+      const allPagos = await pagoRepository.findByCuidadorId(cuidadorId, fromDate, toDate);
+      total = allPagos.length;
+      const start = (page - 1) * limit;
+      pagosPaginated = allPagos.slice(start, start + limit);
+    } else {
+      // Paginación normal con filtros de fecha opcionales
+      const [allPagos, totalCount] = await Promise.all([
+        pagoRepository.findAll(),
+        pagoRepository.count(),
+      ]);
+
+      // Aplicar filtros de fecha si existen
+      let filteredPagos = allPagos;
+      if (fromDate || toDate) {
+        filteredPagos = allPagos.filter(p => {
+          const fecha = new Date(p.fecha);
+          if (fromDate && fecha < fromDate) return false;
+          if (toDate && fecha > toDate) return false;
+          return true;
+        });
+      }
+
+      total = filteredPagos.length;
+      const start = (page - 1) * limit;
+      pagosPaginated = filteredPagos.slice(start, start + limit);
     }
 
-    const dtos = pagos.map(p => ({
+    const dtos = pagosPaginated.map(p => ({
       ...plainToInstance(PagoDTO, p, { excludeExtraneousValues: true }),
       cuidadorNombre: cuidadoresMap.get(p.cuidadorId) || '',
     }));
-    
-    return createSuccessResponse(dtos, requestId);
+
+    return createSuccessResponse({
+      data: dtos,
+      total,
+      page,
+      limit,
+    }, requestId);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Error in handleGET pagos:', message);

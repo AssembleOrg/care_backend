@@ -1,0 +1,623 @@
+/* Global styles for admin pages - Dark mode and improved contrast */
+
+/* Improve text contrast in light mode */
+:root {
+  --mantine-color-text: #1a1a1a;
+  --mantine-color-dimmed: #5c5c5c;
+}
+
+/* Dark mode variables - only for admin */
+.adminContainer.dark :root {
+  --mantine-color-text: #f1f5f9;
+  --mantine-color-dimmed: #94a3b8;
+}
+
+/* For modals/dropdowns that render outside adminContainer */
+body.admin-dark-mode :root {
+  --mantine-color-text: #f1f5f9;
+  --mantine-color-dimmed: #94a3b8;
+}
+
+/* Mantine Modal Dark Mode - for modals inside adminContainer */
+.adminContainer.dark .mantine-Modal-root,
+body.admin-dark-mode .mantine-Modal-root {
+  color: white;
+}
+
+.adminContainer.dark .mantine-Modal-content,
+body.admin-dark-mode .mantine-Modal-content {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: white;
+}
+
+.adminContainer.dark .mantine-Modal-header,
+body.admin-dark-mode .mantine-Modal-header {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.adminContainer.dark .mantine-Modal-title,
+body.admin-dark-mode .mantine-Modal-title {
+  color: white !important;
+  font-weight: 600;
+}
+
+.adminContainer.dark .mantine-Modal-close,
+body.admin-dark-mode .mantine-Modal-close {
+  color: #cbd5e1;
+}
+
+.adminContainer.dark .mantine-Modal-close:hover,
+body.admin-dark-mode .mantine-Modal-close:hover {
+  background: #334155;
+  color: white;
+}
+
+.adminContainer.dark .mantine-Modal-body,
+body.admin-dark-mode .mantine-Modal-body {
+  color: white;
+}
+
+/* All text in modals should be white */
+.adminContainer.dark .mantine-Modal-body *,
+body.admin-dark-mode .mantine-Modal-body * {
+  color: white;
+}
+
+.adminContainer.dark .mantine-Modal-body .mantine-Text-root,
+body.admin-dark-mode .mantine-Modal-body .mantine-Text-root {
+  color: white !important;
+}
+
+.adminContainer.dark .mantine-Modal-body .mantine-Text-root[data-c="dimmed"],
+body.admin-dark-mode .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
+  color: #cbd5e1 !important;
+}
+
+.adminContainer.dark .mantine-Modal-body .mantine-Title-root,
+body.admin-dark-mode .mantine-Modal-body .mantine-Title-root {
+  color: white !important;
+}
+
+/* Mantine Paper Dark Mode */
+.adminContainer.dark .mantine-Paper-root ,
+body.admin-dark-mode .mantine-Paper-root {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+/* Mantine Table Dark Mode */
+.adminContainer.dark .mantine-Table-root ,
+body.admin-dark-mode .mantine-Table-root {
+  color: white;
+}
+
+.adminContainer.dark .mantine-Table-thead ,
+body.admin-dark-mode .mantine-Table-thead {
+  background: #0f172a;
+}
+
+.adminContainer.dark .mantine-Table-th ,
+body.admin-dark-mode .mantine-Table-th {
+  color: white !important;
+  border-bottom-color: #334155;
+  font-weight: 600;
+}
+
+.adminContainer.dark .mantine-Table-td ,
+body.admin-dark-mode .mantine-Table-td {
+  color: white !important;
+  border-bottom-color: #334155;
+}
+
+.adminContainer.dark .mantine-Table-td .mantine-Text-root ,
+body.admin-dark-mode .mantine-Table-td .mantine-Text-root {
+  color: white !important;
+}
+
+.adminContainer.dark .mantine-Table-td .mantine-Text-root[data-c="dimmed"] ,
+body.admin-dark-mode .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
+  color: #cbd5e1 !important;
+}
+
+.adminContainer.dark .mantine-Table-tr:hover ,
+body.admin-dark-mode .mantine-Table-tr:hover {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+/* Mantine Input Dark Mode */
+.adminContainer.dark .mantine-TextInput-input,
+.adminContainer.dark .mantine-NumberInput-input,
+body.admin-dark-mode .mantine-NumberInput-input,
+.adminContainer.dark .mantine-Select-input,
+body.admin-dark-mode .mantine-Select-input,
+.adminContainer.dark .mantine-Textarea-input,
+body.admin-dark-mode .mantine-Textarea-input,
+.adminContainer.dark .mantine-DateInput-input ,
+body.admin-dark-mode .mantine-DateInput-input ,
+body.admin-dark-mode .mantine-TextInput-input,
+.adminContainer.dark .mantine-NumberInput-input,
+body.admin-dark-mode .mantine-NumberInput-input,
+.adminContainer.dark .mantine-Select-input,
+body.admin-dark-mode .mantine-Select-input,
+.adminContainer.dark .mantine-Textarea-input,
+body.admin-dark-mode .mantine-Textarea-input,
+.adminContainer.dark .mantine-DateInput-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-TextInput-input:focus,
+body.admin-dark-mode .mantine-DateInput-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-TextInput-input:focus,
+.adminContainer.dark .mantine-NumberInput-input:focus,
+body.admin-dark-mode .mantine-NumberInput-input:focus,
+.adminContainer.dark .mantine-Select-input:focus,
+body.admin-dark-mode .mantine-Select-input:focus,
+.adminContainer.dark .mantine-Textarea-input:focus,
+body.admin-dark-mode .mantine-Textarea-input:focus,
+.adminContainer.dark .mantine-DateInput-input:focus ,
+body.admin-dark-mode .mantine-DateInput-input:focus ,
+body.admin-dark-mode .mantine-TextInput-input:focus,
+.adminContainer.dark .mantine-NumberInput-input:focus,
+body.admin-dark-mode .mantine-NumberInput-input:focus,
+.adminContainer.dark .mantine-Select-input:focus,
+body.admin-dark-mode .mantine-Select-input:focus,
+.adminContainer.dark .mantine-Textarea-input:focus,
+body.admin-dark-mode .mantine-Textarea-input:focus,
+.adminContainer.dark .mantine-DateInput-input:focus {
+  border-color: #0ea5e9;
+}
+
+.adminContainer.dark .mantine-TextInput-label,
+body.admin-dark-mode .mantine-DateInput-input:focus {
+  border-color: #0ea5e9;
+}
+
+.adminContainer.dark .mantine-TextInput-label,
+.adminContainer.dark .mantine-NumberInput-label,
+body.admin-dark-mode .mantine-NumberInput-label,
+.adminContainer.dark .mantine-Select-label,
+body.admin-dark-mode .mantine-Select-label,
+.adminContainer.dark .mantine-Textarea-label,
+body.admin-dark-mode .mantine-Textarea-label,
+.adminContainer.dark .mantine-DateInput-label ,
+body.admin-dark-mode .mantine-DateInput-label ,
+body.admin-dark-mode .mantine-TextInput-label,
+.adminContainer.dark .mantine-NumberInput-label,
+body.admin-dark-mode .mantine-NumberInput-label,
+.adminContainer.dark .mantine-Select-label,
+body.admin-dark-mode .mantine-Select-label,
+.adminContainer.dark .mantine-Textarea-label,
+body.admin-dark-mode .mantine-Textarea-label,
+.adminContainer.dark .mantine-DateInput-label {
+  color: white !important;
+  font-weight: 500;
+}
+
+.adminContainer.dark .mantine-TextInput-input::placeholder,
+body.admin-dark-mode .mantine-DateInput-label {
+  color: white !important;
+  font-weight: 500;
+}
+
+.adminContainer.dark .mantine-TextInput-input::placeholder,
+.adminContainer.dark .mantine-NumberInput-input::placeholder,
+body.admin-dark-mode .mantine-NumberInput-input::placeholder,
+.adminContainer.dark .mantine-Select-input::placeholder,
+body.admin-dark-mode .mantine-Select-input::placeholder,
+.adminContainer.dark .mantine-Textarea-input::placeholder,
+body.admin-dark-mode .mantine-Textarea-input::placeholder,
+.adminContainer.dark .mantine-DateInput-input::placeholder ,
+body.admin-dark-mode .mantine-DateInput-input::placeholder ,
+body.admin-dark-mode .mantine-TextInput-input::placeholder,
+.adminContainer.dark .mantine-NumberInput-input::placeholder,
+body.admin-dark-mode .mantine-NumberInput-input::placeholder,
+.adminContainer.dark .mantine-Select-input::placeholder,
+body.admin-dark-mode .mantine-Select-input::placeholder,
+.adminContainer.dark .mantine-Textarea-input::placeholder,
+body.admin-dark-mode .mantine-Textarea-input::placeholder,
+.adminContainer.dark .mantine-DateInput-input::placeholder {
+  color: #64748b;
+}
+
+/* Mantine Select Dropdown Dark Mode */
+.adminContainer.dark .mantine-Select-dropdown ,
+body.admin-dark-mode .mantine-DateInput-input::placeholder {
+  color: #64748b;
+}
+
+/* Mantine Select Dropdown Dark Mode */
+.adminContainer.dark .mantine-Select-dropdown ,
+body.admin-dark-mode .mantine-Select-dropdown {
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+.adminContainer.dark .mantine-Select-option ,
+body.admin-dark-mode .mantine-Select-option {
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-Select-option:hover ,
+body.admin-dark-mode .mantine-Select-option:hover {
+  background: #334155;
+}
+
+.adminContainer.dark .mantine-Select-option[data-selected] ,
+body.admin-dark-mode .mantine-Select-option[data-selected] {
+  background: #0ea5e9;
+  color: white;
+}
+
+/* Mantine Button Dark Mode */
+.adminContainer.dark .mantine-Button-root ,
+body.admin-dark-mode .mantine-Button-root {
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-Button-root[data-variant="light"] ,
+body.admin-dark-mode .mantine-Button-root[data-variant="light"] {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+}
+
+.adminContainer.dark .mantine-Button-root[data-variant="light"]:hover ,
+body.admin-dark-mode .mantine-Button-root[data-variant="light"]:hover {
+  background: rgba(14, 165, 233, 0.2);
+}
+
+.adminContainer.dark .mantine-Button-root[data-variant="subtle"] ,
+body.admin-dark-mode .mantine-Button-root[data-variant="subtle"] {
+  color: #94a3b8;
+}
+
+.adminContainer.dark .mantine-Button-root[data-variant="subtle"]:hover ,
+body.admin-dark-mode .mantine-Button-root[data-variant="subtle"]:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+/* Mantine Badge Dark Mode */
+.adminContainer.dark .mantine-Badge-root ,
+body.admin-dark-mode .mantine-Badge-root {
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-Badge-root[data-variant="light"] ,
+body.admin-dark-mode .mantine-Badge-root[data-variant="light"] {
+  background: rgba(14, 165, 233, 0.2);
+  color: #0ea5e9;
+}
+
+/* Mantine Checkbox Dark Mode */
+.adminContainer.dark .mantine-Checkbox-input ,
+body.admin-dark-mode .mantine-Checkbox-input {
+  border-color: #475569;
+  background: #0f172a;
+}
+
+.adminContainer.dark .mantine-Checkbox-input:checked ,
+body.admin-dark-mode .mantine-Checkbox-input:checked {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+.adminContainer.dark .mantine-Checkbox-label ,
+body.admin-dark-mode .mantine-Checkbox-label {
+  color: #f1f5f9;
+}
+
+/* Mantine ActionIcon Dark Mode */
+.adminContainer.dark .mantine-ActionIcon-root ,
+body.admin-dark-mode .mantine-ActionIcon-root {
+  color: #94a3b8;
+}
+
+.adminContainer.dark .mantine-ActionIcon-root:hover ,
+body.admin-dark-mode .mantine-ActionIcon-root:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+/* Mantine Text Dark Mode */
+.adminContainer.dark .mantine-Text-root ,
+body.admin-dark-mode .mantine-Text-root {
+  color: white !important;
+}
+
+.adminContainer.dark .mantine-Text-root[data-c="dimmed"] ,
+body.admin-dark-mode .mantine-Text-root[data-c="dimmed"] {
+  color: #cbd5e1 !important;
+}
+
+/* Mantine Title Dark Mode */
+.adminContainer.dark .mantine-Title-root ,
+body.admin-dark-mode .mantine-Title-root {
+  color: white !important;
+}
+
+/* All titles in dark mode should be white */
+.adminContainer.dark h1,
+body.admin-dark-mode h1,
+.adminContainer.dark h2,
+body.admin-dark-mode h2,
+.adminContainer.dark h3,
+body.admin-dark-mode h3,
+.adminContainer.dark h4,
+body.admin-dark-mode h4,
+.adminContainer.dark h5,
+body.admin-dark-mode h5,
+.adminContainer.dark h6 {
+  color: white !important;
+}
+
+/* Mantine Container Dark Mode */
+.adminContainer.dark .mantine-Container-root ,
+body.admin-dark-mode h6 {
+  color: white !important;
+}
+
+/* Mantine Container Dark Mode */
+.adminContainer.dark .mantine-Container-root ,
+body.admin-dark-mode .mantine-Container-root {
+  color: #f1f5f9;
+}
+
+/* Mantine Stack Dark Mode */
+.adminContainer.dark .mantine-Stack-root ,
+body.admin-dark-mode .mantine-Stack-root {
+  color: #f1f5f9;
+}
+
+/* Mantine Group Dark Mode */
+.adminContainer.dark .mantine-Group-root ,
+body.admin-dark-mode .mantine-Group-root {
+  color: #f1f5f9;
+}
+
+/* Mantine Card Dark Mode */
+.adminContainer.dark .mantine-Card-root ,
+body.admin-dark-mode .mantine-Card-root {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+/* Mantine Divider Dark Mode */
+.adminContainer.dark .mantine-Divider-root ,
+body.admin-dark-mode .mantine-Divider-root {
+  border-color: #334155;
+}
+
+/* Native input elements in dark mode */
+.adminContainer.dark input[type="time"],
+body.admin-dark-mode input[type="time"],
+.adminContainer.dark input[type="text"],
+body.admin-dark-mode input[type="text"],
+.adminContainer.dark input[type="email"],
+body.admin-dark-mode input[type="email"],
+.adminContainer.dark input[type="number"],
+body.admin-dark-mode input[type="number"],
+.adminContainer.dark textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.adminContainer.dark ,
+body.admin-dark-mode textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.adminContainer.dark ,
+body.admin-dark-mode input[type="time"]:focus,
+.adminContainer.dark input[type="text"]:focus,
+body.admin-dark-mode input[type="text"]:focus,
+.adminContainer.dark input[type="email"]:focus,
+body.admin-dark-mode input[type="email"]:focus,
+.adminContainer.dark input[type="number"]:focus,
+body.admin-dark-mode input[type="number"]:focus,
+.adminContainer.dark textarea:focus {
+  border-color: #0ea5e9;
+  outline: none;
+}
+
+.adminContainer.dark ,
+body.admin-dark-mode textarea:focus {
+  border-color: #0ea5e9;
+  outline: none;
+}
+
+.adminContainer.dark ,
+body.admin-dark-mode input[type="time"]:disabled,
+.adminContainer.dark input[type="text"]:disabled,
+body.admin-dark-mode input[type="text"]:disabled,
+.adminContainer.dark input[type="email"]:disabled,
+body.admin-dark-mode input[type="email"]:disabled,
+.adminContainer.dark input[type="number"]:disabled,
+body.admin-dark-mode input[type="number"]:disabled,
+.adminContainer.dark textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pagination styles */
+.adminContainer.dark .mantine-Pagination-root ,
+body.admin-dark-mode textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pagination styles */
+.adminContainer.dark .mantine-Pagination-root ,
+body.admin-dark-mode .mantine-Pagination-root {
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-Pagination-control ,
+body.admin-dark-mode .mantine-Pagination-control {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.adminContainer.dark .mantine-Pagination-control:hover ,
+body.admin-dark-mode .mantine-Pagination-control:hover {
+  background: #334155;
+}
+
+.adminContainer.dark .mantine-Pagination-control[data-active] ,
+body.admin-dark-mode .mantine-Pagination-control[data-active] {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: white;
+}
+
+/* Improve text contrast in light mode - make text darker */
+.mantine-Text-root {
+  color: #0f172a !important;
+}
+
+.mantine-Text-root[data-c="dimmed"] {
+  color: #374151 !important;
+}
+
+.mantine-Title-root {
+  color: #0f172a !important;
+}
+
+.mantine-Table-th {
+  color: #0f172a !important;
+  font-weight: 600;
+}
+
+.mantine-Table-td {
+  color: #1f2937 !important;
+}
+
+.mantine-TextInput-label,
+.mantine-NumberInput-label,
+.mantine-Select-label,
+.mantine-Textarea-label,
+.mantine-DateInput-label {
+  color: #0f172a !important;
+  font-weight: 600;
+}
+
+/* Improve contrast for Paper content */
+.mantine-Paper-root .mantine-Text-root {
+  color: #0f172a !important;
+}
+
+.mantine-Paper-root .mantine-Text-root[data-c="dimmed"] {
+  color: #374151 !important;
+}
+
+/* Improve contrast for Modal content - Light mode */
+.mantine-Modal-body .mantine-Text-root {
+  color: #0f172a !important;
+}
+
+.mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
+  color: #374151 !important;
+}
+
+/* Dark mode modal text - ensure all is white */
+.adminContainer.dark .mantine-Modal-body .mantine-Text-root ,
+body.admin-dark-mode .mantine-Modal-body .mantine-Text-root {
+  color: white !important;
+}
+
+.adminContainer.dark .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] ,
+body.admin-dark-mode .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
+  color: #cbd5e1 !important;
+}
+
+/* Improve contrast for Table content - Light mode */
+.mantine-Table-td .mantine-Text-root {
+  color: #1f2937 !important;
+}
+
+.mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
+  color: #4b5563 !important;
+}
+
+/* Dark mode table text - ensure all is white */
+.adminContainer.dark .mantine-Table-td .mantine-Text-root ,
+body.admin-dark-mode .mantine-Table-td .mantine-Text-root {
+  color: white !important;
+}
+
+.adminContainer.dark .mantine-Table-td .mantine-Text-root[data-c="dimmed"] ,
+body.admin-dark-mode .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
+  color: #cbd5e1 !important;
+}
+
+/* Improve contrast for Card content */
+.mantine-Card-root .mantine-Text-root {
+  color: #0f172a !important;
+}
+
+.mantine-Card-root .mantine-Text-root[data-c="dimmed"] {
+  color: #374151 !important;
+}
+
+/* Improve contrast for Stack/Group content */
+.mantine-Stack-root .mantine-Text-root,
+.mantine-Group-root .mantine-Text-root {
+  color: #0f172a !important;
+}
+
+.mantine-Stack-root .mantine-Text-root[data-c="dimmed"],
+.mantine-Group-root .mantine-Text-root[data-c="dimmed"] {
+  color: #374151 !important;
+}
+
+/* Mantine Menu Dark Mode */
+.adminContainer.dark .mantine-Menu-dropdown ,
+body.admin-dark-mode .mantine-Menu-dropdown {
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+.adminContainer.dark .mantine-Menu-item ,
+body.admin-dark-mode .mantine-Menu-item {
+  color: white;
+}
+
+.adminContainer.dark .mantine-Menu-item:hover ,
+body.admin-dark-mode .mantine-Menu-item:hover {
+  background: #334155;
+}
+
+.adminContainer.dark .mantine-Menu-item[data-hovered] ,
+body.admin-dark-mode .mantine-Menu-item[data-hovered] {
+  background: #334155;
+}
+
+.adminContainer.dark .mantine-Menu-item[data-hovered][data-color="red"] ,
+body.admin-dark-mode .mantine-Menu-item[data-hovered][data-color="red"] {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.adminContainer.dark .mantine-Menu-label ,
+body.admin-dark-mode .mantine-Menu-label {
+  color: #cbd5e1;
+}
+
+.adminContainer.dark .mantine-Menu-divider ,
+body.admin-dark-mode .mantine-Menu-divider {
+  border-color: #334155;
+}

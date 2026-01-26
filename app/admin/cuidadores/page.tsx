@@ -1,11 +1,15 @@
 'use client';
 
-import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper } from '@mantine/core';
+import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Card, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye } from '@tabler/icons-react';
+import { ViewToggle, useViewMode } from '../components/ViewToggle';
+import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
+import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
+import cardStyles from '../components/card-view.module.css';
 
 interface Cuidador {
   id: string;
@@ -34,6 +38,14 @@ export default function CuidadoresPage() {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [viewMode, setViewMode] = useViewMode('list');
+  const [submitting, setSubmitting] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -64,9 +76,10 @@ export default function CuidadoresPage() {
         setPage(result.page);
       }
     } catch (error) {
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
-        message: 'Error al cargar cuidadores',
+        message: message || 'Error al cargar cuidadores',
         color: 'red',
       });
     } finally {
@@ -78,9 +91,12 @@ export default function CuidadoresPage() {
     fetchCuidadores(1, search);
   }, [search]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    setSearching(true);
     setSearch(searchInput);
     setPage(1);
+    // Wait a bit for the search to complete
+    setTimeout(() => setSearching(false), 500);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -91,6 +107,7 @@ export default function CuidadoresPage() {
   const totalPages = useMemo(() => Math.ceil(total / 20), [total]);
 
   const handleSubmit = async (values: typeof form.values) => {
+    setSubmitting(true);
     try {
       const response = await fetch('/api/v1/cuidadores', {
         method: 'POST',
@@ -101,7 +118,7 @@ export default function CuidadoresPage() {
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Error al crear cuidador');
+        throw new Error(extractApiErrorMessage(data) || 'Error al crear cuidador');
       }
 
       notifications.show({
@@ -114,12 +131,14 @@ export default function CuidadoresPage() {
       close();
       fetchCuidadores(page, search);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
         color: 'red',
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -135,6 +154,7 @@ export default function CuidadoresPage() {
   };
 
   const handleView = async (id: string) => {
+    setViewing(id);
     try {
       const response = await fetch(`/api/v1/cuidadores/${id}`);
       const data = await response.json();
@@ -149,12 +169,15 @@ export default function CuidadoresPage() {
         message: 'Error al cargar datos del cuidador',
         color: 'red',
       });
+    } finally {
+      setViewing(null);
     }
   };
 
   const handleUpdate = async (values: typeof form.values) => {
     if (!selectedCuidador) return;
 
+    setUpdating(true);
     try {
       const response = await fetch(`/api/v1/cuidadores/${selectedCuidador.id}`, {
         method: 'PUT',
@@ -165,7 +188,7 @@ export default function CuidadoresPage() {
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Error al actualizar cuidador');
+        throw new Error(extractApiErrorMessage(data) || 'Error al actualizar cuidador');
       }
 
       notifications.show({
@@ -179,27 +202,35 @@ export default function CuidadoresPage() {
       closeEdit();
       fetchCuidadores(page, search);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
         color: 'red',
       });
+    } finally {
+      setUpdating(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este cuidador?')) return;
+  const handleDeleteClick = (id: string, nombre: string) => {
+    setItemToDelete({ id, name: nombre });
+    openDeleteModal();
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    setDeleting(itemToDelete.id);
     try {
-      const response = await fetch(`/api/v1/cuidadores/${id}`, {
+      const response = await fetch(`/api/v1/cuidadores/${itemToDelete.id}`, {
         method: 'DELETE',
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Error al eliminar cuidador');
+        throw new Error(extractApiErrorMessage(data) || 'Error al eliminar cuidador');
       }
 
       notifications.show({
@@ -208,14 +239,18 @@ export default function CuidadoresPage() {
         color: 'green',
       });
 
+      closeDeleteModal();
+      setItemToDelete(null);
       fetchCuidadores(page, search);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
         color: 'red',
       });
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -238,7 +273,7 @@ export default function CuidadoresPage() {
             style={{ flex: 1 }}
             leftSection={<IconSearch size={16} />}
           />
-          <Button onClick={handleSearch}>Buscar</Button>
+          <Button onClick={handleSearch} loading={searching}>Buscar</Button>
           {search && (
             <Button variant="subtle" onClick={() => {
               setSearch('');
@@ -248,43 +283,124 @@ export default function CuidadoresPage() {
               Limpiar
             </Button>
           )}
+          <ViewToggle value={viewMode} onChange={setViewMode} />
         </Group>
       </Paper>
 
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Nombre</Table.Th>
-            <Table.Th>DNI</Table.Th>
-            <Table.Th>Teléfono</Table.Th>
-            <Table.Th>Email</Table.Th>
-            <Table.Th>Acciones</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {cuidadores.map((cuidador) => (
-            <Table.Tr key={cuidador.id}>
-              <Table.Td>{cuidador.nombreCompleto}</Table.Td>
-              <Table.Td>{cuidador.dni || '-'}</Table.Td>
-              <Table.Td>{cuidador.telefono || '-'}</Table.Td>
-              <Table.Td>{cuidador.email || '-'}</Table.Td>
-              <Table.Td>
-                <Group gap="xs">
-                  <ActionIcon color="blue" variant="light" onClick={() => handleView(cuidador.id)}>
+      {viewMode === 'list' ? (
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Nombre</Table.Th>
+              <Table.Th>DNI</Table.Th>
+              <Table.Th>Teléfono</Table.Th>
+              <Table.Th>Email</Table.Th>
+              <Table.Th>Acciones</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {cuidadores.map((cuidador) => (
+              <Table.Tr key={cuidador.id}>
+                <Table.Td>{cuidador.nombreCompleto}</Table.Td>
+                <Table.Td>{cuidador.dni || '-'}</Table.Td>
+                <Table.Td>{cuidador.telefono || '-'}</Table.Td>
+                <Table.Td>{cuidador.email || '-'}</Table.Td>
+                <Table.Td>
+                  <Group gap="xs">
+                  <ActionIcon 
+                    color="blue" 
+                    variant="light" 
+                    onClick={() => handleView(cuidador.id)}
+                    loading={viewing === cuidador.id}
+                    disabled={viewing === cuidador.id || deleting === cuidador.id}
+                  >
                     <IconEye size={16} />
                   </ActionIcon>
-                  <ActionIcon color="orange" variant="light" onClick={() => handleEdit(cuidador)}>
+                  <ActionIcon 
+                    color="orange" 
+                    variant="light" 
+                    onClick={() => handleEdit(cuidador)}
+                    disabled={viewing === cuidador.id || deleting === cuidador.id}
+                  >
                     <IconEdit size={16} />
                   </ActionIcon>
-                  <ActionIcon color="red" variant="light" onClick={() => handleDelete(cuidador.id)}>
+                  <ActionIcon 
+                    color="red" 
+                    variant="light" 
+                    onClick={() => handleDeleteClick(cuidador.id, cuidador.nombreCompleto)}
+                    loading={deleting === cuidador.id}
+                    disabled={viewing === cuidador.id || deleting === cuidador.id}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                  </Group>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      ) : (
+        <div className={cardStyles.cardGrid}>
+          {cuidadores.map((cuidador) => (
+            <div key={cuidador.id} className={cardStyles.cardItem}>
+              <div className={cardStyles.cardHeader}>
+                <h3 className={cardStyles.cardTitle}>{cuidador.nombreCompleto}</h3>
+                <Group gap="xs" className={cardStyles.cardActions}>
+                  <ActionIcon 
+                    color="blue" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleView(cuidador.id)}
+                    loading={viewing === cuidador.id}
+                    disabled={viewing === cuidador.id || deleting === cuidador.id}
+                  >
+                    <IconEye size={16} />
+                  </ActionIcon>
+                  <ActionIcon 
+                    color="orange" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleEdit(cuidador)}
+                    disabled={viewing === cuidador.id || deleting === cuidador.id}
+                  >
+                    <IconEdit size={16} />
+                  </ActionIcon>
+                  <ActionIcon 
+                    color="red" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleDeleteClick(cuidador.id, cuidador.nombreCompleto)}
+                    loading={deleting === cuidador.id}
+                    disabled={viewing === cuidador.id || deleting === cuidador.id}
+                  >
                     <IconTrash size={16} />
                   </ActionIcon>
                 </Group>
-              </Table.Td>
-            </Table.Tr>
+              </div>
+              <div className={cardStyles.cardBody}>
+                <div className={cardStyles.cardField}>
+                  <span className={cardStyles.cardFieldLabel}>DNI</span>
+                  <span className={cuidador.dni ? cardStyles.cardFieldValue : cardStyles.cardFieldValueEmpty}>
+                    {cuidador.dni || 'No especificado'}
+                  </span>
+                </div>
+                <div className={cardStyles.cardField}>
+                  <span className={cardStyles.cardFieldLabel}>Teléfono</span>
+                  <span className={cuidador.telefono ? cardStyles.cardFieldValue : cardStyles.cardFieldValueEmpty}>
+                    {cuidador.telefono || 'No especificado'}
+                  </span>
+                </div>
+                <div className={cardStyles.cardField}>
+                  <span className={cardStyles.cardFieldLabel}>Email</span>
+                  <span className={cuidador.email ? cardStyles.cardFieldValue : cardStyles.cardFieldValueEmpty}>
+                    {cuidador.email || 'No especificado'}
+                  </span>
+                </div>
+              </div>
+            </div>
           ))}
-        </Table.Tbody>
-      </Table>
+        </div>
+      )}
 
       <Group justify="center" mt="xl">
         <Pagination value={page} onChange={handlePageChange} total={Math.max(totalPages, 1)} />
@@ -301,7 +417,7 @@ export default function CuidadoresPage() {
               <Button variant="subtle" onClick={close}>
                 Cancelar
               </Button>
-              <Button type="submit" color="fucsia">
+              <Button type="submit" color="fucsia" loading={submitting} disabled={submitting}>
                 Crear
               </Button>
             </Group>
@@ -320,7 +436,7 @@ export default function CuidadoresPage() {
               <Button variant="subtle" onClick={closeEdit}>
                 Cancelar
               </Button>
-              <Button type="submit" color="fucsia">
+              <Button type="submit" color="fucsia" loading={updating} disabled={updating}>
                 Guardar
               </Button>
             </Group>
@@ -343,6 +459,16 @@ export default function CuidadoresPage() {
           </Stack>
         )}
       </Modal>
+
+      <ConfirmDeleteModal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar Cuidador"
+        message="¿Estás seguro de que deseas eliminar este cuidador?"
+        itemName={itemToDelete?.name}
+        loading={deleting !== null}
+      />
     </Container>
   );
 }

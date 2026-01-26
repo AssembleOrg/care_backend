@@ -4,6 +4,7 @@ import { Container, Title, Paper, Stack, Group, Text, Select, Button, Card, Badg
 import { DateInput } from '@mantine/dates';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
+import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
 import { IconChartBar } from '@tabler/icons-react';
 
 export default function ReportesPage() {
@@ -55,7 +56,7 @@ export default function ReportesPage() {
 
       setResult(data.data);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,

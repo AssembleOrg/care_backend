@@ -1,14 +1,16 @@
 'use client';
 
-import { Container, Title, Paper, Stack, Group, Text, Select, NumberInput, Button, Card, Table, Badge, Divider, Checkbox } from '@mantine/core';
+import { Container, Title, Paper, Stack, Group, Text, Select, NumberInput, Button, Card, Table, Badge, Divider, Checkbox, SimpleGrid } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconCalculator, IconCheck } from '@tabler/icons-react';
+import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
+import { IconCalculator, IconCheck, IconCalendar, IconClock, IconCurrencyDollar } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import styles from './liquidaciones.module.css';
 
 dayjs.extend(isoWeek);
 dayjs.extend(weekOfYear);
@@ -227,7 +229,7 @@ export default function LiquidacionesPage() {
       // Reset - todos los checkboxes a false
       setHorarios(horarios.map(h => ({ ...h, horaInicio: '09:00', horaFin: '17:00', horas: 0, incluir: false })));
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
@@ -255,195 +257,317 @@ export default function LiquidacionesPage() {
   const noneSelected = horarios.every(h => !h.incluir);
 
   return (
-    <Container size="xl" py="xl">
-      <Title order={1} mb="xl">
-        Liquidación de Honorarios
-      </Title>
+    <div className={styles.liquidacionesPage}>
+      <Container size="xl" py="xl">
+        <div className={styles.pageHeader}>
+          <Title order={1} className={styles.pageTitle}>
+            Liquidación de Honorarios
+          </Title>
+          {inicioSemana && finSemana && (
+            <Text size="lg" className={styles.weekRange}>
+              <IconCalendar size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+              Semana del {inicioSemana.format('DD/MM/YYYY')} al {finSemana.format('DD/MM/YYYY')}
+            </Text>
+          )}
+        </div>
 
-      <Stack gap="xl">
-        {/* Selección de cuidador y tarifa */}
-        <Paper p="md" withBorder>
-          <Stack gap="md">
-            <Group grow>
-              <Select
-                label="Cuidador"
-                required
-                placeholder="Seleccionar cuidador"
-                data={cuidadores.map(c => ({ value: c.id, label: c.nombreCompleto }))}
-                value={cuidadorId}
-                onChange={(value) => setCuidadorId(value || '')}
+        <Stack gap="xl">
+          {/* Selección de cuidador y tarifa */}
+          <Paper p="lg" withBorder className={styles.configCard}>
+            <Stack gap="lg">
+              <div className={styles.configHeader}>
+                <IconCurrencyDollar size={24} className={styles.configIcon} />
+                <Title order={3}>Configuración de Liquidación</Title>
+              </div>
+              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                <Select
+                  label="Cuidador"
+                  required
+                  placeholder="Seleccionar cuidador"
+                  data={cuidadores.map(c => ({ value: c.id, label: c.nombreCompleto }))}
+                  value={cuidadorId}
+                  onChange={(value) => setCuidadorId(value || '')}
+                  searchable
+                />
+                <NumberInput
+                  label="Precio por hora"
+                  required
+                  placeholder="0.00"
+                  min={0}
+                  step={100}
+                  value={precioPorHora}
+                  onChange={(value) => setPrecioPorHora(Number(value) || 0)}
+                  leftSection="$"
+                />
+              </SimpleGrid>
+              <DateInput
+                label="Semana"
+                placeholder="Seleccionar semana"
+                value={semanaSeleccionada}
+                onChange={(value) => {
+                  if (value) {
+                    setSemanaSeleccionada(value as unknown as Date);
+                  }
+                }}
+                locale="es"
+                leftSection={<IconCalendar size={18} />}
               />
-              <NumberInput
-                label="Precio por hora"
-                required
-                placeholder="0.00"
-                min={0}
-                step={100}
-                value={precioPorHora}
-                onChange={(value) => setPrecioPorHora(Number(value) || 0)}
-                leftSection="$"
-              />
-            </Group>
-            <DateInput
-              label="Semana"
-              placeholder="Seleccionar semana"
-              value={semanaSeleccionada}
-              onChange={(value) => {
-                if (value) {
-                  setSemanaSeleccionada(value as unknown as Date);
-                }
-              }}
-              locale="es"
-            />
-            {inicioSemana && finSemana && (
-              <Text size="sm" c="dimmed">
-                Semana del {inicioSemana.format('DD/MM/YYYY')} al {finSemana.format('DD/MM/YYYY')}
-              </Text>
-            )}
-          </Stack>
-        </Paper>
+            </Stack>
+          </Paper>
 
-        {/* Tabla de horarios */}
-        <Paper p="md" withBorder>
-          <Group justify="space-between" mb="md">
-            <Title order={3}>Horarios de la Semana</Title>
-            <Group gap="xs">
-              <Button 
-                size="xs" 
-                variant="light" 
-                color="green"
-                onClick={() => toggleAll(true)}
-                disabled={allSelected}
-              >
-                Seleccionar todos
-              </Button>
-              <Button 
-                size="xs" 
-                variant="light" 
-                color="red"
-                onClick={() => toggleAll(false)}
-                disabled={noneSelected}
-              >
-                Deseleccionar todos
-              </Button>
-            </Group>
-          </Group>
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Incluir</Table.Th>
-                <Table.Th>Día</Table.Th>
-                <Table.Th>Hora Inicio</Table.Th>
-                <Table.Th>Hora Fin</Table.Th>
-                <Table.Th>Horas</Table.Th>
-                <Table.Th>Subtotal</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
+          {/* Tabla de horarios */}
+          <Paper p="lg" withBorder className={styles.scheduleCard}>
+            <div className={styles.scheduleHeader}>
+              <div className={styles.scheduleTitleWrapper}>
+                <IconClock size={24} className={styles.scheduleIcon} />
+                <Title order={3}>Horarios de la Semana</Title>
+              </div>
+              <Group gap="xs" className={styles.toggleButtons}>
+                <Button 
+                  size="sm" 
+                  variant="light" 
+                  color="green"
+                  onClick={() => toggleAll(true)}
+                  disabled={allSelected}
+                  className={styles.toggleButton}
+                >
+                  Seleccionar todos
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="light" 
+                  color="red"
+                  onClick={() => toggleAll(false)}
+                  disabled={noneSelected}
+                  className={styles.toggleButton}
+                >
+                  Deseleccionar todos
+                </Button>
+              </Group>
+            </div>
+            
+            {/* Desktop: Tabla */}
+            <div className={styles.tableWrapper}>
+              <Table className={styles.scheduleTable}>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th className={styles.tableHeader}>Incluir</Table.Th>
+                    <Table.Th className={styles.tableHeader}>Día</Table.Th>
+                    <Table.Th className={styles.tableHeader}>Hora Inicio</Table.Th>
+                    <Table.Th className={styles.tableHeader}>Hora Fin</Table.Th>
+                    <Table.Th className={styles.tableHeader}>Horas</Table.Th>
+                    <Table.Th className={styles.tableHeader}>Subtotal</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {horarios.map((horario, index) => {
+                    const subtotal = horario.horas * precioPorHora;
+                    return (
+                      <Table.Tr 
+                        key={index} 
+                        className={`${styles.tableRow} ${horario.incluir ? styles.tableRowActive : styles.tableRowInactive}`}
+                      >
+                        <Table.Td>
+                          <Checkbox
+                            checked={horario.incluir}
+                            onChange={(e) => actualizarHorario(index, 'incluir', e.currentTarget.checked)}
+                            color="fucsia"
+                            size="md"
+                          />
+                        </Table.Td>
+                        <Table.Td>
+                          <div className={styles.dayCell}>
+                            <Text fw={horario.incluir ? 700 : 500} size="md">
+                              {horario.diaNombre}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              {inicioSemana?.add(horario.dia, 'day').format('DD/MM')}
+                            </Text>
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <input
+                            type="time"
+                            value={horario.horaInicio}
+                            onChange={(e) => actualizarHorario(index, 'horaInicio', e.target.value)}
+                            disabled={!horario.incluir}
+                            className={`${styles.timeInput} ${!horario.incluir ? styles.timeInputDisabled : ''}`}
+                          />
+                        </Table.Td>
+                        <Table.Td>
+                          <input
+                            type="time"
+                            value={horario.horaFin}
+                            onChange={(e) => actualizarHorario(index, 'horaFin', e.target.value)}
+                            disabled={!horario.incluir}
+                            className={`${styles.timeInput} ${!horario.incluir ? styles.timeInputDisabled : ''}`}
+                          />
+                        </Table.Td>
+                        <Table.Td>
+                          <Badge 
+                            color={horario.incluir && horario.horas > 0 ? 'green' : 'gray'}
+                            size="lg"
+                            variant="light"
+                          >
+                            {horario.horas.toFixed(2)}h
+                          </Badge>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text 
+                            fw={horario.incluir ? 700 : 500} 
+                            size="md"
+                            c={horario.incluir ? 'fucsia' : 'dimmed'}
+                          >
+                            ${subtotal.toFixed(2)}
+                          </Text>
+                        </Table.Td>
+                      </Table.Tr>
+                    );
+                  })}
+                </Table.Tbody>
+              </Table>
+            </div>
+
+            {/* Mobile: Cards */}
+            <div className={styles.mobileCards}>
               {horarios.map((horario, index) => {
                 const subtotal = horario.horas * precioPorHora;
                 return (
-                  <Table.Tr key={index} style={{ opacity: horario.incluir ? 1 : 0.6 }}>
-                    <Table.Td>
-                      <Checkbox
-                        checked={horario.incluir}
-                        onChange={(e) => actualizarHorario(index, 'incluir', e.currentTarget.checked)}
-                        color="fucsia"
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      <Text fw={horario.incluir ? 600 : 400}>{horario.diaNombre}</Text>
-                      <Text size="xs" c="dimmed">
-                        {inicioSemana?.add(horario.dia, 'day').format('DD/MM')}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <input
-                        type="time"
-                        value={horario.horaInicio}
-                        onChange={(e) => actualizarHorario(index, 'horaInicio', e.target.value)}
-                        disabled={!horario.incluir}
-                        style={{
-                          padding: '4px 8px',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          opacity: horario.incluir ? 1 : 0.5,
-                        }}
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      <input
-                        type="time"
-                        value={horario.horaFin}
-                        onChange={(e) => actualizarHorario(index, 'horaFin', e.target.value)}
-                        disabled={!horario.incluir}
-                        style={{
-                          padding: '4px 8px',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          opacity: horario.incluir ? 1 : 0.5,
-                        }}
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge color={horario.incluir && horario.horas > 0 ? 'green' : 'gray'}>
+                  <div
+                    key={index}
+                    className={`${styles.mobileCard} ${horario.incluir ? styles.mobileCardActive : styles.mobileCardInactive}`}
+                    onClick={() => !horario.incluir && actualizarHorario(index, 'incluir', true)}
+                  >
+                    <div className={styles.mobileCardHeader}>
+                      <div className={styles.mobileCardDay}>
+                        <Checkbox
+                          checked={horario.incluir}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            actualizarHorario(index, 'incluir', e.currentTarget.checked);
+                          }}
+                          color="fucsia"
+                          size="lg"
+                          className={styles.mobileCheckbox}
+                        />
+                        <div className={styles.mobileDayInfo}>
+                          <Text fw={horario.incluir ? 700 : 500} size="lg">
+                            {horario.diaNombre}
+                          </Text>
+                          <Text size="sm" c="dimmed">
+                            {inicioSemana?.add(horario.dia, 'day').format('DD/MM')}
+                          </Text>
+                        </div>
+                      </div>
+                      <Badge 
+                        color={horario.incluir && horario.horas > 0 ? 'green' : 'gray'}
+                        size="lg"
+                        variant="light"
+                        className={styles.mobileHoursBadge}
+                      >
                         {horario.horas.toFixed(2)}h
                       </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text fw={horario.incluir ? 600 : 400} c={horario.incluir ? undefined : 'dimmed'}>
-                        ${subtotal.toFixed(2)}
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
+                    </div>
+                    
+                    {horario.incluir && (
+                      <div className={styles.mobileCardBody}>
+                        <div className={styles.mobileTimeInputs}>
+                          <div className={styles.mobileTimeGroup}>
+                            <Text size="xs" fw={500} c="dimmed" ta="center">
+                              Hora Inicio
+                            </Text>
+                            <input
+                              type="time"
+                              value={horario.horaInicio}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                actualizarHorario(index, 'horaInicio', e.target.value);
+                              }}
+                              className={styles.mobileTimeInput}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                          <div className={styles.mobileTimeGroup}>
+                            <Text size="xs" fw={500} c="dimmed" ta="center">
+                              Hora Fin
+                            </Text>
+                            <input
+                              type="time"
+                              value={horario.horaFin}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                actualizarHorario(index, 'horaFin', e.target.value);
+                              }}
+                              className={styles.mobileTimeInput}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+                        <div className={styles.mobileSubtotal}>
+                          <Text size="xs" c="dimmed" fw={500}>Subtotal</Text>
+                          <Text 
+                            fw={700} 
+                            size="lg"
+                            c="fucsia"
+                          >
+                            ${subtotal.toFixed(2)}
+                          </Text>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-            </Table.Tbody>
-          </Table>
-        </Paper>
+            </div>
+          </Paper>
 
-        {/* Resumen y acción */}
-        <Card shadow="sm" padding="lg" radius="md" withBorder>
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Text size="lg" fw={600}>Días a liquidar:</Text>
-              <Text size="xl" fw={700}>
-                {totales.diasTrabajados} día{totales.diasTrabajados !== 1 ? 's' : ''}
-              </Text>
-            </Group>
-            <Group justify="space-between">
-              <Text size="lg" fw={600}>Total de horas:</Text>
-              <Text size="xl" fw={700} c="cian">
-                {totales.totalHoras.toFixed(2)} horas
-              </Text>
-            </Group>
-            <Divider />
-            <Group justify="space-between">
-              <Text size="lg" fw={600}>Total a liquidar:</Text>
-              <Text size="xl" fw={700} c="fucsia">
-                ${totales.totalMonto.toFixed(2)}
-              </Text>
-            </Group>
-            <Button
-              size="lg"
-              fullWidth
-              leftSection={<IconCalculator size={20} />}
-              rightSection={<IconCheck size={20} />}
-              onClick={handleLiquidar}
-              loading={loading}
-              disabled={totales.diasTrabajados === 0 || !cuidadorId || !precioPorHora}
-              style={{
-                background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%)',
-                marginTop: '16px',
-              }}
-            >
-              Liquidar y Generar Comprobante
-            </Button>
-          </Stack>
-        </Card>
-      </Stack>
-    </Container>
+          {/* Resumen y acción */}
+          <Card shadow="sm" padding="xl" radius="md" withBorder className={styles.summaryCard}>
+            <Stack gap="lg">
+              <div className={styles.summaryHeader}>
+                <IconCalculator size={28} className={styles.summaryIcon} />
+                <Title order={3}>Resumen de Liquidación</Title>
+              </div>
+              
+              <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg" className={styles.summaryGrid}>
+                <div className={styles.summaryItem}>
+                  <Text size="sm" c="dimmed" fw={500} mb={4}>Días a liquidar</Text>
+                  <Text size="xl" fw={700} className={styles.summaryValue}>
+                    {totales.diasTrabajados} día{totales.diasTrabajados !== 1 ? 's' : ''}
+                  </Text>
+                </div>
+                <div className={styles.summaryItem}>
+                  <Text size="sm" c="dimmed" fw={500} mb={4}>Total de horas</Text>
+                  <Text size="xl" fw={700} c="cian" className={styles.summaryValue}>
+                    {totales.totalHoras.toFixed(2)} horas
+                  </Text>
+                </div>
+                <div className={styles.summaryItem}>
+                  <Text size="sm" c="dimmed" fw={500} mb={4}>Total a liquidar</Text>
+                  <Text size="xl" fw={700} c="fucsia" className={styles.summaryValue}>
+                    ${totales.totalMonto.toFixed(2)}
+                  </Text>
+                </div>
+              </SimpleGrid>
+
+              <Divider />
+
+              <Button
+                size="lg"
+                fullWidth
+                leftSection={<IconCalculator size={20} />}
+                rightSection={<IconCheck size={20} />}
+                onClick={handleLiquidar}
+                loading={loading}
+                disabled={totales.diasTrabajados === 0 || !cuidadorId || !precioPorHora}
+                className={styles.submitButton}
+              >
+                Liquidar
+              </Button>
+            </Stack>
+          </Card>
+        </Stack>
+      </Container>
+    </div>
   );
 }

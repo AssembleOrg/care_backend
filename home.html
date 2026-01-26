@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Página de Inicio de Care By Dani</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2C8894", // Teal color from logo
+                        secondary: "#D4AF37", // Gold/Yellow tone from logo
+                        "primary-dark": "#1E5F66",
+                        "secondary-dark": "#B5952F",
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#0F172A",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E293B",
+                        "text-light": "#334155",
+                        "text-dark": "#E2E8F0",
+                    },
+                    fontFamily: {
+                        display: ["'Inter', sans-serif"],
+                        body: ["'Open Sans', sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        xl: "1rem",
+                        "2xl": "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Open+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(to right, #2C8894, #D4AF37);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-colors duration-300">
+<header class="sticky top-0 z-50 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-20">
+<div class="flex-shrink-0 flex items-center gap-3">
+<img alt="Care By Dani Logo" class="h-12 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwG-M8G6G3KRdnavQfdIS9MEdAVFkD-31o7dJ6bt8uUJTz3nk9cPk2xHUDQbrCUwhUGcmJPIWLXuYWKJLEXwBcuc0SxXrBJQDV39pUrFv64fnzQbMiCRoqf5252EdDPER_5wtgyxAnV4Sr9z4bKurwjLvnIIvmP2Q21UMrO4MQ5FYuX8ZVNawpPKQ49G7WKWZJy0ePeJgqzWhlkXDIKbjj85oLSNLQ728vtaJtmfjsSQ3hOl2lx0a1YpnrFwIVgeGdGwM9UJVChFE"/>
+<span class="text-xl font-bold text-primary hidden md:block">Care By Dani</span>
+</div>
+<nav class="hidden md:flex space-x-8">
+<a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium" href="#">Inicio</a>
+<a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium" href="#servicios">Servicios</a>
+<a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium" href="#nosotros">Nosotros</a>
+<a class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium" href="#contacto">Contacto</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" id="theme-toggle">
+<span class="material-icons-outlined dark:hidden">dark_mode</span>
+<span class="material-icons-outlined hidden dark:block">light_mode</span>
+</button>
+<a class="inline-flex items-center px-4 py-2 border border-primary text-sm font-medium rounded-full text-primary bg-transparent hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors" href="#">
+                        Iniciar sesión
+                    </a>
+</div>
+</div>
+</div>
+</header>
+<section class="relative overflow-hidden pt-12 pb-16 lg:pt-20 lg:pb-24">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+<div class="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
+<div class="lg:col-span-6 text-center lg:text-left mb-12 lg:mb-0">
+<span class="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4 tracking-wide uppercase">Cuidado Profesional &amp; Empático</span>
+<h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
+                        Cuidado con <span class="gradient-text">corazón</span> en la comodidad de su hogar
+                    </h1>
+<p class="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                        Brindamos asistencia personalizada y compañía a adultos mayores, asegurando su bienestar y tranquilidad con un equipo profesional y humano.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+<a class="inline-flex justify-center items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-md text-white bg-primary hover:bg-primary-dark transition-all transform hover:scale-105" href="#contacto">
+                            Solicitar información
+                        </a>
+<a class="inline-flex justify-center items-center px-8 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-full text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm" href="#servicios">
+                            Conocer servicios
+                        </a>
+</div>
+<div class="mt-8 flex items-center justify-center lg:justify-start gap-4 text-sm text-gray-500 dark:text-gray-400">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-gray-300 border-2 border-white dark:border-gray-800"></div>
+<div class="w-8 h-8 rounded-full bg-gray-400 border-2 border-white dark:border-gray-800"></div>
+<div class="w-8 h-8 rounded-full bg-gray-500 border-2 border-white dark:border-gray-800"></div>
+</div>
+<p>Más de <span class="font-bold text-primary">500 familias</span> confían en nosotros</p>
+</div>
+</div>
+<div class="lg:col-span-6 relative">
+<div class="relative rounded-2xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent mix-blend-overlay z-10"></div>
+<img alt="Enfermera sonriente cuidando a una señora mayor en el sofá" class="w-full h-full object-cover rounded-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ6F5czfboXvrpjUi0TdbPqRnptHE6a90Bfu3E5AP6E50fRatZl30lcn9gd9LNg3gDbUElSKZIFvND6610iYY499f7ezMl7xq5SJuUhcQrKso6ZrlFfMQB5W_O4QcGw2-0MxNhNOJpMtorykHWtrze4SMJLzO7wZWhB27kSN-Se5P0rs2tKV1Roy9Hr7O5ZXo1FE0yD0is8pUc2kVj9clBu0wed3BhWGdiqzSKd3WWeF5YI4tyuL8i-QTe0JWQHSTBoNEUhM86hEM"/>
+</div>
+<div class="absolute -bottom-6 -left-6 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-lg z-20 flex items-center gap-3 animate-bounce" style="animation-duration: 3s;">
+<span class="material-icons-outlined text-yellow-500 text-3xl">star</span>
+<div>
+<p class="font-bold text-gray-900 dark:text-white">4.9/5</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">Valoración de clientes</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-16 bg-white dark:bg-surface-dark" id="nosotros">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl mb-4">¿Por qué elegirnos?</h2>
+<p class="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                    Entendemos que el cuidado de sus seres queridos es una prioridad. Nuestro enfoque se basa en la confianza, la empatía y la excelencia.
+                </p>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="group p-8 bg-background-light dark:bg-background-dark rounded-2xl hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+<span class="material-icons-outlined text-3xl">volunteer_activism</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Cuidado Compasivo</h3>
+<p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Tratamos a cada persona como si fuera de nuestra propia familia, priorizando su dignidad y respeto en todo momento.
+                    </p>
+</div>
+<div class="group p-8 bg-background-light dark:bg-background-dark rounded-2xl hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+<span class="material-icons-outlined text-3xl">verified_user</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Personal Verificado</h3>
+<p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Todos nuestros cuidadores pasan por rigurosos procesos de selección y antecedentes para garantizar su seguridad.
+                    </p>
+</div>
+<div class="group p-8 bg-background-light dark:bg-background-dark rounded-2xl hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
+<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+<span class="material-icons-outlined text-3xl">schedule</span>
+</div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Flexibilidad Total</h3>
+<p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Adaptamos nuestros horarios y servicios a sus necesidades específicas, desde unas horas hasta cuidado 24/7.
+                    </p>
+</div>
+</div>
+</div>
+</section>
+<section class="py-16 lg:py-24 bg-background-light dark:bg-background-dark" id="servicios">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+<div class="relative mb-12 lg:mb-0 order-last lg:order-first">
+<div class="absolute -top-4 -left-4 w-24 h-24 bg-secondary/20 rounded-full blur-2xl"></div>
+<div class="absolute -bottom-4 -right-4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+<img alt="Cuidadora ayudando a una señora a caminar en el parque" class="relative rounded-2xl shadow-lg w-full object-cover h-[500px]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcLvcoz5-TAaGN96N5DasbaQd7lrsPPvhmeVaWDazj_rzIpAUr_C_oEf5gfKUrNoZCIc_ZfolmKtq8pfATKhYE4pAU088XlM4BzsDS8ZR8kPx8JgDTVdkVrtaDffz8g4mSDxcE8g-hCLiYQmoIt-DReDgYTUF6l8zbVtIPQjkny5p6Mg4vE5FOaKRKFWuMZCtZprEKro_n8RhWfplTY9mVvMrr0DEL02fJLfgBj0CkQdfa45eq2hO_YkukohuIpK0cUKS8PMn7yZ8"/>
+</div>
+<div>
+<span class="text-primary font-semibold tracking-wide uppercase text-sm">Nuestros Servicios</span>
+<h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl mt-2 mb-6">
+                        Asistencia integral para una vida plena
+                    </h2>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-primary">
+<span class="material-icons-outlined">medical_services</span>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-semibold text-gray-900 dark:text-white">Acompañamiento Médico</h4>
+<p class="text-gray-600 dark:text-gray-400 mt-1">Supervisión de medicación y acompañamiento a citas médicas.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-primary">
+<span class="material-icons-outlined">cleaning_services</span>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-semibold text-gray-900 dark:text-white">Ayuda en el Hogar</h4>
+<p class="text-gray-600 dark:text-gray-400 mt-1">Apoyo con tareas domésticas ligeras, preparación de comidas y organización.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-primary">
+<span class="material-icons-outlined">self_improvement</span>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-semibold text-gray-900 dark:text-white">Higiene Personal</h4>
+<p class="text-gray-600 dark:text-gray-400 mt-1">Asistencia digna y respetuosa con el aseo personal y la vestimenta.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-primary">
+<span class="material-icons-outlined">people</span>
+</div>
+</div>
+<div>
+<h4 class="text-lg font-semibold text-gray-900 dark:text-white">Compañía y Recreación</h4>
+<p class="text-gray-600 dark:text-gray-400 mt-1">Conversación, paseos, juegos y actividades para mantener la mente activa.</p>
+</div>
+</div>
+</div>
+<div class="mt-8">
+<a class="text-primary hover:text-primary-dark font-medium inline-flex items-center gap-2 group" href="#contacto">
+                            Ver todos los detalles
+                            <span class="material-icons-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-primary dark:bg-primary-dark relative overflow-hidden">
+<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+<span class="material-icons-outlined text-6xl text-white/30 mb-6">format_quote</span>
+<blockquote class="text-2xl md:text-3xl font-medium text-white italic mb-8 leading-relaxed">
+                "Dani y su equipo no solo cuidaron a mi padre, sino que le devolvieron la alegría. Sentimos una paz inmensa sabiendo que estaba en las mejores manos."
+            </blockquote>
+<cite class="not-italic text-white/90 font-semibold text-lg flex flex-col items-center gap-2">
+<img alt="María González" class="w-16 h-16 rounded-full border-4 border-white/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCG9oRQEn0ODK4ezWCTVhDDFlbiIofPxgteLYL55Ts_pIG_O0pZIMPozpFJ579np-TaigF1PKwB16t0SmvN14yVasJHAzYn9pwvV_EBqM_mxwVOO6Ak39PbmoOUhY0kDMoCBz4E_u_HJNtHWb-fbSxWiLHfY9vSYXBl9Ba3dISWAY0hPhqVAIdXHR7IHSfrIWoJXd8AN59dGMpI6oUnEcLZFt0FuFMhzA-0gB3meRmLsUFgiCS1wlfrvcaE5EDkJqB87aaSiFfBFY0"/>
+<span>María González</span>
+<span class="text-sm font-normal text-white/70">Hija de paciente</span>
+</cite>
+</div>
+</section>
+<section class="py-16 bg-white dark:bg-surface-dark">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative shadow-lg">
+<div class="w-full md:w-1/2 relative z-10">
+<img alt="Entrega de compra a domicilio" class="rounded-2xl shadow-md w-full h-72 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTl4Dlfzc9zLf25EMTlosv8Uy4A3etkXrNy_ytA3gpl-FZGBCGILGTK1Mk7DrSrjF_vhB_2lzWHc0xMf8rMVmy5jWEFF9u_6MQySlGYIAvt7W_xUKE0RNxYV1WuH8_E8UpkxTWCvCiupvt5ZN7vPOuJa0WLTLLofNjB3aFw8ueKU-olb2_zFEqkXwg45HG_Th1q--ck7Sk5JTxpU6GHsp-byOIS5dhVEPc-1KyPyGuT4GL31uVawBCwPL3uaIQPFMi1wSDMZOtS_M"/>
+</div>
+<div class="w-full md:w-1/2 relative z-10 text-left">
+<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">¿Listo para mejorar la calidad de vida de su ser querido?</h2>
+<p class="text-gray-600 dark:text-gray-300 mb-8 text-lg">Contáctenos hoy para una consulta gratuita. Evaluaremos sus necesidades y diseñaremos un plan de cuidado personalizado.</p>
+<form class="space-y-4" id="contacto">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<input class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Nombre completo" type="text"/>
+<input class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Teléfono" type="tel"/>
+</div>
+<input class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Correo electrónico" type="email"/>
+<textarea class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all resize-none" placeholder="¿Cómo podemos ayudarle?" rows="3"></textarea>
+<button class="w-full sm:w-auto px-8 py-3 bg-secondary hover:bg-secondary-dark text-white font-bold rounded-lg shadow-md transition-colors duration-300 flex justify-center items-center gap-2" type="button">
+                            Enviar mensaje
+                            <span class="material-icons-outlined text-sm">send</span>
+</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-2 mb-4">
+<img alt="Care By Dani Logo Footer" class="h-10 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3FM6muU01X-LsREvB1q9ynajHEDDvC3ntEDSZ8xKBQVtjnn549jOaOkISRWJBH_AE-qXyZUh4zsDihTAl6p_of5ud-KtpM3fZYuGMnQVysUYdS-zQu9KQMwQOgLNiaDikRjee1TRPEvma0K55irk8L84bDXiEJuPqNXkHcLexwW-CPBLabYWivBjptESHLM_3eG2ARJ6EW4DzEP-FKgTbLwtpLvIwXA9lcA0ib4SXWAPxmWsYnRTt20Sf94Kx5ApyCahNc3ltsFc"/>
+<span class="text-lg font-bold text-gray-800 dark:text-white">Care By Dani</span>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Dedicados a brindar cuidado humano, cálido y profesional. Su bienestar es nuestra misión.
+                    </p>
+<div class="flex space-x-4">
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">facebook</span></a>
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">camera_alt</span></a> 
+<a class="text-gray-400 hover:text-primary transition-colors" href="#"><span class="material-icons-outlined">alternate_email</span></a> 
+</div>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Enlaces Rápidos</h3>
+<ul class="space-y-3">
+<li><a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm transition-colors" href="#">Inicio</a></li>
+<li><a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm transition-colors" href="#servicios">Nuestros Servicios</a></li>
+<li><a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm transition-colors" href="#nosotros">Sobre Nosotros</a></li>
+<li><a class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary text-sm transition-colors" href="#contacto">Contáctenos</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Contacto</h3>
+<ul class="space-y-3">
+<li class="flex items-start gap-3 text-sm text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-primary text-base">place</span>
+<span>Calle Principal 123, Ciudad, País</span>
+</li>
+<li class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-primary text-base">phone</span>
+<span>+1 234 567 890</span>
+</li>
+<li class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-primary text-base">email</span>
+<span>contacto@carebydani.com</span>
+</li>
+</ul>
+</div>
+<div>
+<h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Horario de Atención</h3>
+<ul class="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+<li class="flex justify-between"><span>Lunes - Viernes:</span> <span>9:00 - 18:00</span></li>
+<li class="flex justify-between"><span>Sábado:</span> <span>10:00 - 14:00</span></li>
+<li class="flex justify-between"><span>Domingo:</span> <span>Cerrado</span></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-sm text-gray-400">© 2023 Care By Dani. Todos los derechos reservados.</p>
+<div class="flex space-x-6 text-sm text-gray-400">
+<a class="hover:text-gray-500 dark:hover:text-gray-300" href="#">Privacidad</a>
+<a class="hover:text-gray-500 dark:hover:text-gray-300" href="#">Términos</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        themeToggleBtn.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        // Check for saved user preference, if any, on load of the website
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+</body></html>

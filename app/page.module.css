@@ -1,6 +1,9 @@
 .page {
   min-height: 100vh;
   background: #fafafa;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 /* Navbar */
@@ -13,34 +16,94 @@
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #eaeaea;
   z-index: 100;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.navbarContainer {
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.navbarGroup {
+  min-height: 60px;
+  align-items: center;
+  width: 100%;
+}
+
+.navbarGroup > * {
+  flex-shrink: 0;
+}
+
+.navbarLogo {
+  width: clamp(60px, 12vw, 108px) !important;
+  height: auto !important;
+  max-width: 100% !important;
+  flex-shrink: 0;
+}
+
+.mobileLoginGroup {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.mobileLoginButton {
+  white-space: nowrap;
+  min-width: fit-content;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .logo {
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #2C8894 !important;
+  font-weight: 700;
+}
+
+/* Asegurar que los enlaces del navbar sean legibles */
+.navbar a:not(.ctaButton) {
+  color: #1a1a2e !important;
+}
+
+.navbar a:not(.ctaButton):hover {
+  color: #2C8894 !important;
 }
 
 .ctaButton {
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
+  background: #2C8894;
   border: none;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .ctaButton:hover {
+  background: #1E5F66;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+  box-shadow: 0 8px 20px rgba(44, 136, 148, 0.3);
 }
 
 .secondaryButton {
-  border-color: #1a1a2e;
-  color: #1a1a2e;
+  border-color: #2C8894 !important;
+  color: #2C8894 !important;
 }
 
 .secondaryButton:hover {
-  background: #1a1a2e;
-  color: white;
+  background: #2C8894 !important;
+  color: white !important;
+}
+
+/* Botón outline en navbar - mejor contraste */
+.navbar .mantine-Button-root[data-variant="outline"] {
+  color: #2C8894 !important;
+  border-color: #2C8894 !important;
+}
+
+.navbar .mantine-Button-root[data-variant="outline"]:hover {
+  background-color: #2C8894 !important;
+  color: white !important;
 }
 
 /* Hero */
@@ -52,9 +115,27 @@
   align-items: center;
 }
 
+.heroContainer {
+  padding-top: 60px;
+  padding-bottom: 60px;
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.heroButtons {
+  justify-content: flex-start;
+}
+
+.heroButton {
+  width: 100%;
+  max-width: 300px;
+}
+
 .heroBadge {
-  background: rgba(255, 107, 157, 0.1);
-  color: #FF6B9D;
+  background: rgba(44, 136, 148, 0.1);
+  color: #2C8894;
   font-weight: 600;
 }
 
@@ -66,14 +147,41 @@
 }
 
 .heroAccent {
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
+  background: linear-gradient(to right, #2C8894, #D4AF37);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+.heroImageWrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.heroImageWrapper :global(img) {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+.heroRatingCard {
+  position: absolute;
+  bottom: -24px;
+  left: -24px;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: bounce 3s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
 .heroSubtitle {
-  color: #666;
+  color: #4a5568 !important;
   line-height: 1.7;
   max-width: 500px;
 }
@@ -102,8 +210,9 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #FF6B9D;
+  color: #2C8894;
   margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
 .sectionTitle {
@@ -162,8 +271,8 @@
 }
 
 .cardBadge {
-  background: rgba(255, 107, 157, 0.1);
-  color: #FF6B9D;
+  background: rgba(44, 136, 148, 0.1);
+  color: #2C8894;
 }
 
 .cardTitle {
@@ -171,7 +280,7 @@
 }
 
 .cardIcon {
-  color: #FF6B9D;
+  color: #2C8894;
 }
 
 .cardStats {
@@ -182,7 +291,7 @@
 }
 
 .statNumber {
-  color: #FF6B9D;
+  color: #2C8894;
 }
 
 /* Preview Section */
@@ -223,7 +332,7 @@
 }
 
 .totalAmount {
-  color: #FF6B9D;
+  color: #2C8894;
 }
 
 /* Timeline */
@@ -247,7 +356,7 @@
   transform: translateX(-50%);
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
+  background: linear-gradient(135deg, #2C8894 0%, #D4AF37 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -255,12 +364,12 @@
   color: white;
   font-weight: 800;
   font-size: 1.5rem;
-  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+  box-shadow: 0 4px 12px rgba(44, 136, 148, 0.4);
   border: 3px solid white;
 }
 
 .stepIcon {
-  color: #00D9FF;
+  color: #2C8894;
 }
 
 /* Security */
@@ -289,12 +398,12 @@
 .securityIcon {
   width: 48px;
   height: 48px;
-  background: rgba(255, 107, 157, 0.1);
+  background: rgba(44, 136, 148, 0.1);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FF6B9D;
+  color: #2C8894;
 }
 
 /* FAQ */
@@ -313,15 +422,140 @@
 }
 
 .ctaCard {
-  background: linear-gradient(135deg, #FF6B9D 0%, #FF8C69 100%);
+  background: linear-gradient(135deg, #2C8894 0%, #1E5F66 100%);
   border-radius: 24px;
   padding: 60px;
 }
 
+/* New sections */
+.whySection {
+  background: #ffffff;
+}
+
+.featureCard {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.featureIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(44, 136, 148, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2C8894;
+  transition: all 0.3s;
+}
+
+.featureCard:hover .featureIcon {
+  background: #2C8894;
+  color: white;
+}
+
+.servicesSection {
+  background: #F8FAFC;
+}
+
+.serviceImageWrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.serviceImageWrapper :global(img) {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+.serviceIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2C8894;
+  flex-shrink: 0;
+}
+
+.testimonialSection {
+  background: #2C8894;
+  position: relative;
+  overflow: hidden;
+  min-height: auto;
+}
+
+.testimonialSection::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.testimonialSection > * {
+  position: relative;
+  z-index: 1;
+}
+
+.contactSection {
+  background: #ffffff;
+}
+
+.contactCard {
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  border: 1px solid #eaeaea;
+}
+
+.contactInput {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.contactInput:focus {
+  outline: none;
+  border-color: #2C8894;
+  box-shadow: 0 0 0 3px rgba(44, 136, 148, 0.1);
+}
+
 /* Footer */
 .footer {
-  background: #ffffff;
+  background: #f9fafb;
   border-top: 1px solid #eaeaea;
+}
+
+.footerContainer {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.sectionContainer {
+  padding-top: 60px;
+  padding-bottom: 60px;
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Responsive */
@@ -340,8 +574,36 @@
 }
 
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 16px;
+  .navbarContainer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .navbarGroup {
+    min-height: 60px;
+    height: 60px !important;
+    justify-content: space-between !important;
+  }
+  
+  .navbarLogo {
+    width: clamp(100px, 18vw, 100px) !important;
+    height: auto !important;
+  }
+  
+  .mobileLoginGroup {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .mobileLoginButton {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 0.875rem;
+    padding: 8px 16px;
   }
   
   .navbar a:not(.ctaButton) {
@@ -349,23 +611,80 @@
   }
   
   .hero {
-    padding-top: 60px;
+    padding-top: 80px;
     min-height: auto;
-    padding-bottom: 60px;
+    padding-bottom: 40px;
+    overflow-x: hidden;
+  }
+  
+  .heroContainer {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 2rem;
     line-height: 1.2;
   }
   
   .heroSubtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
   
   .sectionTitle {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
     line-height: 1.3;
+  }
+  
+  .sectionContainer {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .heroImageWrapper {
+    margin-top: 24px;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .heroImageWrapper :global(img) {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 400px;
+    object-fit: cover;
+  }
+  
+  .serviceImageWrapper {
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .serviceImageWrapper :global(img) {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+  }
+  
+  .heroButtons {
+    justify-content: center;
+  }
+  
+  .heroButton {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .footerContainer {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   
   .bentoGrid {
@@ -430,12 +749,19 @@
 }
 
 @media (max-width: 480px) {
+  .navbarContainer {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
   .heroTitle {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    line-height: 1.2;
   }
   
   .sectionTitle {
     font-size: 1.5rem;
+    line-height: 1.3;
   }
   
   .bentoCard {
@@ -445,5 +771,29 @@
   .ctaButton {
     font-size: 0.9rem;
     padding: 10px 20px;
+  }
+  
+  .heroSubtitle {
+    font-size: 0.9rem;
+  }
+  
+  .contactInput {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+  
+  .footerContainer {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+  
+  .footer img {
+    max-width: 150px;
+    height: auto;
+  }
+  
+  .sectionContainer {
+    padding-top: 30px;
+    padding-bottom: 30px;
   }
 }

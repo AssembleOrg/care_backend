@@ -6,11 +6,13 @@ import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconChevronLeft, IconChevronRight, IconPencil } from '@tabler/icons-react';
+import { IconChevronLeft, IconChevronRight, IconPencil, IconCalendar } from '@tabler/icons-react';
+import { extractApiErrorMessage, parseApiError } from '../../utils/parseApiError';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import styles from './calendario.module.css';
 
 dayjs.extend(isoWeek);
 dayjs.extend(weekOfYear);
@@ -64,6 +66,17 @@ export default function CalendarioPage() {
   const [selectedAsignacion, setSelectedAsignacion] = useState<Asignacion | null>(null);
   const [viewOpened, { open: openView, close: closeView }] = useDisclosure(false);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detectar si es mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const editForm = useForm({
     initialValues: {
@@ -82,7 +95,19 @@ export default function CalendarioPage() {
 
   const fetchAsignaciones = async () => {
     try {
-      const response = await fetch('/api/v1/asignaciones?all=true');
+      const params = new URLSearchParams();
+      
+      // Agregar filtro de semana
+      if (semanaActual) {
+        params.set('semana', dayjs(semanaActual).toISOString());
+      }
+      
+      // Agregar filtro de cuidador
+      if (cuidadorFiltro) {
+        params.set('cuidadorId', cuidadorFiltro);
+      }
+
+      const response = await fetch(`/api/v1/asignaciones/calendario?${params}`);
       const data = await response.json();
       if (data.ok && Array.isArray(data.data)) {
         setAsignaciones(data.data);
@@ -94,6 +119,9 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     fetchAsignaciones();
+  }, [semanaActual, cuidadorFiltro]);
+
+  useEffect(() => {
     fetch('/api/v1/cuidadores?all=true')
       .then(res => res.json())
       .then(data => {
@@ -117,40 +145,40 @@ export default function CalendarioPage() {
   const diasSemana = useMemo(() => Array.from({ length: 7 }, (_, i) => inicioSemana.add(i, 'day')), [inicioSemana]);
 
   const asignacionesFiltradas = useMemo(() => {
-    let filtradas = asignaciones.filter(a => {
-      const inicio = dayjs(a.fechaInicio);
-      const fin = a.fechaFin ? dayjs(a.fechaFin) : null;
-      // Solo mostrar si la semana actual está dentro del rango de la asignación
-      return inicio.isBefore(finSemana.add(1, 'day')) && (!fin || fin.isAfter(inicioSemana.subtract(1, 'day')));
-    });
-
+    // El backend ya filtra por semana, pero puede que necesitemos filtrar por cuidador aquí también
+    // si el filtro cambia sin recargar desde el backend
+    let filtradas = asignaciones;
+    
     if (cuidadorFiltro) {
       filtradas = filtradas.filter(a => a.cuidadorId === cuidadorFiltro);
     }
-
+    
     return filtradas;
-  }, [asignaciones, cuidadorFiltro, inicioSemana, finSemana]);
+  }, [asignaciones, cuidadorFiltro]);
 
   // Verificar si un día específico de la semana está dentro del rango de fechas de la asignación
   const esDiaValido = (asignacion: Asignacion, diaIndex: number) => {
-    const fechaDia = inicioSemana.add(diaIndex, 'day');
-    const fechaInicio = dayjs(asignacion.fechaInicio);
-    const fechaFin = asignacion.fechaFin ? dayjs(asignacion.fechaFin) : null;
+    const fechaDia = inicioSemana.add(diaIndex, 'day').startOf('day'); // dayjs es inmutable, add retorna nuevo objeto
+    const fechaInicio = dayjs(asignacion.fechaInicio).startOf('day');
+    const fechaFin = asignacion.fechaFin ? dayjs(asignacion.fechaFin).startOf('day') : null;
     
-    // El día debe ser >= fecha inicio
+    // El día debe ser >= fecha inicio (inclusive)
     if (fechaDia.isBefore(fechaInicio, 'day')) return false;
-    // Si hay fecha fin, el día debe ser <= fecha fin
+    // Si hay fecha fin, el día debe ser <= fecha fin (inclusive)
     if (fechaFin && fechaDia.isAfter(fechaFin, 'day')) return false;
     
     return true;
   };
 
-  const obtenerAsignacionesPorDia = (diaSemana: number) => {
+  const obtenerAsignacionesPorDia = (diaIndex: number) => {
+    // diaIndex: 0=Lunes, 1=Martes, ..., 6=Domingo (según DIAS_SEMANA)
+    // diaSemana en horarios: 0=Lunes, 1=Martes, ..., 6=Domingo (según la entidad Asignacion)
     return asignacionesFiltradas.filter(a => {
-      if (!Array.isArray(a.horarios)) return false;
+      if (!Array.isArray(a.horarios) || a.horarios.length === 0) return false;
       // Verificar que el día esté dentro del rango de fechas
-      if (!esDiaValido(a, diaSemana)) return false;
-      return a.horarios.some((h: Horario) => h.diaSemana === diaSemana);
+      if (!esDiaValido(a, diaIndex)) return false;
+      // El diaSemana del horario debe coincidir con el índice del día (0=Lunes, 1=Martes, etc.)
+      return a.horarios.some((h: Horario) => h.diaSemana === diaIndex);
     });
   };
 
@@ -164,7 +192,15 @@ export default function CalendarioPage() {
     const [h1, m1] = horaInicio.split(':').map(Number);
     const [h2, m2] = horaFin.split(':').map(Number);
     const minutos = (h2 * 60 + m2) - (h1 * 60 + m1);
-    return (minutos / 60) * 60; // 60px por hora
+    return Math.max((minutos / 60) * 60, 30); // 60px por hora, mínimo 30px
+  };
+
+  const calcularTop = (horaInicio: string, horaFila: number) => {
+    const [h, m] = horaInicio.split(':').map(Number);
+    // Si la asignación empieza en una hora diferente a la fila, retornar 0
+    if (h !== horaFila) return 0;
+    // Calcular posición relativa al inicio de la hora (0-60px dentro de la celda de 60px)
+    return (m / 60) * 60; // Posición en px desde el top de la celda
   };
 
   const semanaAnterior = () => {
@@ -253,7 +289,7 @@ export default function CalendarioPage() {
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error?.message || 'Error al actualizar asignación');
+        throw new Error(extractApiErrorMessage(data) || 'Error al actualizar asignación');
       }
 
       notifications.show({
@@ -265,7 +301,7 @@ export default function CalendarioPage() {
       closeEdit();
       fetchAsignaciones();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Error desconocido';
+      const message = parseApiError(error);
       notifications.show({
         title: 'Error',
         message,
@@ -324,112 +360,187 @@ export default function CalendarioPage() {
         </Stack>
       </Paper>
 
-      <Paper p="md" withBorder>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1200px' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '100px', padding: '8px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>
-                  Hora
-                </th>
-                {diasSemana.map((dia, index) => (
-                  <th
-                    key={index}
-                    style={{
-                      padding: '8px',
-                      textAlign: 'center',
-                      borderBottom: '2px solid #dee2e6',
-                      backgroundColor: dia.isSame(dayjs(), 'day') ? '#fff3cd' : 'transparent',
-                    }}
-                  >
-                    <Text fw={600}>{DIAS_SEMANA[index]}</Text>
-                    <Text size="xs" c="dimmed">
-                      {dia.format('DD/MM')}
-                    </Text>
+      {/* Vista Desktop: Tabla de calendario */}
+      {!isMobile && (
+        <Paper p="md" withBorder>
+          <div className={styles.calendarWrapper}>
+            <table className={styles.calendarTable}>
+              <thead>
+                <tr>
+                  <th className={styles.hourColumn}>
+                    Hora
                   </th>
+                  {diasSemana.map((dia, index) => (
+                    <th
+                      key={index}
+                      className={styles.dayColumn}
+                    >
+                      <Text fw={600}>{DIAS_SEMANA[index]}</Text>
+                      <Text size="xs" c="dimmed">
+                        {dia.format('DD/MM')}
+                      </Text>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {HORAS_DIA.map((hora) => (
+                  <tr key={hora}>
+                    <td className={styles.hourCell}>
+                      {hora.toString().padStart(2, '0')}:00
+                    </td>
+                    {diasSemana.map((dia, diaIndex) => {
+                      // Obtener todas las asignaciones para este día
+                      const asignacionesDelDia = obtenerAsignacionesPorDia(diaIndex);
+                      
+                      // Filtrar por hora: solo las que empiezan en esta hora exacta
+                      const asignacionesDia = asignacionesDelDia.filter(a => {
+                        if (!Array.isArray(a.horarios)) return false;
+                        const horario = a.horarios.find((h: Horario) => h.diaSemana === diaIndex);
+                        if (!horario) return false;
+                        const [hInicio, mInicio] = horario.horaInicio.split(':').map(Number);
+                        // La asignación debe empezar en esta hora (hora exacta o dentro de la hora)
+                        return hInicio === hora;
+                      });
+
+                      return (
+                        <td
+                          key={diaIndex}
+                          className={styles.dayCell}
+                        >
+                          {asignacionesDia.map((asignacion) => {
+                            const horario = asignacion.horarios.find((h: Horario) => h.diaSemana === diaIndex);
+                            if (!horario) return null;
+
+                            const color = obtenerColor(asignacion.personaId);
+                            const altura = calcularAltura(horario.horaInicio, horario.horaFin);
+                            const top = calcularTop(horario.horaInicio, hora);
+
+                            return (
+                              <div
+                                key={asignacion.id}
+                                onClick={() => handleClickAsignacion(asignacion)}
+                                style={{
+                                  position: 'absolute',
+                                  top: `${top}px`,
+                                  left: '2px',
+                                  right: '2px',
+                                  height: `${altura}px`,
+                                  backgroundColor: color,
+                                  color: 'white',
+                                  padding: '4px',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  overflow: 'hidden',
+                                  zIndex: 1,
+                                  cursor: 'pointer',
+                                }}
+                                title={`${asignacion.cuidadorNombre || ''} → ${asignacion.personaNombre || ''}\n${horario.horaInicio} - ${horario.horaFin}`}
+                              >
+                                <Text size="xs" fw={600} truncate>
+                                  {asignacion.personaNombre || asignacion.personaId}
+                                </Text>
+                                <Text size="xs" truncate>
+                                  {horario.horaInicio} - {horario.horaFin}
+                                </Text>
+                              </div>
+                            );
+                          })}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {HORAS_DIA.map((hora) => (
-                <tr key={hora}>
-                  <td
-                    style={{
-                      padding: '4px 8px',
-                      borderRight: '1px solid #dee2e6',
-                      fontSize: '12px',
-                      color: '#666',
-                    }}
-                  >
-                    {hora.toString().padStart(2, '0')}:00
-                  </td>
-                  {diasSemana.map((dia, diaIndex) => {
-                    const asignacionesDia = obtenerAsignacionesPorDia(diaIndex).filter(a => {
-                      if (!Array.isArray(a.horarios)) return false;
-                      const horario = a.horarios.find((h: Horario) => h.diaSemana === diaIndex);
-                      if (!horario) return false;
-                      const [hInicio] = horario.horaInicio.split(':').map(Number);
-                      return hInicio === hora;
-                    });
+              </tbody>
+            </table>
+          </div>
+        </Paper>
+      )}
 
-                    return (
-                      <td
-                        key={diaIndex}
-                        style={{
-                          padding: '2px',
-                          borderRight: '1px solid #dee2e6',
-                          borderBottom: '1px solid #e9ecef',
-                          position: 'relative',
-                          height: '60px',
-                          backgroundColor: dia.isSame(dayjs(), 'day') ? '#fff3cd' : 'transparent',
-                        }}
-                      >
-                        {asignacionesDia.map((asignacion) => {
-                          const horario = asignacion.horarios.find((h: Horario) => h.diaSemana === diaIndex);
-                          if (!horario) return null;
+      {/* Vista Mobile: Lista por día */}
+      {isMobile && (
+        <Stack gap="md">
+          {diasSemana.map((dia, diaIndex) => {
+            const asignacionesDia = obtenerAsignacionesPorDia(diaIndex);
+            const esHoy = dia.isSame(dayjs(), 'day');
 
-                          const color = obtenerColor(asignacion.personaId);
-                          const altura = calcularAltura(horario.horaInicio, horario.horaFin);
+            return (
+              <Paper
+                key={diaIndex}
+                p="md"
+                withBorder
+                className={`${styles.dayCard} ${esHoy ? styles.dayCardToday : ''}`}
+              >
+                <div className={styles.dayHeader}>
+                  <div className={styles.dayTitle}>
+                    <IconCalendar size={20} className={styles.dayIcon} />
+                    <div>
+                      <Text fw={700} size="lg">
+                        {DIAS_SEMANA[diaIndex]}
+                      </Text>
+                      <Text size="sm" c="dimmed">
+                        {dia.format('DD/MM/YYYY')}
+                      </Text>
+                    </div>
+                  </div>
+                  {esHoy && (
+                    <Badge color="yellow" variant="light" size="lg">
+                      Hoy
+                    </Badge>
+                  )}
+                </div>
 
-                          return (
-                            <div
-                              key={asignacion.id}
-                              onClick={() => handleClickAsignacion(asignacion)}
-                              style={{
-                                position: 'absolute',
-                                top: '0',
-                                left: '2px',
-                                right: '2px',
-                                height: `${altura}px`,
-                                backgroundColor: color,
-                                color: 'white',
-                                padding: '4px',
-                                borderRadius: '4px',
-                                fontSize: '11px',
-                                overflow: 'hidden',
-                                zIndex: 1,
-                                cursor: 'pointer',
-                              }}
-                              title={`${asignacion.cuidadorNombre || ''} → ${asignacion.personaNombre || ''}\n${horario.horaInicio} - ${horario.horaFin}`}
-                            >
-                              <Text size="xs" fw={600} truncate>
+                {asignacionesDia.length > 0 ? (
+                  <Stack gap="xs" mt="md">
+                    {asignacionesDia.map((asignacion) => {
+                      const horario = asignacion.horarios.find((h: Horario) => h.diaSemana === diaIndex);
+                      if (!horario) return null;
+
+                      const color = obtenerColor(asignacion.personaId);
+
+                      return (
+                        <div
+                          key={asignacion.id}
+                          className={styles.asignacionCard}
+                          onClick={() => handleClickAsignacion(asignacion)}
+                          style={{ borderLeftColor: color }}
+                        >
+                          <div className={styles.asignacionHeader}>
+                            <div className={styles.asignacionInfo}>
+                              <Text fw={600} size="sm">
                                 {asignacion.personaNombre || asignacion.personaId}
                               </Text>
-                              <Text size="xs" truncate>
-                                {horario.horaInicio} - {horario.horaFin}
+                              <Text size="xs" c="dimmed">
+                                {asignacion.cuidadorNombre || asignacion.cuidadorId}
                               </Text>
                             </div>
-                          );
-                        })}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Paper>
+                            <div
+                              className={styles.colorIndicator}
+                              style={{ backgroundColor: color }}
+                            />
+                          </div>
+                          <div className={styles.asignacionTime}>
+                            <Badge size="sm" variant="light" color="cyan">
+                              {horario.horaInicio} - {horario.horaFin}
+                            </Badge>
+                            <Text size="xs" c="dimmed">
+                              ${asignacion.precioPorHora.toLocaleString()}/h
+                            </Text>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </Stack>
+                ) : (
+                  <Text size="sm" c="dimmed" ta="center" py="md">
+                    No hay asignaciones para este día
+                  </Text>
+                )}
+              </Paper>
+            );
+          })}
+        </Stack>
+      )}
 
       {asignacionesFiltradas.length > 0 && (
         <Paper p="md" withBorder mt="xl">
