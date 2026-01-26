@@ -43,6 +43,7 @@ model PersonaAsistida {
   
   asignaciones              Asignacion[]
   pagos                     Pago[]
+  contratos                 Contrato[]
   auditLogs                 AuditLog[] @relation("PersonaAsistidaAuditLogs")
 }
 
@@ -121,4 +122,26 @@ model Admin {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Contrato{
+  id        String   @id @default(uuid())
+  idCliente String?               //Referencia a ID de personaAsistida. Validaciones en DTO!
+
+  nombreManual String?           //Nombre manual del contrato. Validaciones en DTO!
+  nombreManualHash String?       @unique
+  cuitManual String?            
+  cuitManualHash String?        @unique
+  direccionManual String?       
+  direccionManualHash String?   @unique
+
+  telefonoEmergencia String?
+  telefonoEmergenciaHash String? @unique
+
+  fechaInicio   DateTime        //Fecha inicio contrato
+  fechaFin      DateTime          //Fecha fin contrato
+
+  persona       PersonaAsistida? @relation(fields: [idCliente], references: [id])
+
+  createdAt     DateTime  @default(now())
 }

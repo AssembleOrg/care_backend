@@ -22,12 +22,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Initialize dark mode - only apply to admin container, not html
     const savedDarkMode = localStorage.getItem('darkMode');
     const shouldBeDark = savedDarkMode === null ? true : savedDarkMode === 'true';
-    
+
     setDarkMode(shouldBeDark);
     setMounted(true);
-    
+
     let isMounted = true;
-    
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (isMounted) {
         setUser(user);
@@ -96,6 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Pagos', icon: 'receipt_long', href: '/admin/pagos' },
     { label: 'Liquidaciones', icon: 'calculate', href: '/admin/liquidaciones' },
     { label: 'Reportes', icon: 'bar_chart', href: '/admin/reportes' },
+    { label: 'Contratos', icon: 'assignment', href: '/admin/contratos' },
   ];
 
   const currentPageTitle = navItems.find(item => item.href === pathname)?.label || 'Dashboard';
@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className={`${styles.adminContainer} ${darkMode ? 'dark' : ''}`}>
       {/* Mobile Menu Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className={styles.mobileOverlay}
           onClick={() => setSidebarOpen(false)}
         />
@@ -153,7 +153,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Header */}
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <button 
+            <button
               className={styles.mobileMenuButton}
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle menu"
@@ -185,14 +185,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu.Dropdown>
                 <Menu.Label>{user?.email || 'admin@carebydani.com'}</Menu.Label>
                 <Menu.Divider />
-                <Menu.Item 
+                <Menu.Item
                   leftSection={<span className="material-icons-outlined" style={{ fontSize: '18px' }}>logout</span>}
                   color="red"
                   onClick={handleLogout}
                 >
                   Cerrar Sesión
                 </Menu.Item>
-                <Menu.Item 
+                <Menu.Item
                   leftSection={<span className="material-icons-outlined" style={{ fontSize: '18px' }}>home</span>}
                   component={Link}
                   href="/"
