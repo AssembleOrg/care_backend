@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Pagos', icon: 'receipt_long', href: '/admin/pagos' },
     { label: 'Liquidaciones', icon: 'calculate', href: '/admin/liquidaciones' },
     { label: 'Reportes', icon: 'bar_chart', href: '/admin/reportes' },
-    { label: 'Contratos', icon: 'clipboard_text', href: '/admin/contratos' },
+    { label: 'Contratos', icon: 'assignment', href: '/admin/contratos' },
   ];
 
   const currentPageTitle = navItems.find(item => item.href === pathname)?.label || 'Dashboard';
