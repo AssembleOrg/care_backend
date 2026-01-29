@@ -8,25 +8,22 @@ import { plainToInstance } from 'class-transformer';
 import { AsignacionDTO } from '@/src/application/dto/AsignacionDTO';
 import { auditService } from '@/src/infrastructure/audit/AuditService';
 import { z } from 'zod';
-import { HorarioValidationService, Horario } from '@/src/application/services/HorarioValidationService';
-import { prisma } from '@/src/infrastructure/database/PrismaService';
 import { getClientIp } from '@/src/presentation/middleware/rateLimit';
 
 const asignacionRepository = new AsignacionRepository();
 const cuidadorRepository = new CuidadorRepository();
 const personaRepository = new PersonaAsistidaRepository();
 
-const horarioSchema = z.object({
-  diaSemana: z.number().int().min(0).max(6),
-  horaInicio: z.string().regex(/^\d{2}:\d{2}$/),
-  horaFin: z.string().regex(/^\d{2}:\d{2}$/),
+const cuidadorAsignacionSchema = z.object({
+  horas: z.number().positive(),
+  precioPorHora: z.number().positive(),
 });
 
 const updateSchema = z.object({
-  precioPorHora: z.number().positive().optional(),
+  cuidadoresIds: z.array(z.string().uuid()).min(1).optional(),
   fechaInicio: z.coerce.date().optional(),
   fechaFin: z.coerce.date().nullable().optional(),
-  horarios: z.array(horarioSchema).min(1).optional(),
+  horasPorCuidador: z.record(z.string().uuid(), cuidadorAsignacionSchema).optional(),
   notas: z.string().nullable().optional(),
 });
 
@@ -41,16 +38,20 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
     }
 
     // Obtener nombres
-    const [cuidador, persona] = await Promise.all([
-      cuidadorRepository.findById(asignacion.cuidadorId),
+    const [cuidadoresData, persona] = await Promise.all([
+      Promise.all(asignacion.cuidadoresIds.map(id => cuidadorRepository.findById(id))),
       personaRepository.findById(asignacion.personaId),
     ]);
+
+    const cuidadoresNombres = cuidadoresData
+      .filter(c => c !== null)
+      .map(c => c!.nombreCompleto);
 
     const dto = plainToInstance(AsignacionDTO, asignacion, { excludeExtraneousValues: true });
 
     return createSuccessResponse({
       ...dto,
-      cuidadorNombre: cuidador?.nombreCompleto || '',
+      cuidadoresNombres,
       personaNombre: persona?.nombreCompleto || '',
     }, requestId);
   } catch (error: unknown) {
@@ -74,35 +75,24 @@ async function handlePUT(request: NextRequest, context: HandlerContext) {
     const body = await request.json();
     const validated = updateSchema.parse(body);
 
-    // Si se actualizan horarios, validar superposición
-    if (validated.horarios) {
-      const asignacionesDelCuidador = await prisma.asignacion.findMany({
-        where: {
-          cuidadorId: asignacionExistente.cuidadorId,
-          fechaFin: null,
-          id: { not: params.id }, // Excluir la asignación actual
-        },
-      });
-
-      const horariosExistentes = asignacionesDelCuidador.map((a: { horarios: unknown }) => ({
-        horarios: (Array.isArray(a.horarios) ? (a.horarios as unknown as Horario[]) : []),
-      }));
-
-      const validacion = HorarioValidationService.validarSuperposicion(
-        validated.horarios as Horario[],
-        horariosExistentes
+    // Si se actualizan cuidadores, verificar que existan
+    if (validated.cuidadoresIds) {
+      const cuidadores = await Promise.all(
+        validated.cuidadoresIds.map(id => cuidadorRepository.findById(id))
       );
-
-      if (!validacion.valido) {
-        return createErrorResponse('VALIDATION_ERROR', validacion.error || 'Error de validación de horarios', undefined, requestId, 400);
+      const cuidadoresNoEncontrados = cuidadores.filter(c => !c);
+      if (cuidadoresNoEncontrados.length > 0) {
+        return createErrorResponse('NOT_FOUND', 'Uno o más cuidadores no fueron encontrados', undefined, requestId, 404);
       }
     }
 
+
     const asignacionActualizada = await asignacionRepository.update(params.id, {
-      precioPorHora: validated.precioPorHora,
+      cuidadoresIds: validated.cuidadoresIds,
       fechaInicio: validated.fechaInicio,
       fechaFin: validated.fechaFin,
-      horarios: validated.horarios,
+      horarios: null,
+      horasPorCuidador: validated.horasPorCuidador,
       notas: validated.notas,
     });
 
@@ -112,8 +102,8 @@ async function handlePUT(request: NextRequest, context: HandlerContext) {
       action: 'UPDATE',
       table: 'Asignacion',
       recordId: params.id,
-      oldData: { precioPorHora: asignacionExistente.precioPorHora },
-      newData: { precioPorHora: validated.precioPorHora },
+      oldData: { horasPorCuidador: asignacionExistente.horasPorCuidador },
+      newData: { horasPorCuidador: validated.horasPorCuidador },
       ip,
       userAgent,
     });
@@ -150,7 +140,7 @@ async function handleDELETE(request: NextRequest, context: HandlerContext) {
       action: 'DELETE',
       table: 'Asignacion',
       recordId: params.id,
-      oldData: { cuidadorId: asignacion.cuidadorId, personaId: asignacion.personaId },
+      oldData: { cuidadoresIds: asignacion.cuidadoresIds, personaId: asignacion.personaId },
       ip,
       userAgent,
     });

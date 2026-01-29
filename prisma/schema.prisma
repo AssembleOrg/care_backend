@@ -2,8 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Configurar seed en package.json: "prisma": { "seed": "tsx prisma/seed.ts" }
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -11,89 +9,113 @@ datasource db {
 }
 
 model Cuidador {
-  id            String   @id @default(uuid())
-  nombreCompleto String  @db.Text
-  dniEnc         String
-  dniHash        String  @unique
-  telefonoEnc    String?
-  telefonoHash   String? @unique
-  emailEnc       String?
-  emailHash      String? @unique
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  asignaciones   Asignacion[]
-  pagos          Pago[]
-  auditLogs      AuditLog[] @relation("CuidadorAuditLogs")
+  id                String               @id @default(uuid())
+  nombreCompleto    String
+  dniEnc            String
+  dniHash           String               @unique
+  telefonoEnc       String?
+  telefonoHash      String?              @unique
+  emailEnc          String?
+  emailHash         String?              @unique
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  asignaciones      AsignacionCuidador[]
+  pagos             Pago[]
+  personasAsistidas PersonaCuidador[]
 }
 
 model PersonaAsistida {
-  id                        String   @id @default(uuid())
-  nombreCompleto            String   @db.Text
-  dniEnc                    String?
-  dniHash                   String?  @unique
-  telefonoEnc               String?
-  telefonoHash              String?  @unique
-  direccionEnc              String?  @db.Text
-  direccionHash             String?
-  telefonoContactoEmergenciaEnc String?
+  id                             String            @id @default(uuid())
+  nombreCompleto                 String
+  dniEnc                         String?
+  dniHash                        String?           @unique
+  telefonoEnc                    String?
+  telefonoHash                   String?           @unique
+  direccionEnc                   String?
+  direccionHash                  String?
+  telefonoContactoEmergenciaEnc  String?
   telefonoContactoEmergenciaHash String?
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
-  
-  asignaciones              Asignacion[]
-  pagos                     Pago[]
-  auditLogs                 AuditLog[] @relation("PersonaAsistidaAuditLogs")
+  createdAt                      DateTime          @default(now())
+  updatedAt                      DateTime          @updatedAt
+  asignaciones                   Asignacion[]
+  pagos                          Pago[]
+  cuidadores                     PersonaCuidador[]
+}
+
+model PersonaCuidador {
+  id          String          @id @default(uuid())
+  personaId   String
+  cuidadorId  String
+  fechaInicio DateTime        @default(now())
+  fechaFin    DateTime?
+  activo      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  cuidador    Cuidador        @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
+  persona     PersonaAsistida @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@unique([personaId, cuidadorId, fechaInicio])
+  @@index([personaId])
+  @@index([cuidadorId])
 }
 
 model Asignacion {
-  id            String    @id @default(uuid())
-  cuidadorId    String
-  personaId     String
-  precioPorHora Decimal   @db.Decimal(10, 2)
-  fechaInicio   DateTime
-  fechaFin      DateTime?
-  horarios      Json      // Array de { diaSemana: 0-6, horaInicio: "HH:MM", horaFin: "HH:MM" }
-  notas         String?   @db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  cuidador      Cuidador      @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
-  persona       PersonaAsistida @relation(fields: [personaId], references: [id], onDelete: Cascade)
-  auditLogs     AuditLog[] @relation("AsignacionAuditLogs")
+  id                String               @id @default(uuid())
+  personaId         String
+  fechaInicio       DateTime
+  fechaFin          DateTime?
+  horarios          Json?                // Opcional: días de la semana (0-6)
+  horasPorCuidador  Json?                // { cuidadorId: { horas: number, precioPorHora: number } }
+  notas             String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  persona           PersonaAsistida      @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  cuidadores        AsignacionCuidador[]
+  pagos             Pago[]
+}
+
+model AsignacionCuidador {
+  id           String     @id @default(uuid())
+  asignacionId String
+  cuidadorId   String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  asignacion   Asignacion @relation(fields: [asignacionId], references: [id], onDelete: Cascade)
+  cuidador     Cuidador   @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
+
+  @@unique([asignacionId, cuidadorId])
+  @@index([asignacionId])
+  @@index([cuidadorId])
 }
 
 model Pago {
-  id            String   @id @default(uuid())
-  cuidadorId    String
-  personaId     String?
-  monto         Decimal  @db.Decimal(10, 2)
-  fecha         DateTime
-  metodo        String
-  nota          String?  @db.Text
-  // Campos para liquidación
-  esLiquidacion Boolean  @default(false)
-  precioPorHora Decimal? @db.Decimal(10, 2)
-  horasTrabajadas Decimal? @db.Decimal(10, 2)
-  semanaInicio  DateTime?
-  semanaFin     DateTime?
-  horarios      Json?    // Array de { dia, horaInicio, horaFin, horas }
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  cuidador      Cuidador      @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
-  persona       PersonaAsistida? @relation(fields: [personaId], references: [id], onDelete: SetNull)
-  recibos       ReciboAdjunto[]
-  auditLogs     AuditLog[] @relation("PagoAuditLogs")
+  id              String           @id @default(uuid())
+  cuidadorId      String
+  personaId       String?
+  asignacionId    String?
+  monto           Decimal          @db.Decimal(10, 2)
+  fecha           DateTime
+  metodo          String            @default("LIQUIDACION")
+  nota            String?
+  precioPorHora   Decimal           @db.Decimal(10, 2)
+  horasTrabajadas Decimal           @db.Decimal(10, 2)
+  semanaInicio    DateTime
+  semanaFin       DateTime
+  horarios        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  cuidador        Cuidador         @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
+  persona         PersonaAsistida?  @relation(fields: [personaId], references: [id])
+  asignacion      Asignacion?      @relation(fields: [asignacionId], references: [id], onDelete: SetNull)
+  recibos         ReciboAdjunto[]
 }
 
 model ReciboAdjunto {
   id        String   @id @default(uuid())
   pagoId    String
-  url       String   @db.Text
+  url       String
   filename  String
   createdAt DateTime @default(now())
-  
   pago      Pago     @relation(fields: [pagoId], references: [id], onDelete: Cascade)
 }
 
@@ -108,11 +130,6 @@ model AuditLog {
   ip        String?
   userAgent String?
   createdAt DateTime @default(now())
-  
-  cuidador      Cuidador?      @relation("CuidadorAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Cuidador_fkey")
-  persona       PersonaAsistida? @relation("PersonaAsistidaAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Persona_fkey")
-  asignacion    Asignacion?    @relation("AsignacionAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Asignacion_fkey")
-  pago          Pago?          @relation("PagoAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Pago_fkey")
 }
 
 model Admin {

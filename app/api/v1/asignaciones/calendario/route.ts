@@ -53,7 +53,7 @@ async function handleGET(request: NextRequest) {
 
     // Filtrar por cuidador si se proporciona
     if (cuidadorId) {
-      asignaciones = asignaciones.filter(a => a.cuidadorId === cuidadorId);
+      asignaciones = asignaciones.filter(a => a.cuidadoresIds.includes(cuidadorId));
     }
 
     // Filtrar asignaciones que intersectan con la semana
@@ -70,9 +70,10 @@ async function handleGET(request: NextRequest) {
 
     const dtos = asignacionesFiltradas.map(a => {
       const dto = plainToInstance(AsignacionDTO, a, { excludeExtraneousValues: true });
+      const cuidadoresNombres = a.cuidadoresIds.map(id => cuidadoresMap.get(id) || '').filter(Boolean);
       return {
         ...dto,
-        cuidadorNombre: cuidadoresMap.get(a.cuidadorId) || '',
+        cuidadoresNombres,
         personaNombre: personasMap.get(a.personaId) || '',
       };
     });
