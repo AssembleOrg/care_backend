@@ -1,13 +1,13 @@
 'use client';
 
-import { Container, Title, Paper, Stack, Group, Button, Text, Select, ActionIcon, Modal, Badge, NumberInput, Textarea, Checkbox } from '@mantine/core';
+import { Container, Title, Paper, Stack, Group, Button, Text, Select, ActionIcon, Modal, Badge, NumberInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconChevronLeft, IconChevronRight, IconPencil, IconCalendar } from '@tabler/icons-react';
-import { extractApiErrorMessage, parseApiError } from '../../utils/parseApiError';
+import { IconChevronLeft, IconChevronRight, IconCalendar, IconCurrencyDollar } from '@tabler/icons-react';
+import { parseApiError } from '../../utils/parseApiError';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -20,20 +20,23 @@ dayjs.locale('es');
 
 interface Horario {
   diaSemana: number;
-  horaInicio: string;
-  horaFin: string;
+}
+
+interface CuidadorAsignacion {
+  horas: number;
+  precioPorHora: number;
 }
 
 interface Asignacion {
   id: string;
-  cuidadorId: string;
+  cuidadoresIds: string[];
   personaId: string;
-  cuidadorNombre?: string;
+  cuidadoresNombres?: string[];
   personaNombre?: string;
-  precioPorHora: number;
   fechaInicio: string;
   fechaFin: string | null;
-  horarios: Horario[];
+  horarios: Horario[] | null;
+  horasPorCuidador: Record<string, CuidadorAsignacion> | null;
   notas: string | null;
 }
 
@@ -42,30 +45,17 @@ interface Cuidador {
   nombreCompleto: string;
 }
 
-interface Persona {
-  id: string;
-  nombreCompleto: string;
-}
-
-interface HorarioForm {
-  diaSemana: number;
-  horaInicio: string;
-  horaFin: string;
-  activo: boolean;
-}
-
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-const HORAS_DIA = Array.from({ length: 24 }, (_, i) => i);
 
 export default function CalendarioPage() {
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [cuidadores, setCuidadores] = useState<Cuidador[]>([]);
-  const [personas, setPersonas] = useState<Persona[]>([]);
   const [semanaActual, setSemanaActual] = useState<Date>(new Date());
   const [cuidadorFiltro, setCuidadorFiltro] = useState<string>('');
   const [selectedAsignacion, setSelectedAsignacion] = useState<Asignacion | null>(null);
   const [viewOpened, { open: openView, close: closeView }] = useDisclosure(false);
-  const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+  const [liquidacionOpened, { open: openLiquidacion, close: closeLiquidacion }] = useDisclosure(false);
+  const [selectedCuidadorId, setSelectedCuidadorId] = useState<string>('');
   const [isMobile, setIsMobile] = useState(false);
 
   // Detectar si es mobile
@@ -78,18 +68,13 @@ export default function CalendarioPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const editForm = useForm({
+  const liquidacionForm = useForm({
     initialValues: {
+      cuidadorId: '',
       precioPorHora: 0,
       fechaInicio: new Date(),
-      fechaFin: null as Date | null,
-      horarios: DIAS_SEMANA.map((_, index) => ({
-        diaSemana: index,
-        horaInicio: '09:00',
-        horaFin: '17:00',
-        activo: false,
-      })) as HorarioForm[],
-      notas: '',
+      fechaFin: new Date(),
+      horasTrabajadas: 0,
     },
   });
 
@@ -97,12 +82,10 @@ export default function CalendarioPage() {
     try {
       const params = new URLSearchParams();
       
-      // Agregar filtro de semana
       if (semanaActual) {
         params.set('semana', dayjs(semanaActual).toISOString());
       }
       
-      // Agregar filtro de cuidador
       if (cuidadorFiltro) {
         params.set('cuidadorId', cuidadorFiltro);
       }
@@ -130,14 +113,6 @@ export default function CalendarioPage() {
         }
       })
       .catch(err => console.error('Error fetching cuidadores:', err));
-    fetch('/api/v1/personas-asistidas?all=true')
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok && Array.isArray(data.data)) {
-          setPersonas(data.data);
-        }
-      })
-      .catch(err => console.error('Error fetching personas:', err));
   }, []);
 
   const inicioSemana = useMemo(() => dayjs(semanaActual).startOf('isoWeek'), [semanaActual]);
@@ -145,12 +120,10 @@ export default function CalendarioPage() {
   const diasSemana = useMemo(() => Array.from({ length: 7 }, (_, i) => inicioSemana.add(i, 'day')), [inicioSemana]);
 
   const asignacionesFiltradas = useMemo(() => {
-    // El backend ya filtra por semana, pero puede que necesitemos filtrar por cuidador aquí también
-    // si el filtro cambia sin recargar desde el backend
     let filtradas = asignaciones;
     
     if (cuidadorFiltro) {
-      filtradas = filtradas.filter(a => a.cuidadorId === cuidadorFiltro);
+      filtradas = filtradas.filter(a => a.cuidadoresIds.includes(cuidadorFiltro));
     }
     
     return filtradas;
@@ -158,49 +131,34 @@ export default function CalendarioPage() {
 
   // Verificar si un día específico de la semana está dentro del rango de fechas de la asignación
   const esDiaValido = (asignacion: Asignacion, diaIndex: number) => {
-    const fechaDia = inicioSemana.add(diaIndex, 'day').startOf('day'); // dayjs es inmutable, add retorna nuevo objeto
+    const fechaDia = inicioSemana.add(diaIndex, 'day').startOf('day');
     const fechaInicio = dayjs(asignacion.fechaInicio).startOf('day');
     const fechaFin = asignacion.fechaFin ? dayjs(asignacion.fechaFin).startOf('day') : null;
     
-    // El día debe ser >= fecha inicio (inclusive)
     if (fechaDia.isBefore(fechaInicio, 'day')) return false;
-    // Si hay fecha fin, el día debe ser <= fecha fin (inclusive)
     if (fechaFin && fechaDia.isAfter(fechaFin, 'day')) return false;
     
     return true;
   };
 
   const obtenerAsignacionesPorDia = (diaIndex: number) => {
-    // diaIndex: 0=Lunes, 1=Martes, ..., 6=Domingo (según DIAS_SEMANA)
-    // diaSemana en horarios: 0=Lunes, 1=Martes, ..., 6=Domingo (según la entidad Asignacion)
     return asignacionesFiltradas.filter(a => {
-      if (!Array.isArray(a.horarios) || a.horarios.length === 0) return false;
       // Verificar que el día esté dentro del rango de fechas
       if (!esDiaValido(a, diaIndex)) return false;
-      // El diaSemana del horario debe coincidir con el índice del día (0=Lunes, 1=Martes, etc.)
-      return a.horarios.some((h: Horario) => h.diaSemana === diaIndex);
+      // Si hay horarios, verificar que el día esté incluido
+      if (a.horarios && a.horarios.length > 0) {
+        return a.horarios.some((h: Horario) => h.diaSemana === diaIndex);
+      }
+      // Si no hay horarios, mostrar la asignación en todos los días válidos
+      return true;
     });
   };
 
   const obtenerColor = (personaId: string) => {
-    const index = personas.findIndex(p => p.id === personaId);
+    const personas = Array.from(new Set(asignaciones.map(a => a.personaId)));
+    const index = personas.indexOf(personaId);
     const colores = ['#FF6B9D', '#00CED1', '#FFD700', '#FF8C69', '#9370DB', '#20B2AA', '#FF69B4'];
     return colores[index % colores.length];
-  };
-
-  const calcularAltura = (horaInicio: string, horaFin: string) => {
-    const [h1, m1] = horaInicio.split(':').map(Number);
-    const [h2, m2] = horaFin.split(':').map(Number);
-    const minutos = (h2 * 60 + m2) - (h1 * 60 + m1);
-    return Math.max((minutos / 60) * 60, 30); // 60px por hora, mínimo 30px
-  };
-
-  const calcularTop = (horaInicio: string, horaFila: number) => {
-    const [h, m] = horaInicio.split(':').map(Number);
-    // Si la asignación empieza en una hora diferente a la fila, retornar 0
-    if (h !== horaFila) return 0;
-    // Calcular posición relativa al inicio de la hora (0-60px dentro de la celda de 60px)
-    return (m / 60) * 60; // Posición en px desde el top de la celda
   };
 
   const semanaAnterior = () => {
@@ -220,85 +178,66 @@ export default function CalendarioPage() {
     openView();
   };
 
-  const handleEdit = (asignacion: Asignacion) => {
+  const handleLiquidacionRapida = (asignacion: Asignacion) => {
     setSelectedAsignacion(asignacion);
-    
-    const horariosForm = DIAS_SEMANA.map((_, index) => {
-      const horarioExistente = asignacion.horarios.find(h => h.diaSemana === index);
-      return {
-        diaSemana: index,
-        horaInicio: horarioExistente?.horaInicio || '09:00',
-        horaFin: horarioExistente?.horaFin || '17:00',
-        activo: !!horarioExistente,
-      };
-    });
-
-    editForm.setValues({
-      precioPorHora: asignacion.precioPorHora,
-      fechaInicio: new Date(asignacion.fechaInicio),
-      fechaFin: asignacion.fechaFin ? new Date(asignacion.fechaFin) : null,
-      horarios: horariosForm,
-      notas: asignacion.notas || '',
-    });
-    
-    closeView();
-    openEdit();
+    setSelectedCuidadorId('');
+    openLiquidacion();
   };
 
-  const handleEditSubmit = async (values: typeof editForm.values) => {
-    if (!selectedAsignacion) return;
+  const handleLiquidar = async (values: typeof liquidacionForm.values) => {
+    if (!selectedAsignacion || !values.cuidadorId) {
+      notifications.show({
+        title: 'Error',
+        message: 'Seleccioná un cuidador',
+        color: 'red',
+      });
+      return;
+    }
 
     try {
-      const horariosActivos = values.horarios
-        .filter(h => h.activo)
-        .map(h => ({
-          diaSemana: h.diaSemana,
-          horaInicio: h.horaInicio,
-          horaFin: h.horaFin,
-        }));
+      const fechaInicioDate = values.fechaInicio instanceof Date ? values.fechaInicio : new Date(values.fechaInicio);
+      const fechaFinDate = values.fechaFin instanceof Date ? values.fechaFin : new Date(values.fechaFin);
 
-      if (horariosActivos.length === 0) {
-        notifications.show({
-          title: 'Error',
-          message: 'Seleccioná al menos un día con horarios',
-          color: 'red',
-        });
-        return;
-      }
-
-      const fechaInicio = values.fechaInicio instanceof Date 
-        ? values.fechaInicio 
-        : new Date(values.fechaInicio);
-      
-      const fechaFin = values.fechaFin 
-        ? (values.fechaFin instanceof Date ? values.fechaFin : new Date(values.fechaFin))
-        : null;
-
-      const response = await fetch(`/api/v1/asignaciones/${selectedAsignacion.id}`, {
-        method: 'PUT',
+      const response = await fetch('/api/v1/liquidaciones', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          cuidadorId: values.cuidadorId,
           precioPorHora: values.precioPorHora,
-          fechaInicio: fechaInicio.toISOString(),
-          fechaFin: fechaFin ? fechaFin.toISOString() : null,
-          horarios: horariosActivos,
-          notas: values.notas || null,
+          fechaInicio: fechaInicioDate.toISOString(),
+          fechaFin: fechaFinDate.toISOString(),
+          horasTrabajadas: values.horasTrabajadas,
+          monto: values.horasTrabajadas * values.precioPorHora,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(extractApiErrorMessage(data) || 'Error al actualizar asignación');
+        throw new Error(data.error?.message || 'Error al liquidar');
       }
 
       notifications.show({
         title: 'Éxito',
-        message: 'Asignación actualizada correctamente',
+        message: 'Liquidación creada correctamente',
         color: 'green',
       });
 
-      closeEdit();
+      // Generar comprobante
+      if (data.data?.id) {
+        const pdfResponse = await fetch(`/api/v1/liquidaciones/${data.data.id}/recibo.pdf`);
+        if (pdfResponse.ok) {
+          const blob = await pdfResponse.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `liquidacion-${data.data.id}.pdf`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }
+      }
+
+      closeLiquidacion();
       fetchAsignaciones();
     } catch (error: unknown) {
       const message = parseApiError(error);
@@ -309,6 +248,20 @@ export default function CalendarioPage() {
       });
     }
   };
+
+  // Precargar datos cuando se selecciona un cuidador
+  useEffect(() => {
+    if (selectedCuidadorId && selectedAsignacion) {
+      const data = selectedAsignacion.horasPorCuidador?.[selectedCuidadorId];
+      liquidacionForm.setValues({
+        cuidadorId: selectedCuidadorId,
+        precioPorHora: data?.precioPorHora || 0,
+        fechaInicio: new Date(selectedAsignacion.fechaInicio),
+        fechaFin: selectedAsignacion.fechaFin ? new Date(selectedAsignacion.fechaFin) : new Date(),
+        horasTrabajadas: data?.horas || 0,
+      });
+    }
+  }, [selectedCuidadorId, selectedAsignacion]);
 
   return (
     <Container size="xl" py="xl">
@@ -367,14 +320,8 @@ export default function CalendarioPage() {
             <table className={styles.calendarTable}>
               <thead>
                 <tr>
-                  <th className={styles.hourColumn}>
-                    Hora
-                  </th>
                   {diasSemana.map((dia, index) => (
-                    <th
-                      key={index}
-                      className={styles.dayColumn}
-                    >
+                    <th key={index} className={styles.dayColumn}>
                       <Text fw={600}>{DIAS_SEMANA[index]}</Text>
                       <Text size="xs" c="dimmed">
                         {dia.format('DD/MM')}
@@ -384,73 +331,74 @@ export default function CalendarioPage() {
                 </tr>
               </thead>
               <tbody>
-                {HORAS_DIA.map((hora) => (
-                  <tr key={hora}>
-                    <td className={styles.hourCell}>
-                      {hora.toString().padStart(2, '0')}:00
-                    </td>
-                    {diasSemana.map((dia, diaIndex) => {
-                      // Obtener todas las asignaciones para este día
-                      const asignacionesDelDia = obtenerAsignacionesPorDia(diaIndex);
-                      
-                      // Filtrar por hora: solo las que empiezan en esta hora exacta
-                      const asignacionesDia = asignacionesDelDia.filter(a => {
-                        if (!Array.isArray(a.horarios)) return false;
-                        const horario = a.horarios.find((h: Horario) => h.diaSemana === diaIndex);
-                        if (!horario) return false;
-                        const [hInicio, mInicio] = horario.horaInicio.split(':').map(Number);
-                        // La asignación debe empezar en esta hora (hora exacta o dentro de la hora)
-                        return hInicio === hora;
-                      });
+                <tr>
+                  {diasSemana.map((dia, diaIndex) => {
+                    const asignacionesDia = obtenerAsignacionesPorDia(diaIndex);
+                    const esHoy = dia.isSame(dayjs(), 'day');
 
-                      return (
-                        <td
-                          key={diaIndex}
-                          className={styles.dayCell}
-                        >
+                    return (
+                      <td
+                        key={diaIndex}
+                        className={styles.dayCell}
+                        style={{
+                          backgroundColor: esHoy ? 'var(--mantine-color-yellow-0)' : undefined,
+                        }}
+                      >
+                        <Stack gap="xs" style={{ minHeight: '200px' }}>
                           {asignacionesDia.map((asignacion) => {
-                            const horario = asignacion.horarios.find((h: Horario) => h.diaSemana === diaIndex);
-                            if (!horario) return null;
-
                             const color = obtenerColor(asignacion.personaId);
-                            const altura = calcularAltura(horario.horaInicio, horario.horaFin);
-                            const top = calcularTop(horario.horaInicio, hora);
 
                             return (
-                              <div
+                              <Paper
                                 key={asignacion.id}
-                                onClick={() => handleClickAsignacion(asignacion)}
+                                p="xs"
                                 style={{
-                                  position: 'absolute',
-                                  top: `${top}px`,
-                                  left: '2px',
-                                  right: '2px',
-                                  height: `${altura}px`,
                                   backgroundColor: color,
                                   color: 'white',
-                                  padding: '4px',
-                                  borderRadius: '4px',
-                                  fontSize: '11px',
-                                  overflow: 'hidden',
-                                  zIndex: 1,
                                   cursor: 'pointer',
+                                  borderRadius: '4px',
                                 }}
-                                title={`${asignacion.cuidadorNombre || ''} → ${asignacion.personaNombre || ''}\n${horario.horaInicio} - ${horario.horaFin}`}
+                                onClick={() => handleClickAsignacion(asignacion)}
                               >
                                 <Text size="xs" fw={600} truncate>
                                   {asignacion.personaNombre || asignacion.personaId}
                                 </Text>
-                                <Text size="xs" truncate>
-                                  {horario.horaInicio} - {horario.horaFin}
-                                </Text>
-                              </div>
+                                <Group gap="xs" mt={4}>
+                                  {asignacion.cuidadoresNombres && asignacion.cuidadoresNombres.length > 0 ? (
+                                    <Text size="xs" truncate>
+                                      {asignacion.cuidadoresNombres.join(', ')}
+                                    </Text>
+                                  ) : (
+                                    <Text size="xs" truncate>
+                                      {asignacion.cuidadoresIds.length} cuidador(es)
+                                    </Text>
+                                  )}
+                                </Group>
+                                {asignacion.horasPorCuidador && (
+                                  <Text size="xs" mt={4}>
+                                    {Object.values(asignacion.horasPorCuidador).reduce((sum, d) => sum + d.horas, 0).toFixed(1)}h
+                                  </Text>
+                                )}
+                              </Paper>
                             );
                           })}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                          {asignacionesDia.length > 0 && (
+                            <Button
+                              size="xs"
+                              variant="light"
+                              color="cyan"
+                              leftSection={<IconCurrencyDollar size={14} />}
+                              onClick={() => handleLiquidacionRapida(asignacionesDia[0])}
+                              mt="auto"
+                            >
+                              Liquidar
+                            </Button>
+                          )}
+                        </Stack>
+                      </td>
+                    );
+                  })}
+                </tr>
               </tbody>
             </table>
           </div>
@@ -493,41 +441,41 @@ export default function CalendarioPage() {
                 {asignacionesDia.length > 0 ? (
                   <Stack gap="xs" mt="md">
                     {asignacionesDia.map((asignacion) => {
-                      const horario = asignacion.horarios.find((h: Horario) => h.diaSemana === diaIndex);
-                      if (!horario) return null;
-
                       const color = obtenerColor(asignacion.personaId);
 
                       return (
-                        <div
+                        <Paper
                           key={asignacion.id}
-                          className={styles.asignacionCard}
+                          p="sm"
+                          withBorder
                           onClick={() => handleClickAsignacion(asignacion)}
-                          style={{ borderLeftColor: color }}
+                          style={{ borderLeftColor: color, borderLeftWidth: '4px', cursor: 'pointer' }}
                         >
-                          <div className={styles.asignacionHeader}>
-                            <div className={styles.asignacionInfo}>
-                              <Text fw={600} size="sm">
-                                {asignacion.personaNombre || asignacion.personaId}
-                              </Text>
-                              <Text size="xs" c="dimmed">
-                                {asignacion.cuidadorNombre || asignacion.cuidadorId}
-                              </Text>
-                            </div>
-                            <div
-                              className={styles.colorIndicator}
-                              style={{ backgroundColor: color }}
-                            />
-                          </div>
-                          <div className={styles.asignacionTime}>
-                            <Badge size="sm" variant="light" color="cyan">
-                              {horario.horaInicio} - {horario.horaFin}
-                            </Badge>
-                            <Text size="xs" c="dimmed">
-                              ${asignacion.precioPorHora.toLocaleString()}/h
+                          <Text fw={600} size="sm">
+                            {asignacion.personaNombre || asignacion.personaId}
+                          </Text>
+                          <Text size="xs" c="dimmed" mt={4}>
+                            {asignacion.cuidadoresNombres?.join(', ') || `${asignacion.cuidadoresIds.length} cuidador(es)`}
+                          </Text>
+                          {asignacion.horasPorCuidador && (
+                            <Text size="xs" mt={4}>
+                              {Object.values(asignacion.horasPorCuidador).reduce((sum, d) => sum + d.horas, 0).toFixed(1)} horas
                             </Text>
-                          </div>
-                        </div>
+                          )}
+                          <Button
+                            size="xs"
+                            variant="light"
+                            color="cyan"
+                            leftSection={<IconCurrencyDollar size={14} />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLiquidacionRapida(asignacion);
+                            }}
+                            mt="xs"
+                          >
+                            Liquidar
+                          </Button>
+                        </Paper>
                       );
                     })}
                   </Stack>
@@ -542,46 +490,29 @@ export default function CalendarioPage() {
         </Stack>
       )}
 
-      {asignacionesFiltradas.length > 0 && (
-        <Paper p="md" withBorder mt="xl">
-          <Text fw={600} mb="md">Leyenda</Text>
-          <Group gap="md">
-            {Array.from(new Set(asignacionesFiltradas.map(a => a.personaId))).map((personaId) => {
-              const persona = personas.find(p => p.id === personaId);
-              const asignacion = asignacionesFiltradas.find(a => a.personaId === personaId);
-              return (
-                <Group key={personaId} gap="xs">
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      backgroundColor: obtenerColor(personaId),
-                      borderRadius: '4px',
-                    }}
-                  />
-                  <Text size="sm">{persona?.nombreCompleto || asignacion?.personaNombre || personaId}</Text>
-                </Group>
-              );
-            })}
-          </Group>
-        </Paper>
-      )}
-
       {/* Modal Ver Asignación */}
       <Modal opened={viewOpened} onClose={closeView} title="Detalle de Asignación" size="lg">
         {selectedAsignacion && (
           <Stack gap="md">
             <Group>
-              <Text fw={600}>Cuidador:</Text>
-              <Text>{selectedAsignacion.cuidadorNombre || selectedAsignacion.cuidadorId}</Text>
+              <Text fw={600}>Cuidadores:</Text>
+              <Group gap="xs">
+                {selectedAsignacion.cuidadoresNombres && selectedAsignacion.cuidadoresNombres.length > 0
+                  ? selectedAsignacion.cuidadoresNombres.map((nombre, idx) => (
+                      <Badge key={idx} size="lg" variant="light" color="fucsia">
+                        {nombre}
+                      </Badge>
+                    ))
+                  : selectedAsignacion.cuidadoresIds.map((id, idx) => (
+                      <Badge key={idx} size="lg" variant="light">
+                        {id}
+                      </Badge>
+                    ))}
+              </Group>
             </Group>
             <Group>
               <Text fw={600}>Persona Asistida:</Text>
               <Text>{selectedAsignacion.personaNombre || selectedAsignacion.personaId}</Text>
-            </Group>
-            <Group>
-              <Text fw={600}>Precio por hora:</Text>
-              <Text>${selectedAsignacion.precioPorHora.toLocaleString()}</Text>
             </Group>
             <Group>
               <Text fw={600}>Fecha Inicio:</Text>
@@ -593,16 +524,59 @@ export default function CalendarioPage() {
                 <Text>{new Date(selectedAsignacion.fechaFin).toLocaleDateString('es-AR')}</Text>
               </Group>
             )}
-            <Stack gap="xs">
-              <Text fw={600}>Horarios:</Text>
-              <Group gap="xs">
-                {selectedAsignacion.horarios.map((h, idx) => (
-                  <Badge key={idx} size="lg" variant="light">
-                    {DIAS_SEMANA[h.diaSemana]}: {h.horaInicio} - {h.horaFin}
-                  </Badge>
-                ))}
-              </Group>
-            </Stack>
+            {selectedAsignacion.horarios && selectedAsignacion.horarios.length > 0 && (
+              <Stack gap="xs">
+                <Text fw={600}>Días de Trabajo:</Text>
+                <Group gap="xs">
+                  {selectedAsignacion.horarios.map((h, idx) => (
+                    <Badge key={idx} size="lg" variant="light">
+                      {DIAS_SEMANA[h.diaSemana]}
+                    </Badge>
+                  ))}
+                </Group>
+              </Stack>
+            )}
+            {selectedAsignacion.horasPorCuidador && (
+              <Stack gap="xs">
+                <Text fw={600}>Horas y Precio por Cuidador:</Text>
+                <Stack gap="xs">
+                  {Object.entries(selectedAsignacion.horasPorCuidador).map(([cuidadorId, data]) => {
+                    const cuidadorNombre = selectedAsignacion.cuidadoresNombres?.find((_, idx) => selectedAsignacion.cuidadoresIds[idx] === cuidadorId) || cuidadorId;
+                    const subtotal = data.horas * data.precioPorHora;
+                    return (
+                      <Paper key={cuidadorId} p="sm" withBorder>
+                        <Group justify="space-between" mb="xs">
+                          <Text fw={600}>{cuidadorNombre}</Text>
+                        </Group>
+                        <Group gap="md">
+                          <Badge size="lg" variant="light" color="cyan">
+                            {data.horas.toFixed(2)} horas
+                          </Badge>
+                          <Badge size="lg" variant="light" color="yellow">
+                            ${data.precioPorHora.toLocaleString('es-AR', { useGrouping: true })}/h
+                          </Badge>
+                          <Badge size="lg" variant="light" color="green">
+                            ${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                          </Badge>
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                  <Group justify="space-between" mt="sm" pt="sm" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Text fw={600}>Total horas:</Text>
+                    <Text fw={700} size="lg" c="fucsia">
+                      {Object.values(selectedAsignacion.horasPorCuidador).reduce((sum, data) => sum + data.horas, 0).toFixed(2)} horas
+                    </Text>
+                  </Group>
+                  <Group justify="space-between" pt="sm" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Text fw={600}>Total a liquidar:</Text>
+                    <Text fw={700} size="xl" c="cyan">
+                      ${Object.values(selectedAsignacion.horasPorCuidador).reduce((sum, data) => sum + (data.horas * data.precioPorHora), 0).toLocaleString('es-AR', { minimumFractionDigits: 2, useGrouping: true })}
+                    </Text>
+                  </Group>
+                </Stack>
+              </Stack>
+            )}
             {selectedAsignacion.notas && (
               <Group>
                 <Text fw={600}>Notas:</Text>
@@ -613,88 +587,98 @@ export default function CalendarioPage() {
               <Button variant="subtle" onClick={closeView}>
                 Cerrar
               </Button>
-              <Button color="yellow" leftSection={<IconPencil size={16} />} onClick={() => handleEdit(selectedAsignacion)}>
-                Editar
+              <Button color="cyan" leftSection={<IconCurrencyDollar size={16} />} onClick={() => { closeView(); handleLiquidacionRapida(selectedAsignacion); }}>
+                Liquidar
               </Button>
             </Group>
           </Stack>
         )}
       </Modal>
 
-      {/* Modal Editar Asignación */}
-      <Modal opened={editOpened} onClose={closeEdit} title="Editar Asignación" size="lg">
-        <form onSubmit={editForm.onSubmit(handleEditSubmit)}>
-          <Stack>
-            {selectedAsignacion && (
+      {/* Modal Liquidación Rápida */}
+      <Modal opened={liquidacionOpened} onClose={closeLiquidacion} title="Liquidación Rápida" size="lg">
+        {selectedAsignacion && (
+          <form onSubmit={liquidacionForm.onSubmit(handleLiquidar)}>
+            <Stack gap="md">
               <Paper p="sm" withBorder bg="gray.0">
-                <Group>
-                  <Text size="sm" fw={600}>{selectedAsignacion.cuidadorNombre}</Text>
-                  <Badge size="sm" color="fucsia">→</Badge>
-                  <Text size="sm">{selectedAsignacion.personaNombre}</Text>
+                <Text size="sm" fw={600}>
+                  Persona Asistida: {selectedAsignacion.personaNombre || selectedAsignacion.personaId}
+                </Text>
+              </Paper>
+
+              <Select
+                label="Cuidador"
+                required
+                placeholder="Seleccionar cuidador"
+                data={selectedAsignacion.cuidadoresIds.map(id => {
+                  const cuidador = cuidadores.find(c => c.id === id);
+                  return {
+                    value: id,
+                    label: cuidador?.nombreCompleto || id,
+                  };
+                })}
+                value={selectedCuidadorId}
+                onChange={(value) => setSelectedCuidadorId(value || '')}
+              />
+
+              <NumberInput
+                label="Precio por hora"
+                required
+                placeholder="0,00"
+                min={0}
+                step={100}
+                {...liquidacionForm.getInputProps('precioPorHora')}
+                leftSection="$"
+                thousandSeparator="."
+                decimalSeparator=","
+              />
+
+              <DateInput
+                label="Fecha de inicio"
+                required
+                locale="es"
+                {...liquidacionForm.getInputProps('fechaInicio')}
+              />
+
+              <DateInput
+                label="Fecha de fin"
+                required
+                locale="es"
+                {...liquidacionForm.getInputProps('fechaFin')}
+              />
+
+              <NumberInput
+                label="Horas trabajadas"
+                required
+                placeholder="0.00"
+                min={0}
+                step={0.5}
+                decimalScale={2}
+                {...liquidacionForm.getInputProps('horasTrabajadas')}
+                leftSection="H"
+                description="Horas trabajadas en el período"
+              />
+
+              <Paper p="md" withBorder bg="cyan.0">
+                <Group justify="space-between">
+                  <Text fw={600}>Total a liquidar:</Text>
+                  <Text fw={700} size="xl" c="cyan">
+                    ${(liquidacionForm.values.horasTrabajadas * liquidacionForm.values.precioPorHora).toLocaleString('es-AR', { minimumFractionDigits: 2, useGrouping: true })}
+                  </Text>
                 </Group>
               </Paper>
-            )}
-            <NumberInput
-              label="Precio por hora"
-              required
-              min={0}
-              leftSection="$"
-              {...editForm.getInputProps('precioPorHora')}
-            />
-            <DateInput label="Fecha Inicio" required locale="es" {...editForm.getInputProps('fechaInicio')} />
-            <DateInput label="Fecha Fin (opcional)" locale="es" {...editForm.getInputProps('fechaFin')} />
 
-            <Paper p="md" withBorder>
-              <Text fw={600} mb="md">Horarios Semanales</Text>
-              <Stack gap="sm">
-                {editForm.values.horarios.map((horario, index) => (
-                  <Group key={index} grow>
-                    <Checkbox
-                      label={DIAS_SEMANA[horario.diaSemana]}
-                      {...editForm.getInputProps(`horarios.${index}.activo`, { type: 'checkbox' })}
-                    />
-                    <input
-                      type="time"
-                      value={horario.horaInicio}
-                      onChange={(e) => editForm.setFieldValue(`horarios.${index}.horaInicio`, e.target.value)}
-                      disabled={!horario.activo}
-                      style={{
-                        padding: '4px 8px',
-                        border: '1px solid #ced4da',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        opacity: horario.activo ? 1 : 0.5,
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={horario.horaFin}
-                      onChange={(e) => editForm.setFieldValue(`horarios.${index}.horaFin`, e.target.value)}
-                      disabled={!horario.activo}
-                      style={{
-                        padding: '4px 8px',
-                        border: '1px solid #ced4da',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        opacity: horario.activo ? 1 : 0.5,
-                      }}
-                    />
-                  </Group>
-                ))}
-              </Stack>
-            </Paper>
-
-            <Textarea label="Notas" {...editForm.getInputProps('notas')} />
-            <Group justify="flex-end" mt="md">
-              <Button variant="subtle" onClick={closeEdit}>
-                Cancelar
-              </Button>
-              <Button type="submit" color="fucsia">
-                Guardar Cambios
-              </Button>
-            </Group>
-          </Stack>
-        </form>
+              <Group justify="flex-end" mt="md">
+                <Button variant="subtle" onClick={closeLiquidacion}>
+                  Cancelar
+                </Button>
+                <Button type="submit" color="cyan" leftSection={<IconCurrencyDollar size={16} />}>
+                  Liquidar
+                </Button>
+              </Group>
+            </Stack>
+          </form>
+        )}
       </Modal>
     </Container>
   );

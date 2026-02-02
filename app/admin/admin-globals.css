@@ -242,11 +242,13 @@ body.admin-dark-mode .mantine-Table-tr:hover {
 .adminContainer.dark .mantine-Select-input,
 .adminContainer.dark .mantine-Textarea-input,
 .adminContainer.dark .mantine-DateInput-input,
+.adminContainer.dark .mantine-MultiSelect-input,
 body.admin-dark-mode .mantine-TextInput-input,
 body.admin-dark-mode .mantine-NumberInput-input,
 body.admin-dark-mode .mantine-Select-input,
 body.admin-dark-mode .mantine-Textarea-input,
-body.admin-dark-mode .mantine-DateInput-input {
+body.admin-dark-mode .mantine-DateInput-input,
+body.admin-dark-mode .mantine-MultiSelect-input {
   background: #0f172a !important;
   border-color: #334155 !important;
   color: #f1f5f9 !important;
@@ -257,11 +259,13 @@ body.admin-dark-mode .mantine-DateInput-input {
 .adminContainer.dark .mantine-Select-input:focus,
 .adminContainer.dark .mantine-Textarea-input:focus,
 .adminContainer.dark .mantine-DateInput-input:focus,
+.adminContainer.dark .mantine-MultiSelect-input:focus,
 body.admin-dark-mode .mantine-TextInput-input:focus,
 body.admin-dark-mode .mantine-NumberInput-input:focus,
 body.admin-dark-mode .mantine-Select-input:focus,
 body.admin-dark-mode .mantine-Textarea-input:focus,
-body.admin-dark-mode .mantine-DateInput-input:focus {
+body.admin-dark-mode .mantine-DateInput-input:focus,
+body.admin-dark-mode .mantine-MultiSelect-input:focus {
   border-color: #0ea5e9;
 }
 
@@ -270,11 +274,13 @@ body.admin-dark-mode .mantine-DateInput-input:focus {
 .adminContainer.dark .mantine-Select-label,
 .adminContainer.dark .mantine-Textarea-label,
 .adminContainer.dark .mantine-DateInput-label,
+.adminContainer.dark .mantine-MultiSelect-label,
 body.admin-dark-mode .mantine-TextInput-label,
 body.admin-dark-mode .mantine-NumberInput-label,
 body.admin-dark-mode .mantine-Select-label,
 body.admin-dark-mode .mantine-Textarea-label,
-body.admin-dark-mode .mantine-DateInput-label {
+body.admin-dark-mode .mantine-DateInput-label,
+body.admin-dark-mode .mantine-MultiSelect-label {
   color: white !important;
   font-weight: 500;
 }
@@ -284,11 +290,13 @@ body.admin-dark-mode .mantine-DateInput-label {
 .adminContainer.dark .mantine-Select-input::placeholder,
 .adminContainer.dark .mantine-Textarea-input::placeholder,
 .adminContainer.dark .mantine-DateInput-input::placeholder,
+.adminContainer.dark .mantine-MultiSelect-input::placeholder,
 body.admin-dark-mode .mantine-TextInput-input::placeholder,
 body.admin-dark-mode .mantine-NumberInput-input::placeholder,
 body.admin-dark-mode .mantine-Select-input::placeholder,
 body.admin-dark-mode .mantine-Textarea-input::placeholder,
-body.admin-dark-mode .mantine-DateInput-input::placeholder {
+body.admin-dark-mode .mantine-DateInput-input::placeholder,
+body.admin-dark-mode .mantine-MultiSelect-input::placeholder {
   color: #64748b;
 }
 
@@ -300,25 +308,96 @@ body.admin-dark-mode .mantine-DateInput-input::placeholder {
 
 /* Mantine Select Dropdown Dark Mode */
 .adminContainer.dark .mantine-Select-dropdown,
-body.admin-dark-mode .mantine-Select-dropdown {
+.adminContainer.dark .mantine-MultiSelect-dropdown,
+body.admin-dark-mode .mantine-Select-dropdown,
+body.admin-dark-mode .mantine-MultiSelect-dropdown {
   background: #1e293b;
   border: 1px solid #334155;
 }
 
 .adminContainer.dark .mantine-Select-option,
-body.admin-dark-mode .mantine-Select-option {
+.adminContainer.dark .mantine-MultiSelect-option,
+body.admin-dark-mode .mantine-Select-option,
+body.admin-dark-mode .mantine-MultiSelect-option {
   color: #f1f5f9;
 }
 
 .adminContainer.dark .mantine-Select-option:hover,
-body.admin-dark-mode .mantine-Select-option:hover {
+.adminContainer.dark .mantine-MultiSelect-option:hover,
+.adminContainer.dark .mantine-MultiSelect-option[data-hovered],
+body.admin-dark-mode .mantine-Select-option:hover,
+body.admin-dark-mode .mantine-MultiSelect-option:hover,
+body.admin-dark-mode .mantine-MultiSelect-option[data-hovered] {
   background: #334155;
 }
 
 .adminContainer.dark .mantine-Select-option[data-selected],
-body.admin-dark-mode .mantine-Select-option[data-selected] {
+.adminContainer.dark .mantine-MultiSelect-option[data-selected],
+body.admin-dark-mode .mantine-Select-option[data-selected],
+body.admin-dark-mode .mantine-MultiSelect-option[data-selected] {
   background: #0ea5e9;
   color: white;
+}
+
+/* Mantine MultiSelect Value Badge Dark Mode - Selectores más específicos */
+.adminContainer.dark .mantine-MultiSelect-value,
+body.admin-dark-mode .mantine-MultiSelect-value,
+.adminContainer.dark [class*="MultiSelect-value"],
+body.admin-dark-mode [class*="MultiSelect-value"] {
+  background: #ff3d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.adminContainer.dark .mantine-MultiSelect-valueLabel,
+body.admin-dark-mode .mantine-MultiSelect-valueLabel,
+.adminContainer.dark [class*="MultiSelect-valueLabel"],
+body.admin-dark-mode [class*="MultiSelect-valueLabel"],
+.adminContainer.dark .mantine-MultiSelect-value span,
+body.admin-dark-mode .mantine-MultiSelect-value span,
+.adminContainer.dark .mantine-MultiSelect-value div,
+body.admin-dark-mode .mantine-MultiSelect-value div {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.adminContainer.dark .mantine-MultiSelect-valueRemove,
+body.admin-dark-mode .mantine-MultiSelect-valueRemove,
+.adminContainer.dark [class*="MultiSelect-valueRemove"],
+body.admin-dark-mode [class*="MultiSelect-valueRemove"] {
+  color: #ffffff !important;
+}
+
+.adminContainer.dark .mantine-MultiSelect-valueRemove:hover,
+body.admin-dark-mode .mantine-MultiSelect-valueRemove:hover,
+.adminContainer.dark [class*="MultiSelect-valueRemove"]:hover,
+body.admin-dark-mode [class*="MultiSelect-valueRemove"]:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+/* Asegurar que TODO el texto dentro del value sea legible */
+.adminContainer.dark .mantine-MultiSelect-value *,
+body.admin-dark-mode .mantine-MultiSelect-value *,
+.adminContainer.dark [class*="MultiSelect-value"] *,
+body.admin-dark-mode [class*="MultiSelect-value"] * {
+  color: #ffffff !important;
+}
+
+/* Estilo global más agresivo para valores de MultiSelect */
+.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-value,
+body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-value,
+.adminContainer.dark .mantine-MultiSelect-input [class*="value"],
+body.admin-dark-mode .mantine-MultiSelect-input [class*="value"] {
+  background-color: #ff3d75 !important;
+  color: #ffffff !important;
+}
+
+.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-value *,
+body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-value *,
+.adminContainer.dark .mantine-MultiSelect-input [class*="value"] *,
+body.admin-dark-mode .mantine-MultiSelect-input [class*="value"] * {
+  color: #ffffff !important;
 }
 
 /* Mantine Button Dark Mode */
@@ -573,9 +652,55 @@ body.admin-dark-mode .mantine-Pagination-control[data-active] {
 .mantine-NumberInput-label,
 .mantine-Select-label,
 .mantine-Textarea-label,
-.mantine-DateInput-label {
+.mantine-DateInput-label,
+.mantine-MultiSelect-label {
   color: #0f172a !important;
   font-weight: 600;
+}
+
+/* Mantine MultiSelect Value Badge Light Mode - asegurar contraste */
+.mantine-MultiSelect-value,
+[class*="MultiSelect-value"] {
+  background: #ff3d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.mantine-MultiSelect-valueLabel,
+[class*="MultiSelect-valueLabel"],
+.mantine-MultiSelect-value span,
+.mantine-MultiSelect-value div {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.mantine-MultiSelect-valueRemove,
+[class*="MultiSelect-valueRemove"] {
+  color: #ffffff !important;
+}
+
+.mantine-MultiSelect-valueRemove:hover,
+[class*="MultiSelect-valueRemove"]:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+/* Asegurar que TODO el texto dentro del value sea legible en modo claro también */
+.mantine-MultiSelect-value *,
+[class*="MultiSelect-value"] * {
+  color: #ffffff !important;
+}
+
+/* Estilo global más agresivo para valores de MultiSelect en modo claro */
+.mantine-MultiSelect-input .mantine-MultiSelect-value,
+.mantine-MultiSelect-input [class*="value"] {
+  background-color: #ff3d75 !important;
+  color: #ffffff !important;
+}
+
+.mantine-MultiSelect-input .mantine-MultiSelect-value *,
+.mantine-MultiSelect-input [class*="value"] * {
+  color: #ffffff !important;
 }
 
 /* Improve contrast for Paper content */
@@ -683,4 +808,281 @@ body.admin-dark-mode .mantine-Menu-label {
 .adminContainer.dark .mantine-Menu-divider,
 body.admin-dark-mode .mantine-Menu-divider {
   border-color: #334155;
+}
+
+/* ============================================
+   ESTILOS ULTRA ESPECÍFICOS PARA MULTISELECT VALUE
+   ============================================ */
+
+/* Forzar estilos en valores de MultiSelect - Máxima especificidad */
+.mantine-MultiSelect-input [data-value],
+.mantine-MultiSelect-input [class*="value"],
+.mantine-MultiSelect-input [class*="Value"],
+.mantine-MultiSelect-input > div > div[class*="value"],
+.mantine-MultiSelect-input > div > div[class*="Value"] {
+  background-color: #ff3d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.mantine-MultiSelect-input [data-value] *,
+.mantine-MultiSelect-input [class*="value"] *,
+.mantine-MultiSelect-input [class*="Value"] *,
+.mantine-MultiSelect-input > div > div[class*="value"] *,
+.mantine-MultiSelect-input > div > div[class*="Value"] * {
+  color: #ffffff !important;
+}
+
+/* Modo oscuro - aún más específico */
+.adminContainer.dark .mantine-MultiSelect-input [data-value],
+body.admin-dark-mode .mantine-MultiSelect-input [data-value],
+.adminContainer.dark .mantine-MultiSelect-input [class*="value"],
+body.admin-dark-mode .mantine-MultiSelect-input [class*="value"],
+.adminContainer.dark .mantine-MultiSelect-input [class*="Value"],
+body.admin-dark-mode .mantine-MultiSelect-input [class*="Value"],
+.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="value"],
+body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="value"],
+.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="Value"],
+body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="Value"] {
+  background-color: #ff3d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.adminContainer.dark .mantine-MultiSelect-input [data-value] *,
+body.admin-dark-mode .mantine-MultiSelect-input [data-value] *,
+.adminContainer.dark .mantine-MultiSelect-input [class*="value"] *,
+body.admin-dark-mode .mantine-MultiSelect-input [class*="value"] *,
+.adminContainer.dark .mantine-MultiSelect-input [class*="Value"] *,
+body.admin-dark-mode .mantine-MultiSelect-input [class*="Value"] *,
+.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="value"] *,
+body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="value"] *,
+.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="Value"] *,
+body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="Value"] * {
+  color: #ffffff !important;
+}
+
+/* Clases personalizadas para MultiSelect Pills - MÁXIMA ESPECIFICIDAD */
+/* MODO CLARO - Fondo blanco (por defecto) */
+.multiselect-pill-custom,
+.mantine-MultiSelect-pill.multiselect-pill-custom,
+.mantine-Pill-root.multiselect-pill-custom,
+.mantine-MultiSelect-input .multiselect-pill-custom {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* MODO OSCURO - Fondo rosa (sobrescribe modo claro) */
+.adminContainer.dark .multiselect-pill-custom,
+body.admin-dark-mode .multiselect-pill-custom,
+.adminContainer.dark .mantine-MultiSelect-pill.multiselect-pill-custom,
+body.admin-dark-mode .mantine-MultiSelect-pill.multiselect-pill-custom,
+.adminContainer.dark .mantine-Pill-root.multiselect-pill-custom,
+body.admin-dark-mode .mantine-Pill-root.multiselect-pill-custom,
+.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-custom,
+body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-custom {
+  background-color: #ff3d75 !important;
+  background: #ff3d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-color: transparent !important;
+}
+
+/* MODO CLARO - Label oscuro (por defecto) */
+.multiselect-pill-label-custom,
+.mantine-Pill-label.multiselect-pill-label-custom,
+.multiselect-pill-custom .mantine-Pill-label,
+.mantine-MultiSelect-input .multiselect-pill-label-custom {
+  color: #1a1a1a !important;
+  font-weight: 500 !important;
+}
+
+/* MODO OSCURO - Label blanco (sobrescribe modo claro) */
+.adminContainer.dark .multiselect-pill-label-custom,
+body.admin-dark-mode .multiselect-pill-label-custom,
+.adminContainer.dark .mantine-Pill-label.multiselect-pill-label-custom,
+body.admin-dark-mode .mantine-Pill-label.multiselect-pill-label-custom,
+.adminContainer.dark .multiselect-pill-custom .mantine-Pill-label,
+body.admin-dark-mode .multiselect-pill-custom .mantine-Pill-label,
+.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-label-custom,
+body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-label-custom {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* MODO CLARO - Remove oscuro (por defecto) */
+.multiselect-pill-remove-custom,
+.mantine-Pill-remove.multiselect-pill-remove-custom,
+.multiselect-pill-custom .mantine-Pill-remove,
+.mantine-MultiSelect-input .multiselect-pill-remove-custom {
+  color: #1a1a1a !important;
+}
+
+/* MODO OSCURO - Remove blanco (sobrescribe modo claro) */
+.adminContainer.dark .multiselect-pill-remove-custom,
+body.admin-dark-mode .multiselect-pill-remove-custom,
+.adminContainer.dark .mantine-Pill-remove.multiselect-pill-remove-custom,
+body.admin-dark-mode .mantine-Pill-remove.multiselect-pill-remove-custom,
+.adminContainer.dark .multiselect-pill-custom .mantine-Pill-remove,
+body.admin-dark-mode .multiselect-pill-custom .mantine-Pill-remove,
+.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-remove-custom,
+body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-remove-custom {
+  color: #ffffff !important;
+}
+
+.multiselect-pill-remove-custom:hover,
+.mantine-Pill-remove.multiselect-pill-remove-custom:hover,
+.multiselect-pill-custom .mantine-Pill-remove:hover,
+.mantine-MultiSelect-input .multiselect-pill-remove-custom:hover,
+.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-remove-custom:hover,
+body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-remove-custom:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+/* MODO CLARO - Todo oscuro (por defecto) */
+.multiselect-pill-custom *,
+.mantine-MultiSelect-input .multiselect-pill-custom * {
+  color: #1a1a1a !important;
+}
+
+/* MODO OSCURO - Todo blanco (sobrescribe modo claro) */
+.adminContainer.dark .multiselect-pill-custom *,
+body.admin-dark-mode .multiselect-pill-custom *,
+.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-custom *,
+body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-custom * {
+  color: #ffffff !important;
+}
+
+/* ESTILO ULTRA AGRESIVO - Apuntar a los Pills de Mantine v8 dentro del MultiSelect */
+/* MODO CLARO - Fondo blanco/gris claro con texto oscuro (por defecto) */
+.mantine-MultiSelect-pill,
+.mantine-Pill-root.mantine-MultiSelect-pill,
+.mantine-MultiSelect-input .mantine-MultiSelect-pill,
+.mantine-MultiSelect-input .mantine-Pill-root,
+.mantine-MultiSelect-input [class*="MultiSelect-pill"],
+.mantine-MultiSelect-input [class*="Pill-root"] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border: 1px solid #e2e8f0 !important;
+  border-color: #e2e8f0 !important;
+  border-radius: 6px !important;
+}
+
+/* MODO OSCURO - Fondo rosa con texto blanco (sobrescribe modo claro) */
+.adminContainer.dark .mantine-MultiSelect-pill,
+body.admin-dark-mode .mantine-MultiSelect-pill,
+.adminContainer.dark .mantine-Pill-root.mantine-MultiSelect-pill,
+body.admin-dark-mode .mantine-Pill-root.mantine-MultiSelect-pill,
+.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-pill,
+body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-pill,
+.adminContainer.dark .mantine-MultiSelect-input .mantine-Pill-root,
+body.admin-dark-mode .mantine-MultiSelect-input .mantine-Pill-root,
+.adminContainer.dark .mantine-MultiSelect-input [class*="MultiSelect-pill"],
+body.admin-dark-mode .mantine-MultiSelect-input [class*="MultiSelect-pill"],
+.adminContainer.dark .mantine-MultiSelect-input [class*="Pill-root"],
+body.admin-dark-mode .mantine-MultiSelect-input [class*="Pill-root"] {
+  background-color: #ff3d75 !important;
+  background: #ff3d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-color: transparent !important;
+  border-radius: 6px !important;
+}
+
+/* Estilos para el label dentro del Pill */
+/* MODO CLARO - Texto oscuro (por defecto) */
+.mantine-Pill-label,
+.mantine-MultiSelect-pill .mantine-Pill-label,
+.mantine-Pill-root .mantine-Pill-label,
+.mantine-MultiSelect-input .mantine-Pill-label {
+  color: #1a1a1a !important;
+}
+
+/* MODO OSCURO - Texto blanco (sobrescribe modo claro) */
+.adminContainer.dark .mantine-Pill-label,
+body.admin-dark-mode .mantine-Pill-label,
+.adminContainer.dark .mantine-MultiSelect-pill .mantine-Pill-label,
+body.admin-dark-mode .mantine-MultiSelect-pill .mantine-Pill-label,
+.adminContainer.dark .mantine-Pill-root .mantine-Pill-label,
+body.admin-dark-mode .mantine-Pill-root .mantine-Pill-label {
+  color: #ffffff !important;
+}
+
+/* Estilos para el botón de eliminar dentro del Pill */
+/* MODO CLARO - Icono oscuro (por defecto) */
+.mantine-Pill-remove,
+.mantine-MultiSelect-pill .mantine-Pill-remove,
+.mantine-Pill-root .mantine-Pill-remove,
+.mantine-MultiSelect-input .mantine-Pill-remove {
+  color: #1a1a1a !important;
+}
+
+/* MODO OSCURO - Icono blanco (sobrescribe modo claro) */
+.adminContainer.dark .mantine-Pill-remove,
+body.admin-dark-mode .mantine-Pill-remove,
+.adminContainer.dark .mantine-MultiSelect-pill .mantine-Pill-remove,
+body.admin-dark-mode .mantine-MultiSelect-pill .mantine-Pill-remove {
+  color: #ffffff !important;
+}
+
+.mantine-Pill-remove:hover,
+.mantine-MultiSelect-pill .mantine-Pill-remove:hover,
+.mantine-Pill-root .mantine-Pill-remove:hover,
+.adminContainer.dark .mantine-Pill-remove:hover,
+body.admin-dark-mode .mantine-Pill-remove:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+/* Asegurar que TODO dentro del Pill tenga el color correcto según el modo */
+/* MODO CLARO - Texto oscuro (por defecto) */
+.mantine-MultiSelect-pill *,
+.mantine-Pill-root.mantine-MultiSelect-pill *,
+.mantine-MultiSelect-input .mantine-MultiSelect-pill *,
+.mantine-MultiSelect-input .mantine-Pill-root * {
+  color: #1a1a1a !important;
+}
+
+/* MODO OSCURO - Texto blanco (sobrescribe modo claro) */
+.adminContainer.dark .mantine-MultiSelect-pill *,
+body.admin-dark-mode .mantine-MultiSelect-pill *,
+.adminContainer.dark .mantine-Pill-root.mantine-MultiSelect-pill *,
+body.admin-dark-mode .mantine-Pill-root.mantine-MultiSelect-pill * {
+  color: #ffffff !important;
+}
+
+/* Agregar separación y flex wrap a los valores del MultiSelect - Contenedor correcto */
+.mantine-MultiSelect-pillsList,
+.mantine-PillGroup-group.mantine-MultiSelect-pillsList,
+.mantine-MultiSelect-input .mantine-MultiSelect-pillsList,
+.mantine-MultiSelect-input .mantine-PillGroup-group,
+.mantine-MultiSelect-input [class*="pillsList"],
+.mantine-MultiSelect-input [class*="PillGroup-group"],
+.adminContainer.dark .mantine-MultiSelect-pillsList,
+body.admin-dark-mode .mantine-MultiSelect-pillsList,
+.adminContainer.dark .mantine-PillGroup-group.mantine-MultiSelect-pillsList,
+body.admin-dark-mode .mantine-PillGroup-group.mantine-MultiSelect-pillsList,
+.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-pillsList,
+body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-pillsList,
+.adminContainer.dark .mantine-MultiSelect-input .mantine-PillGroup-group,
+body.admin-dark-mode .mantine-MultiSelect-input .mantine-PillGroup-group {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  row-gap: 6px !important;
+  column-gap: 6px !important;
+  --pg-gap: 6px !important;
+}
+
+/* Ocultar placeholder cuando hay pills seleccionados */
+.mantine-MultiSelect-input:has(.mantine-MultiSelect-pill) .mantine-MultiSelect-inputField::placeholder,
+.mantine-MultiSelect-input:has(.mantine-Pill-root) .mantine-MultiSelect-inputField::placeholder,
+.mantine-MultiSelect-input:has(.multiselect-pill-custom) .mantine-MultiSelect-inputField::placeholder {
+  opacity: 0 !important;
+  color: transparent !important;
 }

@@ -92,8 +92,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Cuidadores', icon: 'people', href: '/admin/cuidadores' },
     { label: 'Personas Asistidas', icon: 'elderly', href: '/admin/personas-asistidas' },
     { label: 'Asignaciones', icon: 'assignment', href: '/admin/asignaciones' },
-    { label: 'Pagos', icon: 'receipt_long', href: '/admin/pagos' },
-    { label: 'Liquidaciones', icon: 'calculate', href: '/admin/liquidaciones' },
+    { label: 'Liquidaciones', icon: 'receipt_long', href: '/admin/liquidaciones' },
     { label: 'Reportes', icon: 'bar_chart', href: '/admin/reportes' },
     { label: 'Contratos', icon: 'assignment', href: '/admin/contratos' },
   ];

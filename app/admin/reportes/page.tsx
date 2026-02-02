@@ -108,7 +108,7 @@ export default function ReportesPage() {
                   </Text>
                 </div>
                 <div>
-                  <Text size="sm" c="dimmed">Cantidad de Pagos</Text>
+                  <Text size="sm" c="dimmed">Cantidad de Liquidaciones</Text>
                   <Text size="xl" fw={600} c="cian">
                     {result.cantidadPagos}
                   </Text>
@@ -126,7 +126,7 @@ export default function ReportesPage() {
                     <Text fw={500}>{item.mes}</Text>
                     <Group gap="lg">
                       <Text>${item.total.toLocaleString()}</Text>
-                      <Badge>{item.cantidad} pagos</Badge>
+                      <Badge>{item.cantidad} liquidaciones</Badge>
                     </Group>
                   </Group>
                 ))}

@@ -11,6 +11,9 @@ export class PagoDTO {
   personaId: string | null;
 
   @Expose()
+  asignacionId: string | null;
+
+  @Expose()
   monto: number;
 
   @Expose()

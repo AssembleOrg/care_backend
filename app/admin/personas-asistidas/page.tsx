@@ -1,11 +1,11 @@
 'use client';
 
-import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper } from '@mantine/core';
+import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye, IconX } from '@tabler/icons-react';
 import { ViewToggle, useViewMode } from '../components/ViewToggle';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
 import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
@@ -47,6 +47,10 @@ export default function PersonasAsistidasPage() {
   const [searching, setSearching] = useState(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [cuidadores, setCuidadores] = useState<Array<{ id: string; nombreCompleto: string }>>([]);
+  const [cuidadoresPersona, setCuidadoresPersona] = useState<Array<{ id: string; cuidadorId: string; cuidadorNombre: string; activo: boolean }>>([]);
+  const [cuidadoresModalOpened, { open: openCuidadoresModal, close: closeCuidadoresModal }] = useDisclosure(false);
+  const [personaIdParaCuidadores, setPersonaIdParaCuidadores] = useState<string | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -91,6 +95,15 @@ export default function PersonasAsistidasPage() {
 
   useEffect(() => {
     fetchPersonas(1, search);
+    // Cargar cuidadores para el select
+    fetch('/api/v1/cuidadores?all=true')
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok && Array.isArray(data.data)) {
+          setCuidadores(data.data);
+        }
+      })
+      .catch(err => console.error('Error fetching cuidadores:', err));
   }, [search]);
 
   const handleSearch = async () => {
@@ -113,7 +126,13 @@ export default function PersonasAsistidasPage() {
       const response = await fetch('/api/v1/personas-asistidas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          nombreCompleto: values.nombreCompleto,
+          dni: values.dni || undefined,
+          telefono: values.telefono || undefined,
+          direccion: values.direccion || undefined,
+          telefonoContactoEmergencia: values.telefonoContactoEmergencia || undefined,
+        }),
       });
 
       const data = await response.json();
@@ -158,13 +177,22 @@ export default function PersonasAsistidasPage() {
   const handleView = async (id: string) => {
     setViewing(id);
     try {
-      const response = await fetch(`/api/v1/personas-asistidas/${id}`);
-      const data = await response.json();
-      if (data.ok) {
-        setSelectedPersona(data.data);
+      const [personaResponse, cuidadoresResponse] = await Promise.all([
+        fetch(`/api/v1/personas-asistidas/${id}`),
+        fetch(`/api/v1/personas-asistidas/${id}/cuidadores`),
+      ]);
+      
+      const personaData = await personaResponse.json();
+      const cuidadoresData = await cuidadoresResponse.json();
+      
+      if (personaData.ok) {
+        setSelectedPersona(personaData.data);
+        if (cuidadoresData.ok) {
+          setCuidadoresPersona(cuidadoresData.data);
+        }
         openView();
       } else {
-        throw new Error(extractApiErrorMessage(data) || 'Error al cargar datos de la persona asistida');
+        throw new Error(extractApiErrorMessage(personaData) || 'Error al cargar datos de la persona asistida');
       }
     } catch (error: unknown) {
       const message = parseApiError(error);
@@ -175,6 +203,98 @@ export default function PersonasAsistidasPage() {
       });
     } finally {
       setViewing(null);
+    }
+  };
+
+  const handleGestionarCuidadores = async (id: string) => {
+    setPersonaIdParaCuidadores(id);
+    try {
+      const response = await fetch(`/api/v1/personas-asistidas/${id}/cuidadores`);
+      const data = await response.json();
+      if (data.ok) {
+        setCuidadoresPersona(data.data);
+        openCuidadoresModal();
+      }
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: 'Error al cargar cuidadores',
+        color: 'red',
+      });
+    }
+  };
+
+  const handleAgregarCuidador = async (cuidadorId: string) => {
+    if (!personaIdParaCuidadores) return;
+    
+    try {
+      const response = await fetch(`/api/v1/personas-asistidas/${personaIdParaCuidadores}/cuidadores`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cuidadorId }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.ok) {
+        throw new Error(extractApiErrorMessage(data) || 'Error al agregar cuidador');
+      }
+      
+      notifications.show({
+        title: 'Éxito',
+        message: 'Cuidador agregado correctamente',
+        color: 'green',
+      });
+      
+      // Recargar lista
+      const listResponse = await fetch(`/api/v1/personas-asistidas/${personaIdParaCuidadores}/cuidadores`);
+      const listData = await listResponse.json();
+      if (listData.ok) {
+        setCuidadoresPersona(listData.data);
+      }
+    } catch (error: unknown) {
+      const message = parseApiError(error);
+      notifications.show({
+        title: 'Error',
+        message,
+        color: 'red',
+      });
+    }
+  };
+
+  const handleEliminarCuidador = async (cuidadorId: string) => {
+    if (!personaIdParaCuidadores) return;
+    
+    try {
+      const response = await fetch(`/api/v1/personas-asistidas/${personaIdParaCuidadores}/cuidadores/${cuidadorId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.ok) {
+        throw new Error(extractApiErrorMessage(data) || 'Error al eliminar cuidador');
+      }
+      
+      notifications.show({
+        title: 'Éxito',
+        message: 'Cuidador eliminado correctamente',
+        color: 'green',
+      });
+      
+      // Recargar lista
+      const listResponse = await fetch(`/api/v1/personas-asistidas/${personaIdParaCuidadores}/cuidadores`);
+      const listData = await listResponse.json();
+      if (listData.ok) {
+        setCuidadoresPersona(listData.data);
+      }
+    } catch (error: unknown) {
+      const message = parseApiError(error);
+      notifications.show({
+        title: 'Error',
+        message,
+        color: 'red',
+      });
     }
   };
 
@@ -418,7 +538,7 @@ export default function PersonasAsistidasPage() {
         <Pagination value={page} onChange={handlePageChange} total={Math.max(totalPages, 1)} />
       </Group>
 
-      <Modal opened={opened} onClose={close} title="Nueva Persona Asistida">
+      <Modal opened={opened} onClose={close} title="Nueva Persona Asistida" size="lg">
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
             <TextInput label="Nombre Completo" required {...form.getInputProps('nombreCompleto')} />
@@ -458,7 +578,7 @@ export default function PersonasAsistidasPage() {
         </form>
       </Modal>
 
-      <Modal opened={viewOpened} onClose={closeView} title="Ver Persona Asistida">
+      <Modal opened={viewOpened} onClose={closeView} title="Ver Persona Asistida" size="lg">
         {selectedPersona && (
           <Stack>
             <TextInput label="Nombre Completo" value={selectedPersona.nombreCompleto} readOnly />
@@ -466,8 +586,81 @@ export default function PersonasAsistidasPage() {
             <TextInput label="Teléfono" value={selectedPersona.telefono || '-'} readOnly />
             <TextInput label="Dirección" value={selectedPersona.direccion || '-'} readOnly />
             <TextInput label="Teléfono Contacto Emergencia" value={selectedPersona.telefonoContactoEmergencia || '-'} readOnly />
+            
+            <Paper p="md" withBorder>
+              <Group justify="space-between" mb="md">
+                <Text fw={600}>Cuidadores</Text>
+                <Button size="xs" onClick={() => handleGestionarCuidadores(selectedPersona.id)}>
+                  Gestionar
+                </Button>
+              </Group>
+              <Stack gap="xs">
+                {cuidadoresPersona.filter(c => c.activo).length === 0 ? (
+                  <Text size="sm" c="dimmed">No hay cuidadores asignados</Text>
+                ) : (
+                  cuidadoresPersona
+                    .filter(c => c.activo)
+                    .map(c => (
+                      <Badge key={c.id} size="lg" variant="light" color="fucsia">
+                        {c.cuidadorNombre}
+                      </Badge>
+                    ))
+                )}
+              </Stack>
+            </Paper>
+            
             <Group justify="flex-end" mt="md">
               <Button variant="subtle" onClick={closeView}>
+                Cerrar
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+
+      <Modal opened={cuidadoresModalOpened} onClose={closeCuidadoresModal} title="Gestionar Cuidadores" size="lg">
+        {personaIdParaCuidadores && (
+          <Stack>
+            <MultiSelect
+              label="Agregar Cuidador"
+              placeholder="Seleccionar cuidador para agregar"
+              data={cuidadores
+                .filter(c => !cuidadoresPersona.find(pc => pc.cuidadorId === c.id && pc.activo))
+                .map(c => ({ value: c.id, label: c.nombreCompleto }))}
+              searchable
+              onChange={(value) => {
+                if (value && value.length > 0) {
+                  handleAgregarCuidador(value[value.length - 1]);
+                }
+              }}
+            />
+            
+            <Paper p="md" withBorder>
+              <Text fw={600} mb="md">Cuidadores Asignados</Text>
+              <Stack gap="xs">
+                {cuidadoresPersona
+                  .filter(c => c.activo)
+                  .map(c => (
+                    <Group key={c.id} justify="space-between">
+                      <Badge size="lg" variant="light" color="fucsia">
+                        {c.cuidadorNombre}
+                      </Badge>
+                      <ActionIcon
+                        color="red"
+                        variant="light"
+                        onClick={() => handleEliminarCuidador(c.cuidadorId)}
+                        disabled={cuidadoresPersona.filter(pc => pc.activo).length === 1}
+                        title={cuidadoresPersona.filter(pc => pc.activo).length === 1 ? 'No se puede eliminar el último cuidador' : 'Eliminar cuidador'}
+                      >
+                        <IconX size={16} />
+                      </ActionIcon>
+                    </Group>
+                  ))}
+              </Stack>
+            </Paper>
+            
+            <Group justify="flex-end" mt="md">
+              <Button variant="subtle" onClick={closeCuidadoresModal}>
                 Cerrar
               </Button>
             </Group>
