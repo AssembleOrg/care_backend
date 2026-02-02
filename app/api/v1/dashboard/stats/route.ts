@@ -25,7 +25,7 @@ async function handleGET(request: NextRequest) {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-    
+
     // Mes anterior para comparar tendencias
     const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
@@ -105,6 +105,7 @@ async function handleGET(request: NextRequest) {
         let pago = null;
         let asignacion = null;
         let persona = null;
+        let contrato = null;
 
         if (log.table === 'Cuidador') {
           cuidador = await prisma.cuidador.findUnique({
@@ -145,6 +146,11 @@ async function handleGET(request: NextRequest) {
               select: { nombreCompleto: true },
             });
           }
+        } else if (log.table === 'Contrato') {
+          contrato = await prisma.contrato.findUnique({
+            where: { id: log.recordId },
+            include: { persona: { select: { nombreCompleto: true } } },
+          });
         }
 
         return {
@@ -152,6 +158,7 @@ async function handleGET(request: NextRequest) {
           cuidador,
           pago,
           asignacion: asignacion ? { ...asignacion, cuidador, persona } : null,
+          contrato,
         };
       })
     );
@@ -174,9 +181,9 @@ async function handleGET(request: NextRequest) {
 
       // Determinar tipo y contenido según la acción y tabla
       if (log.table === 'Cuidador' && log.action === 'CREATE') {
-        const nombreCompleto = log.cuidador?.nombreCompleto || 
-                               (log.newData as { nombreCompleto?: string })?.nombreCompleto || 
-                               'Un cuidador';
+        const nombreCompleto = log.cuidador?.nombreCompleto ||
+          (log.newData as { nombreCompleto?: string })?.nombreCompleto ||
+          'Un cuidador';
         return {
           id: log.id,
           type: 'person_add' as const,
@@ -187,8 +194,8 @@ async function handleGET(request: NextRequest) {
         };
       } else if (log.table === 'Pago' && log.action === 'CREATE') {
         const cuidadorNombre = log.cuidador?.nombreCompleto || 'Un cuidador';
-        const monto = log.pago?.monto ? Number(log.pago.monto) : 
-                     ((log.newData as { monto?: number })?.monto || 0);
+        const monto = log.pago?.monto ? Number(log.pago.monto) :
+          ((log.newData as { monto?: number })?.monto || 0);
         return {
           id: log.id,
           type: 'payment' as const,
@@ -208,6 +215,21 @@ async function handleGET(request: NextRequest) {
           time: timeString,
           createdAt: log.createdAt.toISOString(),
         };
+      } else if (log.table === 'Contrato' && log.action === 'CREATE') {
+        // @ts-ignore - log.contrato is added in the map above but typescript might not know it without full typing
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const contratoObj = (log as any).contrato;
+        const personaNombre = contratoObj?.persona?.nombreCompleto ||
+          (log.newData as { nombreManual?: string })?.nombreManual ||
+          'Cliente';
+        return {
+          id: log.id,
+          type: 'assignment' as const, // Usamos assignment icon para contratos también
+          title: 'Contrato Creado',
+          description: `Contrato generado para ${personaNombre}`,
+          time: timeString,
+          createdAt: log.createdAt.toISOString(),
+        };
       } else {
         // Actividad genérica
         return {
@@ -224,10 +246,10 @@ async function handleGET(request: NextRequest) {
     // Calcular porcentajes de progreso (basados en objetivos o promedios)
     // Para cuidadores: usar un objetivo de 200 (75% = 150/200)
     const cuidadoresProgress = Math.min((totalCuidadores / 200) * 100, 100);
-    
+
     // Para pagos pendientes: usar un objetivo de 20 (25% = 5/20)
     const pagosProgress = Math.min((pagosPendientes / 20) * 100, 100);
-    
+
     // Para saldo: usar un objetivo de 50000 (50% = 25000/50000)
     const saldoProgress = Math.min((saldoTotal / 50000) * 100, 100);
 

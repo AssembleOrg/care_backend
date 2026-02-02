@@ -24,7 +24,7 @@ model Cuidador {
   
   asignaciones   Asignacion[]
   pagos          Pago[]
-  auditLogs      AuditLog[] @relation("CuidadorAuditLogs")
+
 }
 
 model PersonaAsistida {
@@ -44,7 +44,7 @@ model PersonaAsistida {
   asignaciones              Asignacion[]
   pagos                     Pago[]
   contratos                 Contrato[]
-  auditLogs                 AuditLog[] @relation("PersonaAsistidaAuditLogs")
+
 }
 
 model Asignacion {
@@ -61,7 +61,7 @@ model Asignacion {
   
   cuidador      Cuidador      @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
   persona       PersonaAsistida @relation(fields: [personaId], references: [id], onDelete: Cascade)
-  auditLogs     AuditLog[] @relation("AsignacionAuditLogs")
+
 }
 
 model Pago {
@@ -85,7 +85,7 @@ model Pago {
   cuidador      Cuidador      @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
   persona       PersonaAsistida? @relation(fields: [personaId], references: [id], onDelete: SetNull)
   recibos       ReciboAdjunto[]
-  auditLogs     AuditLog[] @relation("PagoAuditLogs")
+
 }
 
 model ReciboAdjunto {
@@ -109,11 +109,12 @@ model AuditLog {
   ip        String?
   userAgent String?
   createdAt DateTime @default(now())
-  
-  cuidador      Cuidador?      @relation("CuidadorAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Cuidador_fkey")
-  persona       PersonaAsistida? @relation("PersonaAsistidaAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Persona_fkey")
-  asignacion    Asignacion?    @relation("AsignacionAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Asignacion_fkey")
-  pago          Pago?          @relation("PagoAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Pago_fkey")
+
+  // Relaciones eliminadas para evitar conflictos de claves foráneas con recordId polimórfico
+  // cuidador      Cuidador?      @relation("CuidadorAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Cuidador_fkey")
+  // persona       PersonaAsistida? @relation("PersonaAsistidaAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Persona_fkey")
+  // asignacion    Asignacion?    @relation("AsignacionAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Asignacion_fkey")
+  // pago          Pago?          @relation("PagoAuditLogs", fields: [recordId], references: [id], map: "AuditLog_Pago_fkey")
 }
 
 model Admin {
