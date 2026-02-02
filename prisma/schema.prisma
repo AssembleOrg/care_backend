@@ -2,8 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Configurar seed en package.json: "prisma": { "seed": "tsx prisma/seed.ts" }
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -28,15 +26,15 @@ model Cuidador {
 }
 
 model PersonaAsistida {
-  id                        String   @id @default(uuid())
-  nombreCompleto            String   @db.Text
-  dniEnc                    String?
-  dniHash                   String?  @unique
-  telefonoEnc               String?
-  telefonoHash              String?  @unique
-  direccionEnc              String?  @db.Text
-  direccionHash             String?
-  telefonoContactoEmergenciaEnc String?
+  id                             String            @id @default(uuid())
+  nombreCompleto                 String
+  dniEnc                         String?
+  dniHash                        String?           @unique
+  telefonoEnc                    String?
+  telefonoHash                   String?           @unique
+  direccionEnc                   String?
+  direccionHash                  String?
+  telefonoContactoEmergenciaEnc  String?
   telefonoContactoEmergenciaHash String?
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
@@ -91,10 +89,9 @@ model Pago {
 model ReciboAdjunto {
   id        String   @id @default(uuid())
   pagoId    String
-  url       String   @db.Text
+  url       String
   filename  String
   createdAt DateTime @default(now())
-  
   pago      Pago     @relation(fields: [pagoId], references: [id], onDelete: Cascade)
 }
 

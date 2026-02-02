@@ -7,7 +7,7 @@ interface DashboardStats {
   totalCuidadores: number;
   totalPagos: number;
   saldoTotalMes: number;
-  pagosPendientes: number;
+  liquidacionesRealizadas: number;
   actividades: ActivityItem[];
   tendencias: {
     cuidadores: {
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Pagos Pendientes Card */}
+        {/* Liquidaciones Realizadas Card */}
         <div className={styles.statCard}>
           <div className={styles.statCardHeader}>
             <div className={`${styles.statIcon} ${styles.statIconPrimary}`}>
@@ -121,19 +121,19 @@ export default function AdminDashboard() {
             </div>
             <span className={`${styles.statTrend} ${styles.statTrendNeutral}`}>
               <span className="material-icons">remove</span>
-              {stats?.pagosPendientes !== undefined ? stats.pagosPendientes : 0}
+              {stats?.liquidacionesRealizadas !== undefined ? stats.liquidacionesRealizadas : 0}
             </span>
           </div>
           <div className={styles.statContent}>
-            <h4 className={styles.statLabel}>Pagos</h4>
+            <h4 className={styles.statLabel}>Liquidaciones</h4>
             {loading ? (
               <div className={styles.loading}>Cargando...</div>
             ) : error ? (
               <div className={styles.error}>Error</div>
             ) : (
               <div className={styles.statValue}>
-                <span className={styles.statNumber}>{stats?.pagosPendientes ?? 0}</span>
-                <span className={styles.statSubtext}>Por procesar</span>
+                <span className={styles.statNumber}>{stats?.liquidacionesRealizadas ?? 0}</span>
+                <span className={styles.statSubtext}>Realizadas</span>
               </div>
             )}
           </div>
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
                 <span className={styles.statNumber}>
                   ${stats?.saldoTotalMes.toLocaleString('es-AR') ?? '14,250'}
                 </span>
-                <span className={styles.statSubtext}>Este mes</span>
+                <span className={styles.statSubtext}>Total pagado</span>
               </div>
             )}
           </div>

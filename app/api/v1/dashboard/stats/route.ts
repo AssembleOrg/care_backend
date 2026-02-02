@@ -45,15 +45,8 @@ async function handleGET(request: NextRequest) {
       ? ((totalCuidadores - totalCuidadoresLastMonth) / totalCuidadoresLastMonth) * 100
       : 0;
 
-    // Obtener pagos pendientes (pagos que no son liquidaciones o que no tienen recibo adjunto)
-    const pagosPendientes = await prisma.pago.count({
-      where: {
-        esLiquidacion: false,
-        recibos: {
-          none: {},
-        },
-      },
-    });
+    // Obtener liquidaciones realizadas (todos los pagos, ya que todos son liquidaciones)
+    const liquidacionesRealizadas = await pagoRepository.count();
 
     // Obtener total de pagos
     const totalPagos = await pagoRepository.count();
@@ -130,13 +123,17 @@ async function handleGET(request: NextRequest) {
           asignacion = await prisma.asignacion.findUnique({
             where: { id: log.recordId },
             select: {
-              cuidadorId: true,
+              cuidadores: {
+                select: {
+                  cuidadorId: true,
+                },
+              },
               personaId: true,
             },
           });
-          if (asignacion?.cuidadorId) {
+          if (asignacion?.cuidadores && asignacion.cuidadores.length > 0) {
             cuidador = await prisma.cuidador.findUnique({
-              where: { id: asignacion.cuidadorId },
+              where: { id: asignacion.cuidadores[0].cuidadorId },
               select: { nombreCompleto: true },
             });
           }
@@ -258,7 +255,7 @@ async function handleGET(request: NextRequest) {
         totalCuidadores,
         totalPagos,
         saldoTotalMes: saldoTotal,
-        pagosPendientes,
+        liquidacionesRealizadas,
         actividades: activities,
         tendencias: {
           cuidadores: {
@@ -272,7 +269,7 @@ async function handleGET(request: NextRequest) {
         },
         progreso: {
           cuidadores: cuidadoresProgress,
-          pagos: pagosProgress,
+          pagos: liquidacionesProgress,
           saldo: saldoProgress,
         },
       },

@@ -1,18 +1,12 @@
 import { Expose } from 'class-transformer';
-import { Horario } from '@/src/domain/entities/Asignacion';
+import { Horario, HorasPorCuidador } from '@/src/domain/entities/Asignacion';
 
 export class AsignacionDTO {
   @Expose()
   id: string;
 
   @Expose()
-  cuidadorId: string;
-
-  @Expose()
   personaId: string;
-
-  @Expose()
-  precioPorHora: number;
 
   @Expose()
   fechaInicio: Date;
@@ -21,10 +15,16 @@ export class AsignacionDTO {
   fechaFin: Date | null;
 
   @Expose()
-  horarios: Horario[];
+  horarios: Horario[] | null;
+
+  @Expose()
+  horasPorCuidador: HorasPorCuidador | null;
 
   @Expose()
   notas: string | null;
+
+  @Expose()
+  cuidadoresIds: string[];
 
   @Expose()
   createdAt: Date;

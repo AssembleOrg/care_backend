@@ -40,16 +40,24 @@ export class PagoRepository implements IPagoRepository {
     return data.map(this.toEntity);
   }
 
+  async findByAsignacionId(asignacionId: string): Promise<Pago[]> {
+    const data = await prisma.pago.findMany({
+      where: { asignacionId },
+      orderBy: { fecha: 'desc' },
+    });
+    return data.map(this.toEntity);
+  }
+
   async create(data: Omit<Pago, 'id' | 'createdAt' | 'updatedAt'>): Promise<Pago> {
     const created = await prisma.pago.create({
       data: {
         cuidadorId: data.cuidadorId,
         personaId: data.personaId,
+        asignacionId: data.asignacionId,
         monto: data.monto,
         fecha: data.fecha,
-        metodo: data.metodo,
+        metodo: data.metodo || 'LIQUIDACION',
         nota: data.nota,
-        esLiquidacion: data.esLiquidacion || false,
         precioPorHora: data.precioPorHora,
         horasTrabajadas: data.horasTrabajadas,
         semanaInicio: data.semanaInicio,
@@ -66,11 +74,11 @@ export class PagoRepository implements IPagoRepository {
       data: {
         ...(data.cuidadorId !== undefined && { cuidadorId: data.cuidadorId }),
         ...(data.personaId !== undefined && { personaId: data.personaId }),
+        ...(data.asignacionId !== undefined && { asignacionId: data.asignacionId }),
         ...(data.monto !== undefined && { monto: data.monto }),
         ...(data.fecha !== undefined && { fecha: data.fecha }),
         ...(data.metodo !== undefined && { metodo: data.metodo }),
         ...(data.nota !== undefined && { nota: data.nota }),
-        ...(data.esLiquidacion !== undefined && { esLiquidacion: data.esLiquidacion }),
         ...(data.precioPorHora !== undefined && { precioPorHora: data.precioPorHora }),
         ...(data.horasTrabajadas !== undefined && { horasTrabajadas: data.horasTrabajadas }),
         ...(data.semanaInicio !== undefined && { semanaInicio: data.semanaInicio }),
@@ -116,17 +124,17 @@ export class PagoRepository implements IPagoRepository {
       data.id,
       data.cuidadorId,
       data.personaId,
+      data.asignacionId,
       Number(data.monto),
       data.fecha,
       data.metodo,
       data.nota,
       data.createdAt,
       data.updatedAt,
-      data.esLiquidacion || false,
-      data.precioPorHora ? Number(data.precioPorHora) : null,
-      data.horasTrabajadas ? Number(data.horasTrabajadas) : null,
-      data.semanaInicio ? new Date(data.semanaInicio) : null,
-      data.semanaFin ? new Date(data.semanaFin) : null,
+      data.precioPorHora ? Number(data.precioPorHora) : 0,
+      data.horasTrabajadas ? Number(data.horasTrabajadas) : 0,
+      data.semanaInicio ? new Date(data.semanaInicio) : new Date(),
+      data.semanaFin ? new Date(data.semanaFin) : new Date(),
       (data.horarios && Array.isArray(data.horarios) ? (data.horarios as unknown as Array<{ dia: number; horaInicio: string; horaFin: string; horas: number }>) : undefined),
     );
   }

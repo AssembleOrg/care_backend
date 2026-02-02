@@ -10,26 +10,22 @@ import { plainToInstance } from 'class-transformer';
 import { getClientIp } from '@/src/presentation/middleware/rateLimit';
 import { PAGINATION_DEFAULT_PAGE, PAGINATION_DEFAULT_LIMIT, PAGINATION_MAX_LIMIT } from '@/src/config/constants';
 import { z } from 'zod';
-import { HorarioValidationService, Horario } from '@/src/application/services/HorarioValidationService';
-import { prisma } from '@/src/infrastructure/database/PrismaService';
 
 const asignacionRepository = new AsignacionRepository();
 const cuidadorRepository = new CuidadorRepository();
 const personaRepository = new PersonaAsistidaRepository();
 
-const horarioSchema = z.object({
-  diaSemana: z.number().int().min(0).max(6),
-  horaInicio: z.string().regex(/^\d{2}:\d{2}$/),
-  horaFin: z.string().regex(/^\d{2}:\d{2}$/),
+const cuidadorAsignacionSchema = z.object({
+  horas: z.number().positive(),
+  precioPorHora: z.number().positive(),
 });
 
 const createSchema = z.object({
-  cuidadorId: z.string().uuid(),
+  cuidadoresIds: z.array(z.string().uuid()).min(1, 'Debe seleccionar al menos un cuidador'),
   personaId: z.string().uuid(),
-  precioPorHora: z.number().positive(),
   fechaInicio: z.coerce.date(),
   fechaFin: z.coerce.date().optional(),
-  horarios: z.array(horarioSchema).min(1),
+  horasPorCuidador: z.record(z.string().uuid(), cuidadorAsignacionSchema).optional(), // { cuidadorId: { horas: number, precioPorHora: number } }
   notas: z.string().optional(),
 });
 
@@ -54,14 +50,15 @@ async function handleGET(request: NextRequest) {
       
       // Filtrar por cuidador si se proporciona
       if (cuidadorId) {
-        asignaciones = asignaciones.filter(a => a.cuidadorId === cuidadorId);
+        asignaciones = asignaciones.filter(a => a.cuidadoresIds.includes(cuidadorId));
       }
       
       const dtos = asignaciones.map(a => {
         const dto = plainToInstance(AsignacionDTO, a, { excludeExtraneousValues: true });
+        const cuidadoresNombres = a.cuidadoresIds.map(id => cuidadoresMap.get(id) || '').filter(Boolean);
         return {
           ...dto,
-          cuidadorNombre: cuidadoresMap.get(a.cuidadorId) || '',
+          cuidadoresNombres,
           personaNombre: personasMap.get(a.personaId) || '',
         };
       });
@@ -76,7 +73,7 @@ async function handleGET(request: NextRequest) {
     
     // Filtrar por cuidador si se proporciona
     if (cuidadorId) {
-      asignaciones = asignaciones.filter(a => a.cuidadorId === cuidadorId);
+      asignaciones = asignaciones.filter(a => a.cuidadoresIds.includes(cuidadorId));
     }
     
     // Aplicar paginación después del filtro
@@ -86,9 +83,10 @@ async function handleGET(request: NextRequest) {
 
     const dtos = asignacionesPaginated.map(a => {
       const dto = plainToInstance(AsignacionDTO, a, { excludeExtraneousValues: true });
+      const cuidadoresNombres = a.cuidadoresIds.map(id => cuidadoresMap.get(id) || '').filter(Boolean);
       return {
         ...dto,
-        cuidadorNombre: cuidadoresMap.get(a.cuidadorId) || '',
+        cuidadoresNombres,
         personaNombre: personasMap.get(a.personaId) || '',
       };
     });
@@ -115,50 +113,30 @@ async function handlePOST(request: NextRequest) {
     const body = await request.json();
     const validated = createSchema.parse(body);
 
-    // Verify cuidador and persona exist
-    const [cuidador, persona] = await Promise.all([
-      cuidadorRepository.findById(validated.cuidadorId),
+    // Verify cuidadores and persona exist
+    const [cuidadores, persona] = await Promise.all([
+      Promise.all(validated.cuidadoresIds.map(id => cuidadorRepository.findById(id))),
       personaRepository.findById(validated.personaId),
     ]);
 
-    if (!cuidador) {
-      return createErrorResponse('NOT_FOUND', 'Cuidador no encontrado', undefined, requestId, 404);
+    const cuidadoresNoEncontrados = cuidadores.filter(c => !c);
+    if (cuidadoresNoEncontrados.length > 0) {
+      return createErrorResponse('NOT_FOUND', 'Uno o más cuidadores no fueron encontrados', undefined, requestId, 404);
     }
 
     if (!persona) {
       return createErrorResponse('NOT_FOUND', 'Persona asistida no encontrada', undefined, requestId, 404);
     }
 
-    // Validar que no se superpongan horarios con otras asignaciones del mismo cuidador
-    const asignacionesExistentes = await prisma.asignacion.findMany({
-      where: {
-        cuidadorId: validated.cuidadorId,
-        fechaFin: null, // Solo asignaciones activas
-      },
-    });
-
-    // Extraer solo los horarios de las asignaciones existentes
-    const horariosExistentes = asignacionesExistentes.map((a: { horarios: unknown }) => ({
-      horarios: (Array.isArray(a.horarios) ? (a.horarios as unknown as Horario[]) : []),
-    }));
-
-    const validacion = HorarioValidationService.validarSuperposicion(
-      validated.horarios as Horario[],
-      horariosExistentes
-    );
-
-    if (!validacion.valido) {
-      return createErrorResponse('VALIDATION_ERROR', validacion.error || 'Error de validación de horarios', undefined, requestId, 400);
-    }
 
     const asignacion = await asignacionRepository.create({
-      cuidadorId: validated.cuidadorId,
       personaId: validated.personaId,
-      precioPorHora: validated.precioPorHora,
       fechaInicio: validated.fechaInicio,
       fechaFin: validated.fechaFin || null,
-      horarios: validated.horarios,
+      horarios: null,
+      horasPorCuidador: validated.horasPorCuidador || null,
       notas: validated.notas || null,
+      cuidadoresIds: validated.cuidadoresIds,
     });
 
     // Audit
@@ -167,7 +145,7 @@ async function handlePOST(request: NextRequest) {
       action: 'CREATE',
       table: 'Asignacion',
       recordId: asignacion.id,
-      newData: { cuidadorId: validated.cuidadorId, personaId: validated.personaId },
+      newData: { cuidadoresIds: validated.cuidadoresIds, personaId: validated.personaId },
       ip,
       userAgent,
     });
