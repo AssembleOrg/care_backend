@@ -123,17 +123,13 @@ async function handleGET(request: NextRequest) {
           asignacion = await prisma.asignacion.findUnique({
             where: { id: log.recordId },
             select: {
-              cuidadores: {
-                select: {
-                  cuidadorId: true,
-                },
-              },
+              cuidadorId: true,
               personaId: true,
             },
           });
-          if (asignacion?.cuidadores && asignacion.cuidadores.length > 0) {
+          if (asignacion?.cuidadorId) {
             cuidador = await prisma.cuidador.findUnique({
-              where: { id: asignacion.cuidadores[0].cuidadorId },
+              where: { id: asignacion.cuidadorId },
               select: { nombreCompleto: true },
             });
           }
@@ -244,8 +240,9 @@ async function handleGET(request: NextRequest) {
     // Para cuidadores: usar un objetivo de 200 (75% = 150/200)
     const cuidadoresProgress = Math.min((totalCuidadores / 200) * 100, 100);
 
-    // Para pagos pendientes: usar un objetivo de 20 (25% = 5/20)
-    const pagosProgress = Math.min((pagosPendientes / 20) * 100, 100);
+    // Para liquidaciones hechas: usar un objetivo de 20 (25% = 5/20)
+    // Reemplazamos pagosPendientes por liquidacionesRealizadas
+    const liquidacionesProgress = Math.min((liquidacionesRealizadas / 20) * 100, 100);
 
     // Para saldo: usar un objetivo de 50000 (50% = 25000/50000)
     const saldoProgress = Math.min((saldoTotal / 50000) * 100, 100);
