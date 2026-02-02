@@ -40,6 +40,7 @@ model PersonaAsistida {
   asignaciones                   Asignacion[]
   pagos                          Pago[]
   cuidadores                     PersonaCuidador[]
+  contratos                      Contrato[]
 }
 
 model PersonaCuidador {
@@ -138,4 +139,21 @@ model Admin {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Contrato {
+  id                     String           @id @default(uuid())
+  idCliente              String?
+  nombreManual           String?
+  nombreManualHash       String?          @unique
+  cuitManual             String?
+  cuitManualHash         String?          @unique
+  direccionManual        String?
+  direccionManualHash    String?          @unique
+  telefonoEmergencia     String?
+  telefonoEmergenciaHash String?          @unique
+  fechaInicio            DateTime
+  fechaFin               DateTime
+  createdAt              DateTime         @default(now())
+  persona                PersonaAsistida? @relation(fields: [idCliente], references: [id])
 }
