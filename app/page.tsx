@@ -1,13 +1,39 @@
 'use client';
 
 import { Container, Title, Text, Grid, Card, Button, Stack, Group, Badge, Paper, Box, Anchor, SimpleGrid, Divider } from '@mantine/core';
-import { IconCheck, IconArrowRight, IconHeart, IconShieldCheck, IconCalendar, IconMedicalCross, IconHome, IconUserCircle, IconUsers, IconUser } from '@tabler/icons-react';
+import { IconCheck, IconArrowRight, IconHeart, IconShieldCheck, IconCalendar, IconMedicalCross, IconHome, IconUserCircle, IconUsers, IconUser, IconBriefcase } from '@tabler/icons-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
+import { useState } from 'react';
+import { notifications } from '@mantine/notifications';
 
 
 export default function HomePage() {
+  const [workForm, setWorkForm] = useState({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '' });
+  const [submittingWork, setSubmittingWork] = useState(false);
+
+  const handleWorkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingWork(true);
+    try {
+      const response = await fetch('/api/v1/solicitudes-empleo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(workForm),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al enviar la solicitud');
+
+      notifications.show({ title: 'Éxito', message: '¡Solicitud enviada! Nos pondremos en contacto contigo pronto.', color: 'green' });
+      setWorkForm({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '' });
+    } catch (error: any) {
+      notifications.show({ title: 'Error', message: error.message, color: 'red' });
+    } finally {
+      setSubmittingWork(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       {/* Navbar */}
@@ -15,19 +41,19 @@ export default function HomePage() {
         <Container size="xl" className={styles.navbarContainer}>
           <Group justify="space-between" h={80} wrap="nowrap" gap="xs" className={styles.navbarGroup}>
             <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: 0, flexShrink: 1 }}>
-              <Image 
-                src="/image.png" 
-                alt="Care By Dani Logo" 
-                width={108} 
+              <Image
+                src="/image.png"
+                alt="Care By Dani Logo"
+                width={108}
                 height={108}
                 className={styles.navbarLogo}
                 style={{ objectFit: 'contain' }}
               />
-              <Text 
-                fw={600} 
-                size="xl" 
-                className={styles.logo} 
-                visibleFrom="sm" 
+              <Text
+                fw={600}
+                size="xl"
+                className={styles.logo}
+                visibleFrom="sm"
                 style={{ whiteSpace: 'nowrap' }}
               >
                 Care By Dani
@@ -38,6 +64,7 @@ export default function HomePage() {
               <Anchor href="#servicios" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Servicios</Anchor>
               <Anchor href="#nosotros" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Nosotros</Anchor>
               <Anchor href="#contacto" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Contacto</Anchor>
+              <Anchor href="#trabaja-con-nosotros" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Trabaja con nosotros</Anchor>
               <Link href="/admin/login">
                 <Button variant="outline" color="primary" size="sm" radius="xl">
                   Iniciar sesión
@@ -104,12 +131,12 @@ export default function HomePage() {
             </Grid.Col>
             <Grid.Col span={{ base: 12, lg: 6 }}>
               <Box className={styles.heroImageWrapper}>
-                <Image 
-                  src="/cuidadora1.png" 
-                  alt="Cuidadora ayudando a una persona mayor" 
+                <Image
+                  src="/cuidadora1.png"
+                  alt="Cuidadora ayudando a una persona mayor"
                   width={600}
                   height={500}
-                  style={{ 
+                  style={{
                     objectFit: 'cover',
                     borderRadius: '1rem',
                     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
@@ -185,12 +212,12 @@ export default function HomePage() {
           <Grid gutter={60} align="center">
             <Grid.Col span={{ base: 12, lg: 6 }} order={{ base: 2, lg: 1 }}>
               <Box className={styles.serviceImageWrapper}>
-                <Image 
-                  src="/cuidadora2.png" 
-                  alt="Cuidadora ayudando a una señora a caminar en el parque" 
+                <Image
+                  src="/cuidadora2.png"
+                  alt="Cuidadora ayudando a una señora a caminar en el parque"
                   width={600}
                   height={500}
-                  style={{ 
+                  style={{
                     objectFit: 'cover',
                     borderRadius: '1rem',
                     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
@@ -282,12 +309,12 @@ export default function HomePage() {
             <Grid gutter={60} align="center">
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Box style={{ width: '100%', overflow: 'hidden' }}>
-                  <Image 
-                    src="/cuidadora3.png" 
-                    alt="Cuidadora ayudando a una persona mayor" 
+                  <Image
+                    src="/cuidadora3.png"
+                    alt="Cuidadora ayudando a una persona mayor"
                     width={600}
                     height={400}
-                    style={{ 
+                    style={{
                       objectFit: 'cover',
                       borderRadius: '1rem',
                       boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
@@ -308,24 +335,24 @@ export default function HomePage() {
                   </Text>
                   <Stack gap="md">
                     <Group grow>
-                      <input 
-                        type="text" 
-                        placeholder="Nombre completo" 
+                      <input
+                        type="text"
+                        placeholder="Nombre completo"
                         className={styles.contactInput}
                       />
-                      <input 
-                        type="tel" 
-                        placeholder="Teléfono" 
+                      <input
+                        type="tel"
+                        placeholder="Teléfono"
                         className={styles.contactInput}
                       />
                     </Group>
-                    <input 
-                      type="email" 
-                      placeholder="Correo electrónico" 
+                    <input
+                      type="email"
+                      placeholder="Correo electrónico"
                       className={styles.contactInput}
                     />
-                    <textarea 
-                      placeholder="¿Cómo podemos ayudarle?" 
+                    <textarea
+                      placeholder="¿Cómo podemos ayudarle?"
                       rows={3}
                       className={styles.contactInput}
                     />
@@ -340,18 +367,101 @@ export default function HomePage() {
         </Container>
       </section>
 
+      {/* Trabaja con Nosotros */}
+      <section id="trabaja-con-nosotros" className={styles.contactSection} style={{ backgroundColor: '#f8f9fa' }}>
+        <Container size="xl" className={styles.sectionContainer}>
+          <Paper className={styles.contactCard} p="xl" radius="2xl">
+            <Grid gutter={60} align="center">
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="xl">
+                  <Badge color="primary" variant="light" size="lg" radius="xl" style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Únete a Nuestro Equipo
+                  </Badge>
+                  <Title order={2} className={styles.sectionTitle}>
+                    Forma parte de Care By Dani
+                  </Title>
+                  <Text size="lg" c="dimmed">
+                    Buscamos cuidadores profesionales, empáticos y comprometidos. Si tienes vocación de servicio, queremos conocerte. Llena el formulario y nos contactaremos contigo a la mayor brevedad.
+                  </Text>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <form onSubmit={handleWorkSubmit}>
+                  <Stack gap="md">
+                    <Group grow>
+                      <input
+                        type="text"
+                        placeholder="Nombre"
+                        required
+                        className={styles.contactInput}
+                        value={workForm.nombre}
+                        onChange={(e) => setWorkForm({ ...workForm, nombre: e.target.value })}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Apellido"
+                        required
+                        className={styles.contactInput}
+                        value={workForm.apellido}
+                        onChange={(e) => setWorkForm({ ...workForm, apellido: e.target.value })}
+                      />
+                    </Group>
+                    <input
+                      type="text"
+                      placeholder="Zona de Trabajo (Ej: CABA, Zona Norte)"
+                      required
+                      className={styles.contactInput}
+                      value={workForm.zonaTrabajo}
+                      onChange={(e) => setWorkForm({ ...workForm, zonaTrabajo: e.target.value })}
+                    />
+                    <Group grow>
+                      <input
+                        type="email"
+                        placeholder="Correo electrónico"
+                        required
+                        className={styles.contactInput}
+                        value={workForm.email}
+                        onChange={(e) => setWorkForm({ ...workForm, email: e.target.value })}
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Teléfono"
+                        required
+                        className={styles.contactInput}
+                        value={workForm.telefono}
+                        onChange={(e) => setWorkForm({ ...workForm, telefono: e.target.value })}
+                      />
+                    </Group>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      color="secondary"
+                      radius="md"
+                      loading={submittingWork}
+                      rightSection={<IconBriefcase size={18} />}
+                    >
+                      Enviar Postulación
+                    </Button>
+                  </Stack>
+                </form>
+              </Grid.Col>
+            </Grid>
+          </Paper>
+        </Container>
+      </section>
+
       {/* Footer */}
       <footer className={styles.footer}>
         <Container size="xl" className={styles.footerContainer}>
           <Grid gutter="xl" mb="xl">
             <Grid.Col span={{ base: 12, md: 4 }}>
               <Box mb="md" style={{ width: '100%', overflow: 'hidden' }}>
-                <Image 
-                  src="/image.png" 
-                  alt="Care By Dani Logo" 
-                  width={300} 
+                <Image
+                  src="/image.png"
+                  alt="Care By Dani Logo"
+                  width={300}
                   height={300}
-                  style={{ 
+                  style={{
                     objectFit: 'contain',
                     width: 'clamp(120px, 30vw, 300px)',
                     height: 'auto',

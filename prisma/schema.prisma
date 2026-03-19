@@ -157,3 +157,23 @@ model Contrato {
   createdAt              DateTime         @default(now())
   persona                PersonaAsistida? @relation(fields: [idCliente], references: [id])
 }
+
+enum EstadoSolicitud{
+  ABIERTA
+  RECIEN_RECIBIDA
+  CERRADA
+}
+
+model SolicitudEmpleo{
+  id                    String          @id @default(uuid())
+  nombre                String
+  apellido              String
+  zonaTrabajo           String            //Zona donde desea trabajar
+  telefono              String
+  telefonoHash          String          @unique
+  email                 String
+  emailHash             String          @unique
+  estado                EstadoSolicitud @default(ABIERTA)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+}
