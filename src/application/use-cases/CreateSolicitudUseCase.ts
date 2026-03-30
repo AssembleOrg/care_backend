@@ -13,6 +13,7 @@ const createSolicitudSchema = z.object({
     zonaTrabajo: z.string().min(1, 'La zona de trabajo es requerida'),
     telefono: z.string().min(1, 'El telefono es requerido'),
     email: z.email('El email debe ser un correo electrónico válido'),
+    experiencia: z.string().max(200, 'La experiencia debe tener como máximo 200 caracteres').optional(),
 });
 
 export class CreateSolicitudUseCase {
@@ -27,6 +28,9 @@ export class CreateSolicitudUseCase {
         const telefonoEnc = encryptionService.encrypt(validatedData.telefono);
         const emailEnc = encryptionService.encrypt(validatedData.email);
 
+        const experienciaEnc = validatedData.experiencia ? encryptionService.encrypt(validatedData.experiencia) : null;
+        const experienciaHash = validatedData.experiencia ? hashingService.hash(validatedData.experiencia) : null;
+
         const solicitudEmpleo = await this.solicitudEmpleoRepository.create({
             nombre: validatedData.nombre,
             apellido: validatedData.apellido,
@@ -36,6 +40,8 @@ export class CreateSolicitudUseCase {
             email: emailEnc,
             emailHash: emailHash,
             estado: EstadoSolicitud.ABIERTA,
+            experiencia: experienciaEnc,
+            experienciaHash: experienciaHash,
         });
 
         await auditService.log({

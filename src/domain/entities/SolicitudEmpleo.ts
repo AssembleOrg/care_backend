@@ -11,6 +11,8 @@ export class SolicitudEmpleo {
         public email: string,
         public emailHash: string,
         public estado: EstadoSolicitud,
+        public experiencia: string | null,
+        public experienciaHash: string | null,
         public createdAt: Date,
         public updatedAt: Date,
     ) { }

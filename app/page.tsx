@@ -10,7 +10,7 @@ import { notifications } from '@mantine/notifications';
 
 
 export default function HomePage() {
-  const [workForm, setWorkForm] = useState({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '' });
+  const [workForm, setWorkForm] = useState({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '', experiencia: '' });
   const [submittingWork, setSubmittingWork] = useState(false);
 
   const handleWorkSubmit = async (e: React.FormEvent) => {
@@ -26,7 +26,7 @@ export default function HomePage() {
       if (!response.ok) throw new Error(data.error || 'Error al enviar la solicitud');
 
       notifications.show({ title: 'Éxito', message: '¡Solicitud enviada! Nos pondremos en contacto contigo pronto.', color: 'green' });
-      setWorkForm({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '' });
+      setWorkForm({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '', experiencia: '' });
     } catch (error: any) {
       notifications.show({ title: 'Error', message: error.message, color: 'red' });
     } finally {
@@ -252,7 +252,7 @@ export default function HomePage() {
                     </Box>
                     <div>
                       <Title order={4} mb={4}>Ayuda en el Hogar</Title>
-                      <Text c="dimmed" size="sm">Apoyo con tareas domésticas ligeras, preparación de comidas y organización.</Text>
+                      <Text c="dimmed" size="sm">Apoyo en tareas domésticas específicas, preparación de alimentos y organización.</Text>
                     </div>
                   </Group>
                   <Group gap="md" align="flex-start">
@@ -261,7 +261,7 @@ export default function HomePage() {
                     </Box>
                     <div>
                       <Title order={4} mb={4}>Higiene Personal</Title>
-                      <Text c="dimmed" size="sm">Asistencia digna y respetuosa con el aseo personal y la vestimenta.</Text>
+                      <Text c="dimmed" size="sm">Asistencia digna y personalizada según las necesidades de cada persona.</Text>
                     </div>
                   </Group>
                   <Group gap="md" align="flex-start">
@@ -270,7 +270,7 @@ export default function HomePage() {
                     </Box>
                     <div>
                       <Title order={4} mb={4}>Compañía y Recreación</Title>
-                      <Text c="dimmed" size="sm">Conversación, paseos, juegos y actividades para mantener la mente activa.</Text>
+                      <Text c="dimmed" size="sm">Actividades como lectura, charlas, paseos y juegos, orientadas al bienestar y la compañía.</Text>
                     </div>
                   </Group>
                 </Stack>
@@ -432,6 +432,14 @@ export default function HomePage() {
                         onChange={(e) => setWorkForm({ ...workForm, telefono: e.target.value })}
                       />
                     </Group>
+                    <textarea
+                      placeholder="¡Contanos tu experiencia! (Máximo 200 caracteres)"
+                      maxLength={200}
+                      rows={3}
+                      className={styles.contactInput}
+                      value={workForm.experiencia}
+                      onChange={(e) => setWorkForm({ ...workForm, experiencia: e.target.value })}
+                    />
                     <Button
                       type="submit"
                       size="lg"

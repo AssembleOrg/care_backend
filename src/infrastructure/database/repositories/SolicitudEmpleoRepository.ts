@@ -15,6 +15,8 @@ export class SolicitudEmpleoRepository implements ISolicitudEmpleoRepository {
                 email: solicitud.email,
                 emailHash: solicitud.emailHash,
                 estado: solicitud.estado,
+                experiencia: solicitud.experiencia,
+                experienciaHash: solicitud.experienciaHash,
             }
         });
 
@@ -83,7 +85,9 @@ export class SolicitudEmpleoRepository implements ISolicitudEmpleoRepository {
             data.telefonoHash,
             data.email,
             data.emailHash,
-            data.estado,
+            data.estado as EstadoSolicitud,
+            data.experiencia,
+            data.experienciaHash,
             data.createdAt,
             data.updatedAt,
         );

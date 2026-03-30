@@ -41,6 +41,17 @@ export class SolicitudEmpleoDTO {
     estado: EstadoSolicitud;
 
     @Expose()
+    @Transform(({ obj }) => {
+        if (!obj.experiencia) return null;
+        try {
+            return encryptionService.decrypt(obj.experiencia);
+        } catch {
+            return null;
+        }
+    })
+    experiencia?: string;
+
+    @Expose()
     createdAt: Date;
 
     @Expose()

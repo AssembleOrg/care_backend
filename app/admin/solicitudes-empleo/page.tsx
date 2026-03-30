@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Select, Button, Badge } from '@mantine/core';
+import { Container, Title, Table, Modal, TextInput, Textarea, Stack, Group, ActionIcon, Pagination, Paper, Select, Button, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
@@ -18,6 +18,7 @@ interface SolicitudEmpleo {
     telefono: string | null;
     email: string | null;
     estado: EstadoSolicitud;
+    experiencia?: string;
     createdAt: string;
 }
 
@@ -300,6 +301,13 @@ export default function SolicitudesEmpleoPage() {
                         <TextInput label="Zona de Trabajo" value={selectedSolicitud.zonaTrabajo} readOnly />
                         <TextInput label="Teléfono" value={selectedSolicitud.telefono || '-'} readOnly />
                         <TextInput label="Email" value={selectedSolicitud.email || '-'} readOnly />
+                        <Textarea 
+                            label="Experiencia" 
+                            value={selectedSolicitud.experiencia || 'No especificada'} 
+                            readOnly 
+                            autosize 
+                            minRows={2} 
+                        />
                         <TextInput label="Fecha de Envío" value={new Date(selectedSolicitud.createdAt).toLocaleString()} readOnly />
                         <TextInput label="Estado Actual" value={selectedSolicitud.estado.replace('_', ' ')} readOnly />
 
