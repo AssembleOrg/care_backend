@@ -58,11 +58,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
     // Cleanup: remove class when component unmounts or pathname changes
     return () => {
-      if (pathname?.startsWith('/admin') && pathname !== '/admin/login') {
-        // Only keep class if still in admin area
-        return;
+      const currentPath = window.location.pathname;
+      const isGoingToAdminPage = currentPath.startsWith('/admin') && currentPath !== '/admin/login';
+      if (!isGoingToAdminPage) {
+        document.body.classList.remove('admin-dark-mode');
       }
-      document.body.classList.remove('admin-dark-mode');
     };
   }, [darkMode, mounted, pathname]);
 
