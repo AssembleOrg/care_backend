@@ -408,7 +408,7 @@ export default function HomePage() {
                     </Group>
                     <input
                       type="text"
-                      placeholder="Zona de Trabajo (Ej: CABA, Zona Norte)"
+                      placeholder="Zona de Trabajo (Ej: CABA, Zona Sur)"
                       required
                       className={styles.contactInput}
                       value={workForm.zonaTrabajo}
@@ -497,8 +497,8 @@ export default function HomePage() {
                 Contacto
               </Text>
               <Stack gap="xs">
-                <Text size="sm" c="dimmed">Calle Principal 123, Ciudad, País</Text>
-                <Text size="sm" c="dimmed">+1 234 567 890</Text>
+                <Text size="sm" c="dimmed">Monteagudo 2933, Local 3</Text>
+                <Text size="sm" c="dimmed">+54 11-7136-2057</Text>
                 <Text size="sm" c="dimmed">contacto@carebydani.com</Text>
               </Stack>
             </Grid.Col>
@@ -507,17 +507,9 @@ export default function HomePage() {
                 Horario de Atención
               </Text>
               <Stack gap="xs">
-                <Group justify="space-between">
-                  <Text size="sm" c="dimmed">Lunes - Viernes:</Text>
-                  <Text size="sm" c="dimmed">9:00 - 18:00</Text>
-                </Group>
-                <Group justify="space-between">
-                  <Text size="sm" c="dimmed">Sábado:</Text>
-                  <Text size="sm" c="dimmed">10:00 - 14:00</Text>
-                </Group>
-                <Group justify="space-between">
-                  <Text size="sm" c="dimmed">Domingo:</Text>
-                  <Text size="sm" c="dimmed">Cerrado</Text>
+                <Group gap="xs">
+                  <Text size="sm" c="dimmed">Lunes a Lunes:</Text>
+                  <Text size="sm" fw={600} c="dark.8">24 hs</Text>
                 </Group>
               </Stack>
             </Grid.Col>

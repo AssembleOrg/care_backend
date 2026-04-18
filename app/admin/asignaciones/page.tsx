@@ -60,7 +60,7 @@ export default function AsignacionesPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
-  
+
   // Liquidación rápida
   const [selectedRapidaAsignacion, setSelectedRapidaAsignacion] = useState<Asignacion | null>(null);
   const [selectedRapidaCuidadorId, setSelectedRapidaCuidadorId] = useState<string>('');
@@ -68,7 +68,7 @@ export default function AsignacionesPage() {
   const [rapidaPrecioPorHora, setRapidaPrecioPorHora] = useState<number>(0);
   const [rapidaOpened, { open: openRapida, close: closeRapida }] = useDisclosure(false);
   const [liquidando, setLiquidando] = useState(false);
-  
+
   // Comprobantes
   const [comprobantesOpened, { open: openComprobantes, close: closeComprobantes }] = useDisclosure(false);
   const [comprobantes, setComprobantes] = useState<Array<{ id: string; fecha: string; monto: number; horasTrabajadas?: number; precioPorHora?: number }>>([]);
@@ -132,12 +132,12 @@ export default function AsignacionesPage() {
         page: String(currentPage),
         limit: '20',
       });
-      
+
       // Agregar filtro de cuidador si existe
       if (cuidadorFiltro) {
         params.set('cuidadorId', cuidadorFiltro);
       }
-      
+
       const response = await fetch(`/api/v1/asignaciones?${params}`);
       const data = await response.json();
       if (data.ok) {
@@ -195,17 +195,17 @@ export default function AsignacionesPage() {
   // Buscar cuidadores cuando cambia el término de búsqueda (solo si hay 2+ caracteres)
   useEffect(() => {
     if (!opened) return;
-    
+
     if (debouncedCuidadorSearch.length === 0) {
       setCuidadoresFiltrados(cuidadores);
       return;
     }
-    
+
     if (debouncedCuidadorSearch.length < 2) {
       setCuidadoresFiltrados([]);
       return;
     }
-    
+
     const fetchCuidadores = async () => {
       try {
         const params = new URLSearchParams({ all: 'true', search: debouncedCuidadorSearch });
@@ -225,16 +225,16 @@ export default function AsignacionesPage() {
   // Buscar personas cuando cambia el término de búsqueda (solo si hay 2+ caracteres)
   useEffect(() => {
     if (!opened) return;
-    
+
     if (debouncedPersonaSearch.length > 0 && debouncedPersonaSearch.length < 2) {
       setPersonas([]);
       return;
     }
-    
+
     if (debouncedPersonaSearch.length < 2) {
       return;
     }
-    
+
     const fetchPersonas = async () => {
       try {
         const params = new URLSearchParams({ all: 'true', search: debouncedPersonaSearch });
@@ -253,7 +253,7 @@ export default function AsignacionesPage() {
 
   const handleLiquidacionRapida = (asignacion: Asignacion) => {
     setSelectedRapidaAsignacion(asignacion);
-    
+
     // Si hay un solo cuidador, asignarlo automáticamente
     if (asignacion.cuidadoresIds.length === 1) {
       const cuidadorId = asignacion.cuidadoresIds[0];
@@ -267,7 +267,7 @@ export default function AsignacionesPage() {
       setRapidaHorasTrabajadas(0);
       setRapidaPrecioPorHora(0);
     }
-    
+
     openRapida();
   };
 
@@ -316,8 +316,8 @@ export default function AsignacionesPage() {
     setLiquidando(true);
     try {
       const fechaInicioDate = new Date(selectedRapidaAsignacion.fechaInicio);
-      const fechaFinDate = selectedRapidaAsignacion.fechaFin 
-        ? new Date(selectedRapidaAsignacion.fechaFin) 
+      const fechaFinDate = selectedRapidaAsignacion.fechaFin
+        ? new Date(selectedRapidaAsignacion.fechaFin)
         : new Date();
 
       const monto = rapidaHorasTrabajadas * rapidaPrecioPorHora;
@@ -416,11 +416,11 @@ export default function AsignacionesPage() {
 
     setSubmitting(true);
     try {
-      const fechaInicio = values.fechaInicio instanceof Date 
-        ? values.fechaInicio 
+      const fechaInicio = values.fechaInicio instanceof Date
+        ? values.fechaInicio
         : new Date(values.fechaInicio);
-      
-      const fechaFin = values.fechaFin 
+
+      const fechaFin = values.fechaFin
         ? (values.fechaFin instanceof Date ? values.fechaFin : new Date(values.fechaFin))
         : null;
 
@@ -515,7 +515,7 @@ export default function AsignacionesPage() {
 
   const handleEdit = (asignacion: Asignacion) => {
     setSelectedAsignacion(asignacion);
-    
+
     // Preparar horas por cuidador
     const horasPorCuidador: Record<string, CuidadorAsignacion> = {};
     if (asignacion.horasPorCuidador) {
@@ -535,7 +535,7 @@ export default function AsignacionesPage() {
       horasPorCuidador: horasPorCuidador,
       notas: asignacion.notas || '',
     });
-    
+
     openEdit();
   };
 
@@ -563,11 +563,11 @@ export default function AsignacionesPage() {
 
     setUpdating(true);
     try {
-      const fechaInicio = values.fechaInicio instanceof Date 
-        ? values.fechaInicio 
+      const fechaInicio = values.fechaInicio instanceof Date
+        ? values.fechaInicio
         : new Date(values.fechaInicio);
-      
-      const fechaFin = values.fechaFin 
+
+      const fechaFin = values.fechaFin
         ? (values.fechaFin instanceof Date ? values.fechaFin : new Date(values.fechaFin))
         : null;
 
@@ -616,8 +616,8 @@ export default function AsignacionesPage() {
       <Group justify="space-between" mb="xl">
         <Title order={1}>Asignaciones</Title>
         <Group>
-          <Button 
-            leftSection={<IconFilter size={16} />} 
+          <Button
+            leftSection={<IconFilter size={16} />}
             variant={showFilters ? 'filled' : 'light'}
             color="cian"
             onClick={() => setShowFilters(!showFilters)}
@@ -645,10 +645,10 @@ export default function AsignacionesPage() {
           <Group justify="space-between" mb="md">
             <Text fw={600}>Filtros</Text>
             {cuidadorFiltro && (
-              <Button 
-                size="xs" 
-                variant="subtle" 
-                color="red" 
+              <Button
+                size="xs"
+                variant="subtle"
+                color="red"
                 leftSection={<IconX size={14} />}
                 onClick={() => {
                   setCuidadorFiltro('');
@@ -678,17 +678,17 @@ export default function AsignacionesPage() {
       <Stack gap="md">
         {asignaciones.map((asignacion) => (
           <Paper key={asignacion.id} p="md" withBorder>
-                <Group justify="space-between" align="flex-start">
-                  <Stack gap="xs" style={{ flex: 1 }}>
-                    <Group>
-                      <Text fw={600}>
-                        {asignacion.cuidadoresNombres && asignacion.cuidadoresNombres.length > 0
-                          ? asignacion.cuidadoresNombres.join(', ')
-                          : asignacion.cuidadoresIds.join(', ')}
-                      </Text>
-                      <Badge color="fucsia">→</Badge>
-                      <Text>{asignacion.personaNombre || asignacion.personaId}</Text>
-                    </Group>
+            <Group justify="space-between" align="flex-start">
+              <Stack gap="xs" style={{ flex: 1 }}>
+                <Group>
+                  <Text fw={600}>
+                    {asignacion.cuidadoresNombres && asignacion.cuidadoresNombres.length > 0
+                      ? asignacion.cuidadoresNombres.join(', ')
+                      : asignacion.cuidadoresIds.join(', ')}
+                  </Text>
+                  <Badge color="fucsia">→</Badge>
+                  <Text>{asignacion.personaNombre || asignacion.personaId}</Text>
+                </Group>
                 <Text size="sm" c="dimmed">
                   Desde: {new Date(asignacion.fechaInicio).toLocaleDateString('es-AR')}
                   {asignacion.fechaFin && ` hasta ${new Date(asignacion.fechaFin).toLocaleDateString('es-AR')}`}
@@ -703,9 +703,9 @@ export default function AsignacionesPage() {
                 <ActionIcon color="blue" variant="light" onClick={() => handleView(asignacion)}>
                   <IconEye size={16} />
                 </ActionIcon>
-                <ActionIcon 
-                  color="yellow" 
-                  variant="light" 
+                <ActionIcon
+                  color="yellow"
+                  variant="light"
                   onClick={() => handleEdit(asignacion)}
                   disabled={deleting === asignacion.id}
                 >
@@ -729,15 +729,15 @@ export default function AsignacionesPage() {
                 >
                   Comprobantes
                 </Button>
-                  <ActionIcon 
-                    color="red" 
-                    variant="light" 
-                    onClick={() => handleDeleteClick(asignacion.id, `${asignacion.cuidadoresNombres?.join(', ') || asignacion.cuidadoresIds.join(', ')} → ${asignacion.personaNombre || ''}`)}
-                    loading={deleting === asignacion.id}
-                    disabled={deleting === asignacion.id}
-                  >
-                    <IconTrash size={16} />
-                  </ActionIcon>
+                <ActionIcon
+                  color="red"
+                  variant="light"
+                  onClick={() => handleDeleteClick(asignacion.id, `${asignacion.cuidadoresNombres?.join(', ') || asignacion.cuidadoresIds.join(', ')} → ${asignacion.personaNombre || ''}`)}
+                  loading={deleting === asignacion.id}
+                  disabled={deleting === asignacion.id}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
               </Group>
             </Group>
           </Paper>
@@ -867,18 +867,22 @@ export default function AsignacionesPage() {
                       </Paper>
                     );
                   })}
-                  <Group justify="space-between" mt="sm" p="sm" style={{ backgroundColor: 'var(--mantine-color-gray-0)', borderRadius: '4px' }}>
-                    <Text fw={600}>Total de horas trabajadas:</Text>
-                    <Text fw={700} size="lg" c="fucsia">
-                      {totalHorasTrabajadas.toFixed(2)} horas
-                    </Text>
-                  </Group>
-                  <Group justify="space-between" p="sm" style={{ backgroundColor: 'var(--mantine-color-cyan-0)', borderRadius: '4px' }}>
-                    <Text fw={600}>Total a liquidar:</Text>
-                    <Text fw={700} size="lg" c="cyan">
-                      ${totalMonto.toLocaleString('es-AR', { minimumFractionDigits: 2, useGrouping: true })}
-                    </Text>
-                  </Group>
+                  <Paper withBorder p="sm" mt="sm">
+                    <Group justify="space-between">
+                      <Text fw={600}>Total de horas trabajadas:</Text>
+                      <Text fw={700} size="lg" c="fucsia">
+                        {totalHorasTrabajadas.toFixed(2)} horas
+                      </Text>
+                    </Group>
+                  </Paper>
+                  <Paper withBorder p="sm">
+                    <Group justify="space-between">
+                      <Text fw={600}>Total a liquidar:</Text>
+                      <Text fw={700} size="lg" c="cyan">
+                        ${totalMonto.toLocaleString('es-AR', { minimumFractionDigits: 2, useGrouping: true })}
+                      </Text>
+                    </Group>
+                  </Paper>
                 </Stack>
               </Paper>
             )}
@@ -905,15 +909,15 @@ export default function AsignacionesPage() {
               <Group gap="xs">
                 {selectedAsignacion.cuidadoresNombres && selectedAsignacion.cuidadoresNombres.length > 0
                   ? selectedAsignacion.cuidadoresNombres.map((nombre, idx) => (
-                      <Badge key={idx} size="lg" variant="light" color="fucsia">
-                        {nombre}
-                      </Badge>
-                    ))
+                    <Badge key={idx} size="lg" variant="light" color="fucsia">
+                      {nombre}
+                    </Badge>
+                  ))
                   : selectedAsignacion.cuidadoresIds.map((id, idx) => (
-                      <Badge key={idx} size="lg" variant="light">
-                        {id}
-                      </Badge>
-                    ))}
+                    <Badge key={idx} size="lg" variant="light">
+                      {id}
+                    </Badge>
+                  ))}
               </Group>
             </Group>
             <Group>
@@ -994,7 +998,7 @@ export default function AsignacionesPage() {
         <form onSubmit={editForm.onSubmit(handleEditSubmit)}>
           <Stack>
             {selectedAsignacion && (
-              <Paper p="sm" withBorder bg="gray.0">
+              <Paper p="sm" withBorder>
                 <Group>
                   <Text size="sm" fw={600}>
                     {selectedAsignacion.personaNombre}
@@ -1107,18 +1111,22 @@ export default function AsignacionesPage() {
                       </Paper>
                     );
                   })}
-                  <Group justify="space-between" mt="sm" p="sm" style={{ backgroundColor: 'var(--mantine-color-gray-0)', borderRadius: '4px' }}>
-                    <Text fw={600}>Total de horas trabajadas:</Text>
-                    <Text fw={700} size="lg" c="fucsia">
-                      {totalHorasTrabajadasEdit.toFixed(2)} horas
-                    </Text>
-                  </Group>
-                  <Group justify="space-between" p="sm" style={{ backgroundColor: 'var(--mantine-color-cyan-0)', borderRadius: '4px' }}>
-                    <Text fw={600}>Total a liquidar:</Text>
-                    <Text fw={700} size="lg" c="cyan">
-                      ${totalMontoEdit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                    </Text>
-                  </Group>
+                  <Paper withBorder p="sm" mt="sm">
+                    <Group justify="space-between">
+                      <Text fw={600}>Total de horas trabajadas:</Text>
+                      <Text fw={700} size="lg" c="fucsia">
+                        {totalHorasTrabajadasEdit.toFixed(2)} horas
+                      </Text>
+                    </Group>
+                  </Paper>
+                  <Paper withBorder p="sm">
+                    <Group justify="space-between">
+                      <Text fw={600}>Total a liquidar:</Text>
+                      <Text fw={700} size="lg" c="cyan">
+                        ${totalMontoEdit.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                      </Text>
+                    </Group>
+                  </Paper>
                 </Stack>
               </Paper>
             )}
@@ -1140,7 +1148,7 @@ export default function AsignacionesPage() {
       <Modal opened={rapidaOpened} onClose={closeRapida} title="Liquidación Rápida" size="lg">
         {selectedRapidaAsignacion && (
           <Stack gap="md">
-            <Paper p="sm" withBorder bg="gray.0">
+            <Paper p="sm" withBorder>
               <Text size="sm" fw={600} mb="xs">
                 Persona Asistida: {selectedRapidaAsignacion.personaNombre || selectedRapidaAsignacion.personaId}
               </Text>
@@ -1148,15 +1156,15 @@ export default function AsignacionesPage() {
                 <Text size="xs" c="dimmed">Cuidadores:</Text>
                 {selectedRapidaAsignacion.cuidadoresNombres && selectedRapidaAsignacion.cuidadoresNombres.length > 0
                   ? selectedRapidaAsignacion.cuidadoresNombres.map((nombre, idx) => (
-                      <Badge key={idx} size="sm" variant="light" color="fucsia">
-                        {nombre}
-                      </Badge>
-                    ))
+                    <Badge key={idx} size="sm" variant="light" color="fucsia">
+                      {nombre}
+                    </Badge>
+                  ))
                   : selectedRapidaAsignacion.cuidadoresIds.map((id, idx) => (
-                      <Badge key={idx} size="sm" variant="light">
-                        {id}
-                      </Badge>
-                    ))}
+                    <Badge key={idx} size="sm" variant="light">
+                      {id}
+                    </Badge>
+                  ))}
               </Group>
             </Paper>
 
@@ -1181,7 +1189,7 @@ export default function AsignacionesPage() {
             {selectedRapidaCuidadorId && (
               <>
                 {selectedRapidaAsignacion.horasPorCuidador?.[selectedRapidaCuidadorId] && (
-                  <Paper p="md" withBorder bg="gray.0">
+                  <Paper p="md" withBorder>
                     <Stack gap="xs">
                       <Text size="sm" fw={600} mb="xs">Datos de la asignación:</Text>
                       <Group justify="space-between">
@@ -1196,20 +1204,20 @@ export default function AsignacionesPage() {
                           {selectedRapidaAsignacion.horasPorCuidador[selectedRapidaCuidadorId].horas.toFixed(2)} horas
                         </Text>
                       </Group>
-                    <Group justify="space-between">
-                      <Text size="sm">Fecha inicio:</Text>
-                      <Text size="sm" fw={600}>
-                        {new Date(selectedRapidaAsignacion.fechaInicio).toLocaleDateString('es-AR')}
-                      </Text>
-                    </Group>
-                    {selectedRapidaAsignacion.fechaFin && (
                       <Group justify="space-between">
-                        <Text size="sm">Fecha fin:</Text>
+                        <Text size="sm">Fecha inicio:</Text>
                         <Text size="sm" fw={600}>
-                          {new Date(selectedRapidaAsignacion.fechaFin).toLocaleDateString('es-AR')}
+                          {new Date(selectedRapidaAsignacion.fechaInicio).toLocaleDateString('es-AR')}
                         </Text>
                       </Group>
-                    )}
+                      {selectedRapidaAsignacion.fechaFin && (
+                        <Group justify="space-between">
+                          <Text size="sm">Fecha fin:</Text>
+                          <Text size="sm" fw={600}>
+                            {new Date(selectedRapidaAsignacion.fechaFin).toLocaleDateString('es-AR')}
+                          </Text>
+                        </Group>
+                      )}
                     </Stack>
                   </Paper>
                 )}
@@ -1242,7 +1250,7 @@ export default function AsignacionesPage() {
                 />
 
                 {rapidaHorasTrabajadas > 0 && rapidaPrecioPorHora > 0 && (
-                  <Paper p="md" withBorder bg="cyan.0">
+                  <Paper p="md" withBorder style={{ borderColor: 'var(--mantine-color-cyan-filled)' }}>
                     <Stack gap="xs">
                       <Text size="sm" fw={600}>Resumen de liquidación:</Text>
                       <Group justify="space-between">
@@ -1287,15 +1295,15 @@ export default function AsignacionesPage() {
                 <Text size="xs" c="dimmed">Cuidadores:</Text>
                 {asignacionComprobantes.cuidadoresNombres && asignacionComprobantes.cuidadoresNombres.length > 0
                   ? asignacionComprobantes.cuidadoresNombres.map((nombre, idx) => (
-                      <Badge key={idx} size="sm" variant="light" color="fucsia">
-                        {nombre}
-                      </Badge>
-                    ))
+                    <Badge key={idx} size="sm" variant="light" color="fucsia">
+                      {nombre}
+                    </Badge>
+                  ))
                   : asignacionComprobantes.cuidadoresIds.map((id, idx) => (
-                      <Badge key={idx} size="sm" variant="light">
-                        {id}
-                      </Badge>
-                    ))}
+                    <Badge key={idx} size="sm" variant="light">
+                      {id}
+                    </Badge>
+                  ))}
               </Group>
             </Paper>
 
