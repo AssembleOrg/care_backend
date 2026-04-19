@@ -34,6 +34,7 @@ async function handleGET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const all = searchParams.get('all') === 'true';
   const cuidadorId = searchParams.get('cuidadorId');
+  const personaId = searchParams.get('personaId');
 
   try {
     // Obtener cuidadores y personas para incluir nombres
@@ -51,6 +52,10 @@ async function handleGET(request: NextRequest) {
       // Filtrar por cuidador si se proporciona
       if (cuidadorId) {
         asignaciones = asignaciones.filter(a => a.cuidadoresIds.includes(cuidadorId));
+      }
+      // Filtrar por persona si se proporciona
+      if (personaId) {
+        asignaciones = asignaciones.filter(a => a.personaId === personaId);
       }
       
       const dtos = asignaciones.map(a => {
@@ -74,6 +79,10 @@ async function handleGET(request: NextRequest) {
     // Filtrar por cuidador si se proporciona
     if (cuidadorId) {
       asignaciones = asignaciones.filter(a => a.cuidadoresIds.includes(cuidadorId));
+    }
+    // Filtrar por persona si se proporciona
+    if (personaId) {
+      asignaciones = asignaciones.filter(a => a.personaId === personaId);
     }
     
     // Aplicar paginación después del filtro

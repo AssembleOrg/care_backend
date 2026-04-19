@@ -1,15 +1,18 @@
 'use client';
 
 import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye, IconX } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye, IconX, IconFileDownload } from '@tabler/icons-react';
 import { ViewToggle, useViewMode } from '../components/ViewToggle';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
 import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
 import cardStyles from '../components/card-view.module.css';
+import { pdf } from '@react-pdf/renderer';
+import { ComprobantePdfDocument, FilaPdfData } from '../components/ComprobantePdfDocument';
 
 interface PersonaAsistida {
   id: string;
@@ -51,6 +54,101 @@ export default function PersonasAsistidasPage() {
   const [cuidadoresPersona, setCuidadoresPersona] = useState<Array<{ id: string; cuidadorId: string; cuidadorNombre: string; activo: boolean }>>([]);
   const [cuidadoresModalOpened, { open: openCuidadoresModal, close: closeCuidadoresModal }] = useDisclosure(false);
   const [personaIdParaCuidadores, setPersonaIdParaCuidadores] = useState<string | null>(null);
+
+  const [comprobanteModalOpened, { open: openComprobanteModal, close: closeComprobanteModal }] = useDisclosure(false);
+  const [comprobantePersona, setComprobantePersona] = useState<PersonaAsistida | null>(null);
+  const [comprobanteDesde, setComprobanteDesde] = useState<Date | null>(null);
+  const [comprobanteHasta, setComprobanteHasta] = useState<Date | null>(null);
+  const [generandoPdf, setGenerandoPdf] = useState(false);
+
+  const handleOpenComprobante = (persona: PersonaAsistida) => {
+    setComprobantePersona(persona);
+    setComprobanteDesde(null);
+    setComprobanteHasta(null);
+    openComprobanteModal();
+  };
+
+  const handleGenerarComprobante = async () => {
+    if (!comprobantePersona || !comprobanteDesde || !comprobanteHasta) return;
+    
+    setGenerandoPdf(true);
+    try {
+      const response = await fetch(`/api/v1/asignaciones?all=true&personaId=${comprobantePersona.id}`);
+      const data = await response.json();
+      
+      if (!data.ok) throw new Error('Error al obtener asignaciones');
+      
+      const asignaciones = data.data as any[];
+      
+      // Filtrar las asignaciones que se solapan con el periodo
+      const asignacionesFiltradas = asignaciones.filter(asig => {
+        const asigInicio = new Date(asig.fechaInicio);
+        const asigFin = asig.fechaFin ? new Date(asig.fechaFin) : new Date(8640000000000000); // Max date if no end date
+        
+        // Return true if ranges overlap
+        return asigInicio <= comprobanteHasta && asigFin >= comprobanteDesde;
+      });
+
+      // Mapear al modelo tabular del PDF (una fila por cuidador/guardia)
+      const filasPdf: FilaPdfData[] = [];
+      asignacionesFiltradas.forEach(asig => {
+        const dStrInicio = new Date(asig.fechaInicio).toLocaleDateString('es-AR');
+        const dStrFin = asig.fechaFin ? new Date(asig.fechaFin).toLocaleDateString('es-AR') : '';
+        const periodo = `${dStrInicio}${dStrFin ? ` - ${dStrFin}` : ''}`;
+
+        if (asig.horasPorCuidador) {
+          asig.cuidadoresIds.forEach((id: string, index: number) => {
+            const stats = asig.horasPorCuidador[id];
+            if (stats) {
+              const horas = stats.horas || 0;
+              const precioPorHora = stats.precioPorHora || 0;
+              filasPdf.push({
+                periodo,
+                cuidadorNombre: asig.cuidadoresNombres?.[index] || 'Sin nombre',
+                horas,
+                precioPorHora,
+                subtotal: horas * precioPorHora,
+              });
+            }
+          });
+        }
+      });
+
+      const blob = await pdf(
+        <ComprobantePdfDocument 
+          personaNombre={comprobantePersona.nombreCompleto}
+          fechaDesde={comprobanteDesde.toLocaleDateString('es-AR')}
+          fechaHasta={comprobanteHasta.toLocaleDateString('es-AR')}
+          filas={filasPdf}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Comprobante_${comprobantePersona.nombreCompleto.replace(/\s+/g, '_')}_${comprobanteDesde.toLocaleDateString('es-AR').replace(/\//g, '-')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      closeComprobanteModal();
+      notifications.show({
+        title: 'Éxito',
+        message: 'Comprobante generado correctamente',
+        color: 'green',
+      });
+    } catch (error) {
+       console.error(error);
+       notifications.show({
+         title: 'Error',
+         message: 'No se pudo generar el comprobante',
+         color: 'red',
+       });
+    } finally {
+      setGenerandoPdf(false);
+    }
+  };
 
   const form = useForm({
     initialValues: {
@@ -457,6 +555,15 @@ export default function PersonasAsistidasPage() {
                   >
                     <IconTrash size={16} />
                   </ActionIcon>
+                  <ActionIcon 
+                    color="teal" 
+                    variant="light" 
+                    onClick={() => handleOpenComprobante(persona)}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                    title="Descargar comprobante"
+                  >
+                    <IconFileDownload size={16} />
+                  </ActionIcon>
                   </Group>
                 </Table.Td>
               </Table.Tr>
@@ -498,6 +605,16 @@ export default function PersonasAsistidasPage() {
                     disabled={viewing === persona.id || deleting === persona.id}
                   >
                     <IconTrash size={16} />
+                  </ActionIcon>
+                  <ActionIcon 
+                    color="teal" 
+                    variant="light" 
+                    size="sm" 
+                    onClick={() => handleOpenComprobante(persona)}
+                    disabled={viewing === persona.id || deleting === persona.id}
+                    title="Descargar comprobante"
+                  >
+                    <IconFileDownload size={16} />
                   </ActionIcon>
                 </Group>
               </div>
@@ -677,6 +794,59 @@ export default function PersonasAsistidasPage() {
         itemName={itemToDelete?.name}
         loading={deleting !== null}
       />
+
+      <Modal opened={comprobanteModalOpened} onClose={closeComprobanteModal} title="Generar Comprobante PDF">
+        {comprobantePersona && (
+          <Stack>
+            <Text>Generar comprobante para: <b>{comprobantePersona.nombreCompleto}</b></Text>
+            <DateInput
+              label="Desde"
+              required
+              placeholder="Seleccionar fecha"
+              value={comprobanteDesde}
+              onChange={(val: any) => {
+                if (!val) return setComprobanteDesde(null);
+                if (typeof val === 'string') {
+                  const [y, m, d] = val.split('T')[0].split('-').map(Number);
+                  setComprobanteDesde(new Date(y, m - 1, d));
+                } else {
+                  setComprobanteDesde(new Date(val));
+                }
+              }}
+              maxDate={comprobanteHasta || undefined}
+            />
+            <DateInput
+              label="Hasta"
+              required
+              placeholder="Seleccionar fecha"
+              value={comprobanteHasta}
+              onChange={(val: any) => {
+                if (!val) return setComprobanteHasta(null);
+                if (typeof val === 'string') {
+                  const [y, m, d] = val.split('T')[0].split('-').map(Number);
+                  setComprobanteHasta(new Date(y, m - 1, d));
+                } else {
+                  setComprobanteHasta(new Date(val));
+                }
+              }}
+              minDate={comprobanteDesde || undefined}
+            />
+            <Group justify="flex-end" mt="md">
+              <Button variant="subtle" onClick={closeComprobanteModal}>
+                Cancelar
+              </Button>
+              <Button
+                color="fucsia"
+                onClick={handleGenerarComprobante}
+                loading={generandoPdf}
+                disabled={!comprobanteDesde || !comprobanteHasta || generandoPdf}
+              >
+                Generar Comprobante
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </Container>
   );
 }
