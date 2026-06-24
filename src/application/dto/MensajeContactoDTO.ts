@@ -1,19 +1,12 @@
 import { Expose, Transform } from 'class-transformer';
 import { encryptionService } from '@/src/infrastructure/crypto/EncryptionService';
-import { EstadoSolicitud } from '@/src/domain/entities/EstadoSolicitud';
 
-export class SolicitudEmpleoDTO {
+export class MensajeContactoDTO {
     @Expose()
     id: string;
 
     @Expose()
     nombre: string;
-
-    @Expose()
-    apellido: string;
-
-    @Expose()
-    zonaTrabajo: string;
 
     @Expose()
     @Transform(({ obj }) => {
@@ -38,25 +31,19 @@ export class SolicitudEmpleoDTO {
     email: string | null;
 
     @Expose()
-    estado: EstadoSolicitud;
-
-    @Expose()
     @Transform(({ obj }) => {
-        if (!obj.experiencia) return null;
+        if (!obj.mensaje) return null;
         try {
-            return encryptionService.decrypt(obj.experiencia);
+            return encryptionService.decrypt(obj.mensaje);
         } catch {
             return null;
         }
     })
-    experiencia?: string;
+    mensaje: string | null;
 
     @Expose()
-    cvUrl?: string | null;
+    leido: boolean;
 
     @Expose()
     createdAt: Date;
-
-    @Expose()
-    updatedAt: Date;
 }

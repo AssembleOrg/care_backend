@@ -13,6 +13,7 @@ export class SolicitudEmpleo {
         public estado: EstadoSolicitud,
         public experiencia: string | null,
         public experienciaHash: string | null,
+        public cvUrl: string | null,
         public createdAt: Date,
         public updatedAt: Date,
     ) { }
