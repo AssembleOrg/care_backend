@@ -7,6 +7,8 @@ import { notifications } from '@mantine/notifications';
 import { IconSearch, IconEye, IconEdit } from '@tabler/icons-react';
 import { ViewToggle, useViewMode } from '../components/ViewToggle';
 import { parseApiError } from '../utils/parseApiError';
+import { formatDate, formatDateTime } from '../utils/formatDate';
+import { REALTIME_EVENTS } from '../layout';
 import cardStyles from '../components/card-view.module.css';
 import { EstadoSolicitud } from '@/src/domain/entities/EstadoSolicitud';
 
@@ -97,6 +99,13 @@ export default function SolicitudesEmpleoPage() {
         fetchSolicitudes(1, search);
     }, [search]);
 
+    // Refrescar en vivo cuando llega una solicitud nueva (realtime desde el layout)
+    useEffect(() => {
+        const onNueva = () => fetchSolicitudes(1, search);
+        window.addEventListener(REALTIME_EVENTS.solicitudes, onNueva);
+        return () => window.removeEventListener(REALTIME_EVENTS.solicitudes, onNueva);
+    }, [search]);
+
     const handleSearch = async () => {
         setSearching(true);
         setSearch(searchInput);
@@ -148,6 +157,7 @@ export default function SolicitudesEmpleoPage() {
             closeEditState();
             setSelectedSolicitud(null);
             fetchSolicitudes(page, search);
+            window.dispatchEvent(new CustomEvent(REALTIME_EVENTS.refreshBadges));
         } catch (error: unknown) {
             const message = parseApiError(error);
             notifications.show({
@@ -210,7 +220,7 @@ export default function SolicitudesEmpleoPage() {
                                 <Table.Td>{solicitud.zonaTrabajo}</Table.Td>
                                 <Table.Td>{solicitud.email || '-'}</Table.Td>
                                 <Table.Td>{solicitud.telefono || '-'}</Table.Td>
-                                <Table.Td>{new Date(solicitud.createdAt).toLocaleDateString()}</Table.Td>
+                                <Table.Td>{formatDate(solicitud.createdAt)}</Table.Td>
                                 <Table.Td>
                                     <Badge color={getEstadoColor(solicitud.estado)} variant="light">
                                         {solicitud.estado.replace('_', ' ')}
@@ -308,7 +318,7 @@ export default function SolicitudesEmpleoPage() {
                             autosize 
                             minRows={2} 
                         />
-                        <TextInput label="Fecha de Envío" value={new Date(selectedSolicitud.createdAt).toLocaleString()} readOnly />
+                        <TextInput label="Fecha de Envío" value={formatDateTime(selectedSolicitud.createdAt)} readOnly />
                         <TextInput label="Estado Actual" value={selectedSolicitud.estado.replace('_', ' ')} readOnly />
 
                         <Group justify="flex-end" mt="md">

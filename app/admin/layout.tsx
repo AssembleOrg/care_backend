@@ -1,13 +1,22 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/src/infrastructure/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { Menu, UnstyledButton } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import styles from './admin.module.css';
 import './admin-globals.css';
+
+/** Eventos que las vistas de listas escuchan para refrescar en vivo. */
+export const REALTIME_EVENTS = {
+  contacto: 'realtime:mensaje-contacto',
+  solicitudes: 'realtime:solicitud-empleo',
+  /** Disparar tras marcar leído / cambiar estado para recalcular badges. */
+  refreshBadges: 'badge:refresh',
+} as const;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -16,7 +25,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [unread, setUnread] = useState<{ contacto: number; solicitudes: number }>({ contacto: 0, solicitudes: 0 });
   const supabase = createClient();
+
+  // Contador real de no leídos desde la DB (contacto: leido=false; solicitudes: estado != CERRADA)
+  const fetchUnread = useRef(async () => {
+    try {
+      const res = await fetch('/api/v1/dashboard/unread-counts');
+      if (res.ok) {
+        const data = await res.json();
+        setUnread({ contacto: data.contacto ?? 0, solicitudes: data.solicitudes ?? 0 });
+      }
+    } catch {
+      /* silencioso: el badge no es crítico */
+    }
+  }).current;
 
   useEffect(() => {
     // Initialize dark mode - only apply to admin container, not html
@@ -45,6 +68,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  // Realtime: nuevas filas en MensajeContacto / SolicitudEmpleo (Supabase Postgres Changes)
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-forms-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'MensajeContacto' },
+        (payload) => {
+          const nombre = (payload.new as { nombre?: string })?.nombre;
+          notifications.show({
+            title: 'Nuevo mensaje de contacto',
+            message: nombre ? `De ${nombre}` : 'Revisá Mensajes de Contacto',
+            color: 'blue',
+          });
+          window.dispatchEvent(new CustomEvent(REALTIME_EVENTS.contacto));
+          fetchUnread();
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'SolicitudEmpleo' },
+        (payload) => {
+          const nw = payload.new as { nombre?: string; apellido?: string };
+          const nombre = [nw?.nombre, nw?.apellido].filter(Boolean).join(' ');
+          notifications.show({
+            title: 'Nueva solicitud de empleo',
+            message: nombre ? `De ${nombre}` : 'Revisá Solicitudes de Empleo',
+            color: 'teal',
+          });
+          window.dispatchEvent(new CustomEvent(REALTIME_EVENTS.solicitudes));
+          fetchUnread();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, fetchUnread]);
+
+  // Carga inicial de no leídos + recálculo cuando una vista marca leído/cambia estado
+  useEffect(() => {
+    fetchUnread();
+    const onRefresh = () => fetchUnread();
+    window.addEventListener(REALTIME_EVENTS.refreshBadges, onRefresh);
+    return () => window.removeEventListener(REALTIME_EVENTS.refreshBadges, onRefresh);
+  }, [fetchUnread]);
 
   useEffect(() => {
     if (mounted) {
@@ -122,17 +193,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ''}`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <span className="material-icons-outlined">{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const badge =
+              item.href === '/admin/contacto'
+                ? unread.contacto
+                : item.href === '/admin/solicitudes-empleo'
+                  ? unread.solicitudes
+                  : 0;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ''}`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <span className="material-icons-outlined">{item.icon}</span>
+                <span>{item.label}</span>
+                {badge > 0 && <span className={styles.navBadge}>{badge > 99 ? '99+' : badge}</span>}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className={styles.sidebarFooter}>
