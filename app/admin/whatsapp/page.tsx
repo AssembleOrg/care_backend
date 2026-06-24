@@ -188,7 +188,8 @@ export default function WhatsappPage() {
                     <Group>
                         <Button
                             leftSection={<IconRefresh size={18} />}
-                            variant="default"
+                            color="blue"
+                            variant="light"
                             loading={acting}
                             onClick={() => doAction('restart')}
                         >
