@@ -18,6 +18,7 @@ import {
 import { DateInput } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
 import { ContratoDTO } from '@/src/application/dto/ContratoDTO';
+import { formatDate } from '../utils/formatDate';
 
 export default function ContratosPage() {
     const [isManual, setIsManual] = useState(false);
@@ -234,7 +235,7 @@ export default function ContratosPage() {
 
                             return (
                                 <Table.Tr key={contrato.id}>
-                                    <Table.Td>{new Date(contrato.createdAt).toLocaleDateString()}</Table.Td>
+                                    <Table.Td>{formatDate(contrato.createdAt)}</Table.Td>
                                     <Table.Td>{nombre}</Table.Td>
                                     <Table.Td>{direccion}</Table.Td>
                                     <Table.Td>

@@ -97,6 +97,22 @@
   font-weight: 600;
 }
 
+.navBadge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 10px;
+}
+
 .navLink .material-icons-outlined {
   font-size: 20px;
 }

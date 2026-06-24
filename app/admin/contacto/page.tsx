@@ -7,6 +7,8 @@ import { notifications } from '@mantine/notifications';
 import { IconSearch, IconEye, IconMail, IconMailOpened } from '@tabler/icons-react';
 import { ViewToggle, useViewMode } from '../components/ViewToggle';
 import { parseApiError } from '../utils/parseApiError';
+import { formatDateTime } from '../utils/formatDate';
+import { REALTIME_EVENTS } from '../layout';
 import cardStyles from '../components/card-view.module.css';
 
 interface MensajeContacto {
@@ -62,6 +64,13 @@ export default function ContactoPage() {
         fetchMensajes(1, search);
     }, [search]);
 
+    // Refrescar en vivo cuando llega un mensaje nuevo (realtime desde el layout)
+    useEffect(() => {
+        const onNuevo = () => fetchMensajes(1, search);
+        window.addEventListener(REALTIME_EVENTS.contacto, onNuevo);
+        return () => window.removeEventListener(REALTIME_EVENTS.contacto, onNuevo);
+    }, [search]);
+
     const handleSearch = async () => {
         setSearching(true);
         setSearch(searchInput);
@@ -95,6 +104,7 @@ export default function ContactoPage() {
 
             setMensajes((prev) => prev.map((m) => (m.id === mensaje.id ? { ...m, leido } : m)));
             if (selected?.id === mensaje.id) setSelected({ ...selected, leido });
+            window.dispatchEvent(new CustomEvent(REALTIME_EVENTS.refreshBadges));
             if (notify) {
                 notifications.show({ title: 'Éxito', message: leido ? 'Marcado como leído' : 'Marcado como no leído', color: 'green' });
             }
@@ -154,7 +164,7 @@ export default function ContactoPage() {
                                 <Table.Td>{mensaje.nombre}</Table.Td>
                                 <Table.Td>{mensaje.email || '-'}</Table.Td>
                                 <Table.Td>{mensaje.telefono || '-'}</Table.Td>
-                                <Table.Td>{new Date(mensaje.createdAt).toLocaleString()}</Table.Td>
+                                <Table.Td>{formatDateTime(mensaje.createdAt)}</Table.Td>
                                 <Table.Td>
                                     <Group gap="xs">
                                         <ActionIcon color="blue" variant="light" onClick={() => handleView(mensaje)}>
@@ -224,7 +234,7 @@ export default function ContactoPage() {
                                 </div>
                                 <div className={cardStyles.cardField}>
                                     <span className={cardStyles.cardFieldLabel}>Fecha</span>
-                                    <span className={cardStyles.cardFieldValue}>{new Date(mensaje.createdAt).toLocaleString()}</span>
+                                    <span className={cardStyles.cardFieldValue}>{formatDateTime(mensaje.createdAt)}</span>
                                 </div>
                             </div>
                         </div>
@@ -244,7 +254,7 @@ export default function ContactoPage() {
                         <TextInput label="Email" value={selected.email || '-'} readOnly />
                         <TextInput label="Teléfono" value={selected.telefono || '-'} readOnly />
                         <Textarea label="Mensaje" value={selected.mensaje || '-'} readOnly autosize minRows={3} />
-                        <TextInput label="Fecha de Envío" value={new Date(selected.createdAt).toLocaleString()} readOnly />
+                        <TextInput label="Fecha de Envío" value={formatDateTime(selected.createdAt)} readOnly />
                         <Group justify="flex-end" mt="md">
                             <Button variant="subtle" onClick={closeView}>Cerrar</Button>
                         </Group>

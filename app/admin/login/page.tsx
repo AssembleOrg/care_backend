@@ -161,7 +161,8 @@ export default function LoginPage() {
               className={styles.submitButton}
               disabled={loading}
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading && <span className={styles.spinner} aria-hidden="true" />}
+            {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
 
