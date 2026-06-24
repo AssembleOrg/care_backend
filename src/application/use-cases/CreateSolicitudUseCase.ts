@@ -32,19 +32,37 @@ export class CreateSolicitudUseCase {
         const experienciaEnc = validatedData.experiencia ? encryptionService.encrypt(validatedData.experiencia) : null;
         const experienciaHash = validatedData.experiencia ? hashingService.hash(validatedData.experiencia) : null;
 
-        const solicitudEmpleo = await this.solicitudEmpleoRepository.create({
-            nombre: validatedData.nombre,
-            apellido: validatedData.apellido,
-            zonaTrabajo: validatedData.zonaTrabajo,
-            telefono: telefonoEnc,
-            telefonoHash: telefonoHash,
-            email: emailEnc,
-            emailHash: emailHash,
-            estado: EstadoSolicitud.ABIERTA,
-            experiencia: experienciaEnc,
-            experienciaHash: experienciaHash,
-            cvUrl: validatedData.cvUrl ?? null,
-        });
+        let solicitudEmpleo;
+        try {
+            solicitudEmpleo = await this.solicitudEmpleoRepository.create({
+                nombre: validatedData.nombre,
+                apellido: validatedData.apellido,
+                zonaTrabajo: validatedData.zonaTrabajo,
+                telefono: telefonoEnc,
+                telefonoHash: telefonoHash,
+                email: emailEnc,
+                emailHash: emailHash,
+                estado: EstadoSolicitud.ABIERTA,
+                experiencia: experienciaEnc,
+                experienciaHash: experienciaHash,
+                cvUrl: validatedData.cvUrl ?? null,
+            });
+        } catch (error: any) {
+            // P2002 = violación de constraint único (ya existe solicitud con ese email/teléfono)
+            if (error?.code === 'P2002') {
+                const target = Array.isArray(error.meta?.target)
+                    ? error.meta.target.join(',')
+                    : String(error.meta?.target ?? '');
+                if (target.includes('email')) {
+                    throw new Error('Ya recibimos una solicitud con este email. Te contactaremos pronto.');
+                }
+                if (target.includes('telefono')) {
+                    throw new Error('Ya recibimos una solicitud con este teléfono. Te contactaremos pronto.');
+                }
+                throw new Error('Ya recibimos una solicitud con estos datos. Te contactaremos pronto.');
+            }
+            throw error;
+        }
 
         await auditService.log({
             actor: 'ADMIN',
