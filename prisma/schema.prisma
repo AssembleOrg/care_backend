@@ -175,7 +175,19 @@ model SolicitudEmpleo{
   emailHash             String          @unique
   estado                EstadoSolicitud @default(ABIERTA)
   experiencia           String?         @db.VarChar(200)
-  experienciaHash       String?         
+  experienciaHash       String?
+  cvUrl                 String?           //Path del CV en Supabase Storage
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
+}
+
+model MensajeContacto{
+  id          String   @id @default(uuid())
+  nombre      String
+  telefono    String?              //Encriptado
+  email       String               //Encriptado
+  mensaje     String   @db.Text    //Encriptado
+  leido       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

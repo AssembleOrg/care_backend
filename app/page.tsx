@@ -1,7 +1,7 @@
 'use client';
 
-import { Container, Title, Text, Grid, Card, Button, Stack, Group, Badge, Paper, Box, Anchor, SimpleGrid, Divider } from '@mantine/core';
-import { IconCheck, IconArrowRight, IconHeart, IconShieldCheck, IconCalendar, IconMedicalCross, IconHome, IconUserCircle, IconUsers, IconUser, IconBriefcase } from '@tabler/icons-react';
+import { Container, Title, Text, Grid, Card, Button, Stack, Group, Badge, Paper, Box, Anchor, SimpleGrid, Divider, FileInput } from '@mantine/core';
+import { IconCheck, IconArrowRight, IconHeart, IconShieldCheck, IconCalendar, IconMedicalCross, IconHome, IconUserCircle, IconUsers, IconUser, IconBriefcase, IconPaperclip } from '@tabler/icons-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
@@ -11,22 +11,71 @@ import { notifications } from '@mantine/notifications';
 
 export default function HomePage() {
   const [workForm, setWorkForm] = useState({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '', experiencia: '' });
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [submittingWork, setSubmittingWork] = useState(false);
+
+  const MAX_CV_BYTES = 10 * 1024 * 1024;
+  const ALLOWED_CV_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ];
+  const [contactForm, setContactForm] = useState({ nombre: '', telefono: '', email: '', mensaje: '' });
+  const [submittingContact, setSubmittingContact] = useState(false);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingContact(true);
+    try {
+      const response = await fetch('/api/v1/contacto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al enviar el mensaje');
+
+      notifications.show({ title: 'Éxito', message: '¡Mensaje enviado! Nos pondremos en contacto contigo pronto.', color: 'green' });
+      setContactForm({ nombre: '', telefono: '', email: '', mensaje: '' });
+    } catch (error: any) {
+      notifications.show({ title: 'Error', message: error.message, color: 'red' });
+    } finally {
+      setSubmittingContact(false);
+    }
+  };
+
+  const handleCvChange = (file: File | null) => {
+    if (file) {
+      if (file.size > MAX_CV_BYTES) {
+        notifications.show({ title: 'Error', message: 'El CV no puede superar los 10MB.', color: 'red' });
+        return;
+      }
+      if (file.type && !ALLOWED_CV_TYPES.includes(file.type)) {
+        notifications.show({ title: 'Error', message: 'Formato inválido. Se aceptan PDF, DOC o DOCX.', color: 'red' });
+        return;
+      }
+    }
+    setCvFile(file);
+  };
 
   const handleWorkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmittingWork(true);
     try {
+      const formData = new FormData();
+      Object.entries(workForm).forEach(([key, value]) => formData.append(key, value));
+      if (cvFile) formData.append('cv', cvFile);
+
       const response = await fetch('/api/v1/solicitudes-empleo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(workForm),
+        body: formData,
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al enviar la solicitud');
 
       notifications.show({ title: 'Éxito', message: '¡Solicitud enviada! Nos pondremos en contacto contigo pronto.', color: 'green' });
       setWorkForm({ nombre: '', apellido: '', zonaTrabajo: '', telefono: '', email: '', experiencia: '' });
+      setCvFile(null);
     } catch (error: any) {
       notifications.show({ title: 'Error', message: error.message, color: 'red' });
     } finally {
@@ -333,33 +382,46 @@ export default function HomePage() {
                   <Text size="lg" c="dimmed">
                     Contáctenos hoy para una consulta gratuita. Evaluaremos sus necesidades y diseñaremos un plan de cuidado personalizado.
                   </Text>
-                  <Stack gap="md">
-                    <Group grow>
+                  <form onSubmit={handleContactSubmit}>
+                    <Stack gap="md">
+                      <Group grow>
+                        <input
+                          type="text"
+                          placeholder="Nombre completo"
+                          className={styles.contactInput}
+                          value={contactForm.nombre}
+                          onChange={(e) => setContactForm({ ...contactForm, nombre: e.target.value })}
+                          required
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Teléfono"
+                          className={styles.contactInput}
+                          value={contactForm.telefono}
+                          onChange={(e) => setContactForm({ ...contactForm, telefono: e.target.value })}
+                        />
+                      </Group>
                       <input
-                        type="text"
-                        placeholder="Nombre completo"
+                        type="email"
+                        placeholder="Correo electrónico"
                         className={styles.contactInput}
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                        required
                       />
-                      <input
-                        type="tel"
-                        placeholder="Teléfono"
+                      <textarea
+                        placeholder="¿Cómo podemos ayudarle?"
+                        rows={3}
                         className={styles.contactInput}
+                        value={contactForm.mensaje}
+                        onChange={(e) => setContactForm({ ...contactForm, mensaje: e.target.value })}
+                        required
                       />
-                    </Group>
-                    <input
-                      type="email"
-                      placeholder="Correo electrónico"
-                      className={styles.contactInput}
-                    />
-                    <textarea
-                      placeholder="¿Cómo podemos ayudarle?"
-                      rows={3}
-                      className={styles.contactInput}
-                    />
-                    <Button size="lg" color="secondary" radius="md" rightSection={<IconArrowRight size={18} />}>
-                      Enviar mensaje
-                    </Button>
-                  </Stack>
+                      <Button type="submit" size="lg" color="secondary" radius="md" loading={submittingContact} rightSection={<IconArrowRight size={18} />}>
+                        Enviar mensaje
+                      </Button>
+                    </Stack>
+                  </form>
                 </Stack>
               </Grid.Col>
             </Grid>
@@ -439,6 +501,15 @@ export default function HomePage() {
                       className={styles.contactInput}
                       value={workForm.experiencia}
                       onChange={(e) => setWorkForm({ ...workForm, experiencia: e.target.value })}
+                    />
+                    <FileInput
+                      placeholder="Adjuntar CV (PDF, DOC o DOCX — máx. 10MB)"
+                      accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      leftSection={<IconPaperclip size={18} />}
+                      value={cvFile}
+                      onChange={handleCvChange}
+                      clearable
+                      size="md"
                     />
                     <Button
                       type="submit"

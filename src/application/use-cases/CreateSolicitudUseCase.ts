@@ -14,6 +14,7 @@ const createSolicitudSchema = z.object({
     telefono: z.string().min(1, 'El telefono es requerido'),
     email: z.email('El email debe ser un correo electrónico válido'),
     experiencia: z.string().max(200, 'La experiencia debe tener como máximo 200 caracteres').optional(),
+    cvUrl: z.string().optional(),
 });
 
 export class CreateSolicitudUseCase {
@@ -42,6 +43,7 @@ export class CreateSolicitudUseCase {
             estado: EstadoSolicitud.ABIERTA,
             experiencia: experienciaEnc,
             experienciaHash: experienciaHash,
+            cvUrl: validatedData.cvUrl ?? null,
         });
 
         await auditService.log({

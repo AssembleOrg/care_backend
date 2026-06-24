@@ -17,6 +17,7 @@ export class SolicitudEmpleoRepository implements ISolicitudEmpleoRepository {
                 estado: solicitud.estado,
                 experiencia: solicitud.experiencia,
                 experienciaHash: solicitud.experienciaHash,
+                cvUrl: solicitud.cvUrl,
             }
         });
 
@@ -88,6 +89,7 @@ export class SolicitudEmpleoRepository implements ISolicitudEmpleoRepository {
             data.estado as EstadoSolicitud,
             data.experiencia,
             data.experienciaHash,
+            data.cvUrl,
             data.createdAt,
             data.updatedAt,
         );
