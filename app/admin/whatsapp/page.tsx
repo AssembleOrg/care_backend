@@ -28,27 +28,68 @@ export default function WhatsappPage() {
     const [status, setStatus] = useState<BotStatus | null>(null);
     const [loading, setLoading] = useState(true);
     const [acting, setActing] = useState(false);
-    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const inFlightRef = useRef(false);
 
-    const fetchStatus = useCallback(async () => {
+    // Una sola pasada de fetch, con guard anti-solapamiento.
+    const fetchStatus = useCallback(async (): Promise<BotStatus | null> => {
+        if (inFlightRef.current) return null;
+        inFlightRef.current = true;
         try {
             const res = await fetch('/api/v1/whatsapp-bot', { cache: 'no-store' });
             const data = await res.json();
             setStatus(data);
+            return data;
         } catch {
-            setStatus({ connected: false, loggedIn: false, qr: null, error: 'Sin conexión con el bot.' });
+            const fallback = { connected: false, loggedIn: false, qr: null, error: 'Sin conexión con el bot.' };
+            setStatus(fallback);
+            return fallback;
         } finally {
+            inFlightRef.current = false;
             setLoading(false);
         }
     }, []);
 
+    // Poll adaptativo y auto-detenido:
+    //  - vinculado            -> 20s (solo chequeo de salud)
+    //  - esperando QR/scan    -> 3s
+    //  - pestaña oculta       -> no pollea (ahorra requests)
     useEffect(() => {
-        fetchStatus();
-        // Poll cada 4s: mientras no esté vinculado el QR se refresca solo.
-        pollRef.current = setInterval(fetchStatus, 4000);
-        return () => {
-            if (pollRef.current) clearInterval(pollRef.current);
+        let cancelled = false;
+
+        const schedule = (data: BotStatus | null) => {
+            if (cancelled) return;
+            const delay = data?.loggedIn ? 20000 : 3000;
+            timerRef.current = setTimeout(loop, delay);
         };
+
+        const loop = async () => {
+            if (cancelled) return;
+            if (typeof document !== 'undefined' && document.hidden) {
+                schedule(status); // pestaña oculta: reintenta luego sin pegarle
+                return;
+            }
+            const data = await fetchStatus();
+            schedule(data);
+        };
+
+        loop();
+
+        // Al volver a la pestaña, refrescar ya.
+        const onVisible = () => {
+            if (!document.hidden) {
+                if (timerRef.current) clearTimeout(timerRef.current);
+                loop();
+            }
+        };
+        document.addEventListener('visibilitychange', onVisible);
+
+        return () => {
+            cancelled = true;
+            if (timerRef.current) clearTimeout(timerRef.current);
+            document.removeEventListener('visibilitychange', onVisible);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fetchStatus]);
 
     const doAction = async (action: 'restart' | 'logout') => {
