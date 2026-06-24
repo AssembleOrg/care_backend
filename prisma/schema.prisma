@@ -170,15 +170,18 @@ model SolicitudEmpleo{
   apellido              String
   zonaTrabajo           String            //Zona donde desea trabajar
   telefono              String
-  telefonoHash          String          @unique
+  telefonoHash          String
   email                 String
-  emailHash             String          @unique
+  emailHash             String
   estado                EstadoSolicitud @default(ABIERTA)
   experiencia           String?         @db.VarChar(200)
   experienciaHash       String?
   cvUrl                 String?           //Path del CV en Supabase Storage
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
+
+  @@index([emailHash])
+  @@index([telefonoHash])
 }
 
 model MensajeContacto{
@@ -190,4 +193,15 @@ model MensajeContacto{
   leido       Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Registro de envíos de formularios públicos para rate limiting por IP (anti-spam).
+// ipHash = hash de la IP (no se guarda la IP en claro). routeKey identifica el form.
+model FormSubmissionLog {
+  id        String   @id @default(uuid())
+  routeKey  String   // 'solicitudes-empleo' | 'contacto'
+  ipHash    String
+  createdAt DateTime @default(now())
+
+  @@index([routeKey, ipHash, createdAt])
 }

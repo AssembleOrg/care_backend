@@ -5,6 +5,10 @@ export const PAGINATION_MAX_LIMIT = 100;
 export const RATE_LIMIT_LOGIN_ATTEMPTS = 5;
 export const RATE_LIMIT_LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
+// Formularios públicos (empleo + contacto): anti-spam por IP
+export const RATE_LIMIT_FORM_MAX = 5;
+export const RATE_LIMIT_FORM_WINDOW_MS = 60 * 60 * 1000; // 1 hora
+
 export const SESSION_COOKIE_NAME = 'carebydani_session';
 export const SESSION_MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 

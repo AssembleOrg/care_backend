@@ -3,6 +3,9 @@ import { CreateMensajeContactoUseCase } from '@/src/application/use-cases/Create
 import { ListMensajesContactoUseCase } from '@/src/application/use-cases/ListMensajesContactoUseCase';
 import { MensajeContactoRepository } from '@/src/infrastructure/database/repositories/MensajeContactoRepository';
 import { requireAuth } from '@/src/presentation/middleware/auth';
+import { getClientIp } from '@/src/presentation/middleware/rateLimit';
+import { checkFormRateLimit, isHoneypotTriggered } from '@/src/presentation/middleware/formAntiSpam';
+import { RATE_LIMIT_FORM_MAX, RATE_LIMIT_FORM_WINDOW_MS } from '@/src/config/constants';
 
 const mensajeContactoRepository = new MensajeContactoRepository();
 const createMensajeContactoUseCase = new CreateMensajeContactoUseCase(mensajeContactoRepository);
@@ -69,6 +72,21 @@ async function notifyByBrevo(data: { nombre: string; telefono?: string; email: s
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
+
+        // Honeypot: campo trampa lleno = bot. Fingimos éxito.
+        if (isHoneypotTriggered(body.website)) {
+            return NextResponse.json({ message: 'Mensaje enviado correctamente.' }, { status: 201 });
+        }
+
+        // Rate limit por IP (anti-spam, respaldado en DB)
+        const ip = getClientIp(req);
+        const rate = await checkFormRateLimit(ip, 'contacto', RATE_LIMIT_FORM_MAX, RATE_LIMIT_FORM_WINDOW_MS);
+        if (!rate.allowed) {
+            return NextResponse.json(
+                { error: 'Demasiados envíos. Esperá un rato e intentá de nuevo.' },
+                { status: 429 },
+            );
+        }
 
         // 1. Persistir SIEMPRE (no depende de Brevo)
         const mensaje = await createMensajeContactoUseCase.execute(body);

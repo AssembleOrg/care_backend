@@ -5,6 +5,9 @@ import { ListSolicitudesEmpleoUseCase } from '@/src/application/use-cases/ListSo
 import { EstadoSolicitud } from '@/src/domain/entities/EstadoSolicitud';
 import { requireAuth } from '@/src/presentation/middleware/auth';
 import { createAdminClient } from '@/src/infrastructure/supabase/admin';
+import { getClientIp } from '@/src/presentation/middleware/rateLimit';
+import { checkFormRateLimit, isHoneypotTriggered } from '@/src/presentation/middleware/formAntiSpam';
+import { RATE_LIMIT_FORM_MAX, RATE_LIMIT_FORM_WINDOW_MS } from '@/src/config/constants';
 
 // Instanciar dependencias
 const solicitudEmpleoRepository = new SolicitudEmpleoRepository();
@@ -84,9 +87,12 @@ export async function POST(req: NextRequest) {
     try {
         const contentType = req.headers.get('content-type') || '';
         let body: Record<string, any>;
+        let honeypot: unknown;
+        let cvFile: File | null = null;
 
         if (contentType.includes('multipart/form-data')) {
             const formData = await req.formData();
+            honeypot = formData.get('website');
             body = {
                 nombre: formData.get('nombre') ?? undefined,
                 apellido: formData.get('apellido') ?? undefined,
@@ -98,10 +104,31 @@ export async function POST(req: NextRequest) {
 
             const cv = formData.get('cv');
             if (cv && cv instanceof File && cv.size > 0) {
-                body.cvUrl = await uploadCv(cv);
+                cvFile = cv;
             }
         } else {
             body = await req.json();
+            honeypot = body.website;
+        }
+
+        // Honeypot: si el campo trampa viene lleno, es un bot. Fingimos éxito.
+        if (isHoneypotTriggered(honeypot)) {
+            return NextResponse.json({ message: 'OK' }, { status: 201 });
+        }
+
+        // Rate limit por IP (anti-spam, respaldado en DB)
+        const ip = getClientIp(req);
+        const rate = await checkFormRateLimit(ip, 'solicitudes-empleo', RATE_LIMIT_FORM_MAX, RATE_LIMIT_FORM_WINDOW_MS);
+        if (!rate.allowed) {
+            return NextResponse.json(
+                { error: 'Demasiados envíos. Esperá un rato e intentá de nuevo.' },
+                { status: 429 },
+            );
+        }
+
+        // Subir CV recién después de pasar honeypot + rate limit (evita archivos huérfanos)
+        if (cvFile) {
+            body.cvUrl = await uploadCv(cvFile);
         }
 
         const auditContext = {

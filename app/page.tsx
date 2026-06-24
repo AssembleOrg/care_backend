@@ -22,6 +22,8 @@ export default function HomePage() {
   ];
   const [contactForm, setContactForm] = useState({ nombre: '', telefono: '', email: '', mensaje: '' });
   const [submittingContact, setSubmittingContact] = useState(false);
+  // Honeypot anti-spam: debe quedar SIEMPRE vacío para un humano.
+  const [honeypot, setHoneypot] = useState('');
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ export default function HomePage() {
       const response = await fetch('/api/v1/contacto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm),
+        body: JSON.stringify({ ...contactForm, website: honeypot }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al enviar el mensaje');
@@ -64,6 +66,7 @@ export default function HomePage() {
     try {
       const formData = new FormData();
       Object.entries(workForm).forEach(([key, value]) => formData.append(key, value));
+      formData.append('website', honeypot);
       if (cvFile) formData.append('cv', cvFile);
 
       const response = await fetch('/api/v1/solicitudes-empleo', {
@@ -383,6 +386,16 @@ export default function HomePage() {
                     Contáctenos hoy para una consulta gratuita. Evaluaremos sus necesidades y diseñaremos un plan de cuidado personalizado.
                   </Text>
                   <form onSubmit={handleContactSubmit}>
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+                    />
                     <Stack gap="md">
                       <Group grow>
                         <input
@@ -449,6 +462,16 @@ export default function HomePage() {
               </Grid.Col>
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <form onSubmit={handleWorkSubmit}>
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+                  />
                   <Stack gap="md">
                     <Group grow>
                       <input
