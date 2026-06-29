@@ -1,40 +1,50 @@
-'use client';
+"use client";
 
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { createClient } from '@/src/infrastructure/supabase/client';
-import type { User } from '@supabase/supabase-js';
-import Link from 'next/link';
-import { Menu, UnstyledButton } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import styles from './admin.module.css';
-import './admin-globals.css';
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { createClient } from "@/src/infrastructure/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
+import { Menu, UnstyledButton } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import styles from "./admin.module.css";
+import "./admin-globals.css";
 
 /** Eventos que las vistas de listas escuchan para refrescar en vivo. */
 export const REALTIME_EVENTS = {
-  contacto: 'realtime:mensaje-contacto',
-  solicitudes: 'realtime:solicitud-empleo',
+  contacto: "realtime:mensaje-contacto",
+  solicitudes: "realtime:solicitud-empleo",
   /** Disparar tras marcar leído / cambiar estado para recalcular badges. */
-  refreshBadges: 'badge:refresh',
+  refreshBadges: "badge:refresh",
 } as const;
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [unread, setUnread] = useState<{ contacto: number; solicitudes: number }>({ contacto: 0, solicitudes: 0 });
+  const [unread, setUnread] = useState<{
+    contacto: number;
+    solicitudes: number;
+  }>({ contacto: 0, solicitudes: 0 });
   const supabase = createClient();
 
   // Contador real de no leídos desde la DB (contacto: leido=false; solicitudes: estado != CERRADA)
   const fetchUnread = useRef(async () => {
     try {
-      const res = await fetch('/api/v1/dashboard/unread-counts');
+      const res = await fetch("/api/v1/dashboard/unread-counts");
       if (res.ok) {
         const data = await res.json();
-        setUnread({ contacto: data.contacto ?? 0, solicitudes: data.solicitudes ?? 0 });
+        setUnread({
+          contacto: data.contacto ?? 0,
+          solicitudes: data.solicitudes ?? 0,
+        });
       }
     } catch {
       /* silencioso: el badge no es crítico */
@@ -43,8 +53,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     // Initialize dark mode - only apply to admin container, not html
-    const savedDarkMode = localStorage.getItem('darkMode');
-    const shouldBeDark = savedDarkMode === null ? true : savedDarkMode === 'true';
+    const savedDarkMode = localStorage.getItem("darkMode");
+    const shouldBeDark =
+      savedDarkMode === null ? true : savedDarkMode === "true";
 
     setDarkMode(shouldBeDark);
     setMounted(true);
@@ -57,7 +68,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
         setUser(session?.user ?? null);
       }
@@ -72,31 +85,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Realtime: nuevas filas en MensajeContacto / SolicitudEmpleo (Supabase Postgres Changes)
   useEffect(() => {
     const channel = supabase
-      .channel('admin-forms-realtime')
+      .channel("admin-forms-realtime")
       .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'MensajeContacto' },
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "MensajeContacto" },
         (payload) => {
           const nombre = (payload.new as { nombre?: string })?.nombre;
           notifications.show({
-            title: 'Nuevo mensaje de contacto',
-            message: nombre ? `De ${nombre}` : 'Revisá Mensajes de Contacto',
-            color: 'blue',
+            title: "Nuevo mensaje de contacto",
+            message: nombre ? `De ${nombre}` : "Revisá Mensajes de Contacto",
+            color: "blue",
           });
           window.dispatchEvent(new CustomEvent(REALTIME_EVENTS.contacto));
           fetchUnread();
         },
       )
       .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'SolicitudEmpleo' },
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "SolicitudEmpleo" },
         (payload) => {
           const nw = payload.new as { nombre?: string; apellido?: string };
-          const nombre = [nw?.nombre, nw?.apellido].filter(Boolean).join(' ');
+          const nombre = [nw?.nombre, nw?.apellido].filter(Boolean).join(" ");
           notifications.show({
-            title: 'Nueva solicitud de empleo',
-            message: nombre ? `De ${nombre}` : 'Revisá Solicitudes de Empleo',
-            color: 'teal',
+            title: "Nueva solicitud de empleo",
+            message: nombre ? `De ${nombre}` : "Revisá Solicitudes de Empleo",
+            color: "teal",
           });
           window.dispatchEvent(new CustomEvent(REALTIME_EVENTS.solicitudes));
           fetchUnread();
@@ -114,25 +127,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     fetchUnread();
     const onRefresh = () => fetchUnread();
     window.addEventListener(REALTIME_EVENTS.refreshBadges, onRefresh);
-    return () => window.removeEventListener(REALTIME_EVENTS.refreshBadges, onRefresh);
+    return () =>
+      window.removeEventListener(REALTIME_EVENTS.refreshBadges, onRefresh);
   }, [fetchUnread]);
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('darkMode', darkMode ? 'true' : 'false');
+      localStorage.setItem("darkMode", darkMode ? "true" : "false");
+      // Marca de scope: el CSS global de admin (admin-globals.css) solo aplica
+      // bajo body.admin-active, para que no se filtre a la landing.
+      document.body.classList.add("admin-active");
       // Add/remove class on body for modals/dropdowns that render outside adminContainer
       if (darkMode) {
-        document.body.classList.add('admin-dark-mode');
+        document.body.classList.add("admin-dark-mode");
       } else {
-        document.body.classList.remove('admin-dark-mode');
+        document.body.classList.remove("admin-dark-mode");
       }
     }
-    // Cleanup: remove class when component unmounts or pathname changes
+    // Cleanup: remove classes when leaving the admin area (pathname change / unmount)
     return () => {
       const currentPath = window.location.pathname;
-      const isGoingToAdminPage = currentPath.startsWith('/admin') && currentPath !== '/admin/login';
+      const isGoingToAdminPage =
+        currentPath.startsWith("/admin") && currentPath !== "/admin/login";
       if (!isGoingToAdminPage) {
-        document.body.classList.remove('admin-dark-mode');
+        document.body.classList.remove("admin-dark-mode");
+        document.body.classList.remove("admin-active");
       }
     };
   }, [darkMode, mounted, pathname]);
@@ -145,13 +164,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (pathname === '/admin/login') {
+  if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    router.push("/admin/login");
     router.refresh();
   };
 
@@ -160,22 +179,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const navItems = [
-    { label: 'Dashboard', icon: 'dashboard', href: '/admin' },
-    { label: 'Cuidadores', icon: 'people', href: '/admin/cuidadores' },
-    { label: 'Personas Asistidas', icon: 'elderly', href: '/admin/personas-asistidas' },
-    { label: 'Asignaciones', icon: 'assignment', href: '/admin/asignaciones' },
-    { label: 'Liquidaciones', icon: 'receipt_long', href: '/admin/liquidaciones' },
-    { label: 'Reportes', icon: 'bar_chart', href: '/admin/reportes' },
-    { label: 'Contratos', icon: 'description', href: '/admin/contratos' },
-    { label: 'Solicitudes de Empleo', icon: 'work', href: '/admin/solicitudes-empleo' },
-    { label: 'Mensajes de Contacto', icon: 'mail', href: '/admin/contacto' },
-    { label: 'Bot de WhatsApp', icon: 'smartphone', href: '/admin/whatsapp' },
+    { label: "Dashboard", icon: "dashboard", href: "/admin" },
+    { label: "Cuidadores", icon: "people", href: "/admin/cuidadores" },
+    {
+      label: "Personas Asistidas",
+      icon: "elderly",
+      href: "/admin/personas-asistidas",
+    },
+    { label: "Asignaciones", icon: "assignment", href: "/admin/asignaciones" },
+    {
+      label: "Liquidaciones",
+      icon: "receipt_long",
+      href: "/admin/liquidaciones",
+    },
+    { label: "Reportes", icon: "bar_chart", href: "/admin/reportes" },
+    { label: "Contratos", icon: "description", href: "/admin/contratos" },
+    {
+      label: "Solicitudes de Empleo",
+      icon: "work",
+      href: "/admin/solicitudes-empleo",
+    },
+    { label: "Mensajes de Contacto", icon: "mail", href: "/admin/contacto" },
+    { label: "Bot de WhatsApp", icon: "smartphone", href: "/admin/whatsapp" },
   ];
 
-  const currentPageTitle = navItems.find(item => item.href === pathname)?.label || 'Dashboard';
+  const currentPageTitle =
+    navItems.find((item) => item.href === pathname)?.label || "Dashboard";
 
   return (
-    <div className={`${styles.adminContainer} ${darkMode ? 'dark' : ''}`}>
+    <div className={`${styles.adminContainer} ${darkMode ? "dark" : ""}`}>
       {/* Mobile Menu Overlay */}
       {sidebarOpen && (
         <div
@@ -185,7 +217,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Sidebar */}
-      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
+      <aside
+        className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}
+      >
         <div className={styles.sidebarHeader}>
           <div className={styles.logoContainer}>
             <span className="material-icons">medical_services</span>
@@ -196,21 +230,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className={styles.nav}>
           {navItems.map((item) => {
             const badge =
-              item.href === '/admin/contacto'
+              item.href === "/admin/contacto"
                 ? unread.contacto
-                : item.href === '/admin/solicitudes-empleo'
+                : item.href === "/admin/solicitudes-empleo"
                   ? unread.solicitudes
                   : 0;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ''}`}
+                className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ""}`}
                 onClick={() => setSidebarOpen(false)}
               >
                 <span className="material-icons-outlined">{item.icon}</span>
                 <span>{item.label}</span>
-                {badge > 0 && <span className={styles.navBadge}>{badge > 99 ? '99+' : badge}</span>}
+                {badge > 0 && (
+                  <span className={styles.navBadge}>
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -221,7 +259,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="material-icons-outlined">logout</span>
             <span>Cerrar Sesión</span>
           </button>
-          <Link href="/" className={styles.homeLink} onClick={() => setSidebarOpen(false)}>
+          <Link
+            href="/"
+            className={styles.homeLink}
+            onClick={() => setSidebarOpen(false)}
+          >
             <span className="material-icons-outlined">home</span>
             <span>Volver al inicio</span>
           </Link>
@@ -255,28 +297,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <UnstyledButton className={styles.userMenuButton}>
                   <div className={styles.userMenu}>
                     <div className={styles.userAvatar}>
-                      {user?.email?.charAt(0).toUpperCase() || 'A'}
+                      {user?.email?.charAt(0).toUpperCase() || "A"}
                     </div>
                     <div className={styles.userInfo}>
                       <span className={styles.userName}>Administrador</span>
-                      <span className={styles.userEmail}>{user?.email || 'admin@carebydani.com'}</span>
+                      <span className={styles.userEmail}>
+                        {user?.email || "admin@carebydani.com"}
+                      </span>
                     </div>
                     <span className="material-icons-outlined">expand_more</span>
                   </div>
                 </UnstyledButton>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Label>{user?.email || 'admin@carebydani.com'}</Menu.Label>
+                <Menu.Label>{user?.email || "admin@carebydani.com"}</Menu.Label>
                 <Menu.Divider />
                 <Menu.Item
-                  leftSection={<span className="material-icons-outlined" style={{ fontSize: '18px' }}>logout</span>}
+                  leftSection={
+                    <span
+                      className="material-icons-outlined"
+                      style={{ fontSize: "18px" }}
+                    >
+                      logout
+                    </span>
+                  }
                   color="red"
                   onClick={handleLogout}
                 >
                   Cerrar Sesión
                 </Menu.Item>
                 <Menu.Item
-                  leftSection={<span className="material-icons-outlined" style={{ fontSize: '18px' }}>home</span>}
+                  leftSection={
+                    <span
+                      className="material-icons-outlined"
+                      style={{ fontSize: "18px" }}
+                    >
+                      home
+                    </span>
+                  }
                   component={Link}
                   href="/"
                 >
@@ -288,13 +346,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content */}
-        <div className={styles.content}>
-          {children}
-        </div>
+        <div className={styles.content}>{children}</div>
       </main>
 
       {/* Dark Mode Toggle */}
-      <button onClick={toggleDarkMode} className={styles.darkModeToggle} type="button">
+      <button
+        onClick={toggleDarkMode}
+        className={styles.darkModeToggle}
+        type="button"
+      >
         {darkMode ? (
           <span className="material-icons">light_mode</span>
         ) : (

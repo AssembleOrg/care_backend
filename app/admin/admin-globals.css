@@ -1,19 +1,15 @@
 /* Global styles for admin pages - Dark mode and improved contrast */
+/* NOTA: todo este archivo está scopeado bajo body.admin-active / body.admin-dark-mode
+   para que NO se filtre a la landing pública (causaba que el hero se pintara de azul). */
 
-/* Improve text contrast in light mode */
-:root {
+/* Improve text contrast in light mode (solo admin) */
+body.admin-active {
   --mantine-color-text: #1a1a1a;
   --mantine-color-dimmed: #5c5c5c;
 }
 
 /* Dark mode variables - only for admin */
-.adminContainer.dark :root {
-  --mantine-color-text: #f1f5f9;
-  --mantine-color-dimmed: #94a3b8;
-}
-
-/* For modals/dropdowns that render outside adminContainer */
-body.admin-dark-mode :root {
+body.admin-dark-mode {
   --mantine-color-text: #f1f5f9;
   --mantine-color-dimmed: #94a3b8;
 }
@@ -33,7 +29,9 @@ body.admin-dark-mode :root {
   background: #ffffff !important;
   color: #1a1a1a !important;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .mantine-Notification-title {
@@ -52,7 +50,9 @@ body.admin-dark-mode .mantine-Notification-root {
   background: #1e293b !important;
   color: #f1f5f9 !important;
   border: 1px solid #334155;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 .adminContainer.dark .mantine-Notification-title,
@@ -95,13 +95,15 @@ body.admin-dark-mode .mantine-Notification-description {
   border: 1px solid #b91c1c;
 }
 
-.mantine-Notification-root[data-variant="filled"][data-color="red"] .mantine-Notification-title,
+.mantine-Notification-root[data-variant="filled"][data-color="red"]
+  .mantine-Notification-title,
 .mantine-Notification-root[data-color="red"] .mantine-Notification-title {
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
-.mantine-Notification-root[data-variant="filled"][data-color="red"] .mantine-Notification-description,
+.mantine-Notification-root[data-variant="filled"][data-color="red"]
+  .mantine-Notification-description,
 .mantine-Notification-root[data-color="red"] .mantine-Notification-description {
   color: #fef2f2 !important;
   font-weight: 400 !important;
@@ -115,14 +117,17 @@ body.admin-dark-mode .mantine-Notification-description {
   border: 1px solid #15803d;
 }
 
-.mantine-Notification-root[data-variant="filled"][data-color="green"] .mantine-Notification-title,
+.mantine-Notification-root[data-variant="filled"][data-color="green"]
+  .mantine-Notification-title,
 .mantine-Notification-root[data-color="green"] .mantine-Notification-title {
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
-.mantine-Notification-root[data-variant="filled"][data-color="green"] .mantine-Notification-description,
-.mantine-Notification-root[data-color="green"] .mantine-Notification-description {
+.mantine-Notification-root[data-variant="filled"][data-color="green"]
+  .mantine-Notification-description,
+.mantine-Notification-root[data-color="green"]
+  .mantine-Notification-description {
   color: #f0fdf4 !important;
   font-weight: 400 !important;
 }
@@ -626,34 +631,34 @@ body.admin-dark-mode .mantine-Pagination-control[data-active] {
   color: white;
 }
 
-/* Improve text contrast in light mode - make text darker */
-.mantine-Text-root {
+/* Improve text contrast in light mode - make text darker (solo admin) */
+body.admin-active .mantine-Text-root {
   color: #0f172a !important;
 }
 
-.mantine-Text-root[data-c="dimmed"] {
+body.admin-active .mantine-Text-root[data-c="dimmed"] {
   color: #374151 !important;
 }
 
-.mantine-Title-root {
+body.admin-active .mantine-Title-root {
   color: #0f172a !important;
 }
 
-.mantine-Table-th {
+body.admin-active .mantine-Table-th {
   color: #0f172a !important;
   font-weight: 600;
 }
 
-.mantine-Table-td {
+body.admin-active .mantine-Table-td {
   color: #1f2937 !important;
 }
 
-.mantine-TextInput-label,
-.mantine-NumberInput-label,
-.mantine-Select-label,
-.mantine-Textarea-label,
-.mantine-DateInput-label,
-.mantine-MultiSelect-label {
+body.admin-active .mantine-TextInput-label,
+body.admin-active .mantine-NumberInput-label,
+body.admin-active .mantine-Select-label,
+body.admin-active .mantine-Textarea-label,
+body.admin-active .mantine-DateInput-label,
+body.admin-active .mantine-MultiSelect-label {
   color: #0f172a !important;
   font-weight: 600;
 }
@@ -703,21 +708,21 @@ body.admin-dark-mode .mantine-Pagination-control[data-active] {
   color: #ffffff !important;
 }
 
-/* Improve contrast for Paper content */
-.mantine-Paper-root .mantine-Text-root {
+/* Improve contrast for Paper content (solo admin) */
+body.admin-active .mantine-Paper-root .mantine-Text-root {
   color: #0f172a !important;
 }
 
-.mantine-Paper-root .mantine-Text-root[data-c="dimmed"] {
+body.admin-active .mantine-Paper-root .mantine-Text-root[data-c="dimmed"] {
   color: #374151 !important;
 }
 
 /* Improve contrast for Modal content - Light mode */
-.mantine-Modal-body .mantine-Text-root {
+body.admin-active .mantine-Modal-body .mantine-Text-root {
   color: #0f172a !important;
 }
 
-.mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
+body.admin-active .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
   color: #374151 !important;
 }
 
@@ -732,12 +737,12 @@ body.admin-dark-mode .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
   color: #cbd5e1 !important;
 }
 
-/* Improve contrast for Table content - Light mode */
-.mantine-Table-td .mantine-Text-root {
+/* Improve contrast for Table content - Light mode (solo admin) */
+body.admin-active .mantine-Table-td .mantine-Text-root {
   color: #1f2937 !important;
 }
 
-.mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
+body.admin-active .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
   color: #4b5563 !important;
 }
 
@@ -752,23 +757,23 @@ body.admin-dark-mode .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
   color: #cbd5e1 !important;
 }
 
-/* Improve contrast for Card content */
-.mantine-Card-root .mantine-Text-root {
+/* Improve contrast for Card content (solo admin) */
+body.admin-active .mantine-Card-root .mantine-Text-root {
   color: #0f172a !important;
 }
 
-.mantine-Card-root .mantine-Text-root[data-c="dimmed"] {
+body.admin-active .mantine-Card-root .mantine-Text-root[data-c="dimmed"] {
   color: #374151 !important;
 }
 
-/* Improve contrast for Stack/Group content */
-.mantine-Stack-root .mantine-Text-root,
-.mantine-Group-root .mantine-Text-root {
+/* Improve contrast for Stack/Group content (solo admin) */
+body.admin-active .mantine-Stack-root .mantine-Text-root,
+body.admin-active .mantine-Group-root .mantine-Text-root {
   color: #0f172a !important;
 }
 
-.mantine-Stack-root .mantine-Text-root[data-c="dimmed"],
-.mantine-Group-root .mantine-Text-root[data-c="dimmed"] {
+body.admin-active .mantine-Stack-root .mantine-Text-root[data-c="dimmed"],
+body.admin-active .mantine-Group-root .mantine-Text-root[data-c="dimmed"] {
   color: #374151 !important;
 }
 
@@ -929,7 +934,9 @@ body.admin-dark-mode .mantine-Pill-remove.multiselect-pill-remove-custom,
 .adminContainer.dark .multiselect-pill-custom .mantine-Pill-remove,
 body.admin-dark-mode .multiselect-pill-custom .mantine-Pill-remove,
 .adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-remove-custom,
-body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-remove-custom {
+body.admin-dark-mode
+  .mantine-MultiSelect-input
+  .multiselect-pill-remove-custom {
   color: #ffffff !important;
 }
 
@@ -937,8 +944,12 @@ body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-remove-custom 
 .mantine-Pill-remove.multiselect-pill-remove-custom:hover,
 .multiselect-pill-custom .mantine-Pill-remove:hover,
 .mantine-MultiSelect-input .multiselect-pill-remove-custom:hover,
-.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-remove-custom:hover,
-body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-remove-custom:hover {
+.adminContainer.dark
+  .mantine-MultiSelect-input
+  .multiselect-pill-remove-custom:hover,
+body.admin-dark-mode
+  .mantine-MultiSelect-input
+  .multiselect-pill-remove-custom:hover {
   background: rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
 }
@@ -1080,9 +1091,12 @@ body.admin-dark-mode .mantine-MultiSelect-input .mantine-PillGroup-group {
 }
 
 /* Ocultar placeholder cuando hay pills seleccionados */
-.mantine-MultiSelect-input:has(.mantine-MultiSelect-pill) .mantine-MultiSelect-inputField::placeholder,
-.mantine-MultiSelect-input:has(.mantine-Pill-root) .mantine-MultiSelect-inputField::placeholder,
-.mantine-MultiSelect-input:has(.multiselect-pill-custom) .mantine-MultiSelect-inputField::placeholder {
+.mantine-MultiSelect-input:has(.mantine-MultiSelect-pill)
+  .mantine-MultiSelect-inputField::placeholder,
+.mantine-MultiSelect-input:has(.mantine-Pill-root)
+  .mantine-MultiSelect-inputField::placeholder,
+.mantine-MultiSelect-input:has(.multiselect-pill-custom)
+  .mantine-MultiSelect-inputField::placeholder {
   opacity: 0 !important;
   color: transparent !important;
 }
