@@ -12,9 +12,11 @@
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #eaeaea;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-soft);
   z-index: 100;
   padding: 0;
   max-width: 100%;
@@ -60,59 +62,113 @@
 }
 
 .logo {
-  color: #2C8894 !important;
+  color: var(--color-teal) !important;
   font-weight: 700;
 }
 
 /* Asegurar que los enlaces del navbar sean legibles */
 .navbar a:not(.ctaButton) {
-  color: #1a1a2e !important;
+  color: var(--color-ink) !important;
 }
 
 .navbar a:not(.ctaButton):hover {
-  color: #2C8894 !important;
+  color: var(--color-teal) !important;
 }
 
 .ctaButton {
-  background: #2C8894;
+  background: var(--color-teal);
   border: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .ctaButton:hover {
-  background: #1E5F66;
+  background: var(--color-teal-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(44, 136, 148, 0.3);
+  box-shadow: var(--shadow-soft);
 }
 
 .secondaryButton {
-  border-color: #2C8894 !important;
-  color: #2C8894 !important;
+  border-color: var(--color-teal) !important;
+  color: var(--color-teal) !important;
 }
 
 .secondaryButton:hover {
-  background: #2C8894 !important;
+  background: var(--color-teal) !important;
   color: white !important;
 }
 
 /* Botón outline en navbar - mejor contraste */
 .navbar .mantine-Button-root[data-variant="outline"] {
-  color: #2C8894 !important;
-  border-color: #2C8894 !important;
+  color: var(--color-teal) !important;
+  border-color: var(--color-teal) !important;
 }
 
 .navbar .mantine-Button-root[data-variant="outline"]:hover {
-  background-color: #2C8894 !important;
+  background-color: var(--color-teal) !important;
   color: white !important;
 }
 
-/* Hero */
+/* Drawer móvil — fondo teal profundo, links blancos grandes */
+.mobileDrawer {
+  background: var(--color-teal-deep) !important;
+}
+
+.mobileDrawerHeader {
+  background: var(--color-teal-deep) !important;
+}
+
+.mobileDrawer :global(.mantine-Drawer-close) {
+  color: var(--color-snow);
+}
+
+.drawerLink {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-snow) !important;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.drawerLink:hover {
+  color: var(--color-gold) !important;
+}
+
+/* CTA dorado global — patrón de máxima conversión (design.md §3) */
+.ctaGold,
+.ctaGold:hover {
+  background: var(--color-gold) !important;
+  color: var(--color-teal-deep) !important;
+  border: none !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 700 !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.ctaGold:hover {
+  background: var(--color-gold-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold-glow) !important;
+}
+
+/* ───────── Hero — contraste dramático (design.md §5) ───────── */
+.heroDark {
+  color: var(--color-snow);
+}
+
 .hero {
-  padding-top: 70px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-  min-height: 90vh;
+  padding-top: 80px;
+  background: var(--color-teal-deep);
+  min-height: 85vh;
   display: flex;
   align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .heroContainer {
@@ -128,35 +184,51 @@
   justify-content: flex-start;
 }
 
-.heroButton {
-  width: 100%;
-  max-width: 300px;
+.heroTrust {
+  justify-content: flex-start;
 }
 
-.heroBadge {
-  background: rgba(44, 136, 148, 0.1);
-  color: #2C8894;
-  font-weight: 600;
+.heroButton {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* CTA secundario "fantasma" sobre teal */
+.heroGhost {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  color: var(--color-snow) !important;
+  border-radius: var(--radius-pill) !important;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.heroGhost:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--color-snow) !important;
 }
 
 .heroTitle {
-  font-size: 4rem;
-  font-weight: 800;
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
   line-height: 1.1;
-  color: #1a1a2e;
+  color: var(--color-snow);
 }
 
-.heroAccent {
-  background: linear-gradient(to right, #2C8894, #D4AF37);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.heroSubtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+  line-height: 1.7;
+  max-width: 520px;
 }
 
+/* Imagen con efecto blend hacia el teal de la izquierda */
 .heroImageWrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
+  border-radius: var(--radius-card);
 }
 
 .heroImageWrapper :global(img) {
@@ -166,43 +238,15 @@
   display: block;
 }
 
-.heroRatingCard {
+/* Capa de fusión: teal-deep → transparente + calidez ámbar */
+.heroImageWrapper::after {
+  content: "";
   position: absolute;
-  bottom: -24px;
-  left: -24px;
-  background: white;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  animation: bounce 3s infinite;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.heroSubtitle {
-  color: #4a5568 !important;
-  line-height: 1.7;
-  max-width: 500px;
-}
-
-.heroImagePlaceholder {
-  background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
-  border-radius: 20px;
-  height: 400px;
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed #ddd;
-  aspect-ratio: 4/3;
-}
-
-@media (max-width: 768px) {
-  .heroImagePlaceholder {
-    height: 250px;
-    margin-top: 32px;
-  }
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--color-teal-deep) 0%, transparent 45%),
+    linear-gradient(to bottom right, rgba(212, 175, 55, 0.18), transparent 60%);
+  pointer-events: none;
 }
 
 /* Sections */
@@ -210,15 +254,16 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #2C8894;
+  color: var(--color-teal);
   margin-bottom: 8px;
   text-transform: uppercase;
 }
 
 .sectionTitle {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #1a1a2e;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 600;
+  color: var(--color-ink);
   line-height: 1.2;
 }
 
@@ -239,7 +284,9 @@
   border: 1px solid #eaeaea;
   border-radius: 16px;
   padding: 24px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .bentoCard:hover {
@@ -272,7 +319,7 @@
 
 .cardBadge {
   background: rgba(44, 136, 148, 0.1);
-  color: #2C8894;
+  color: #2c8894;
 }
 
 .cardTitle {
@@ -280,7 +327,7 @@
 }
 
 .cardIcon {
-  color: #2C8894;
+  color: #2c8894;
 }
 
 .cardStats {
@@ -291,7 +338,7 @@
 }
 
 .statNumber {
-  color: #2C8894;
+  color: #2c8894;
 }
 
 /* Preview Section */
@@ -300,7 +347,7 @@
 }
 
 .checkIcon {
-  color: #00D9FF;
+  color: #00d9ff;
 }
 
 .previewCard {
@@ -332,7 +379,7 @@
 }
 
 .totalAmount {
-  color: #2C8894;
+  color: #2c8894;
 }
 
 /* Timeline */
@@ -356,7 +403,7 @@
   transform: translateX(-50%);
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #2C8894 0%, #D4AF37 100%);
+  background: linear-gradient(135deg, #2c8894 0%, #d4af37 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -369,7 +416,7 @@
 }
 
 .stepIcon {
-  color: #2C8894;
+  color: #2c8894;
 }
 
 /* Security */
@@ -403,7 +450,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2C8894;
+  color: #2c8894;
 }
 
 /* FAQ */
@@ -411,9 +458,30 @@
   background: #ffffff;
 }
 
+/* Columna izquierda del FAQ — sticky en desktop */
+.faqSticky {
+  position: sticky;
+  top: 100px;
+}
+
 .accordion {
   --accordion-item-bg: #f8f9fa;
   --accordion-control-fg: #1a1a2e;
+}
+
+.faqSection :global(.mantine-Accordion-item) {
+  background: var(--surface-warm);
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-card) !important;
+}
+
+.faqSection :global(.mantine-Accordion-item[data-active]) {
+  border-color: var(--color-teal) !important;
+  box-shadow: var(--shadow-soft);
+}
+
+.faqSection :global(.mantine-Accordion-control:hover) {
+  background: var(--surface-teal-soft);
 }
 
 /* CTA Section */
@@ -422,7 +490,7 @@
 }
 
 .ctaCard {
-  background: linear-gradient(135deg, #2C8894 0%, #1E5F66 100%);
+  background: linear-gradient(135deg, #2c8894 0%, #1e5f66 100%);
   border-radius: 24px;
   padding: 60px;
 }
@@ -433,12 +501,17 @@
 }
 
 .featureCard {
-  transition: transform 0.3s, box-shadow 0.3s;
+  background: var(--surface-warm) !important;
+  border: none !important;
+  border-radius: var(--radius-card) !important;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 }
 
 .featureCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .featureIcon {
@@ -449,23 +522,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2C8894;
+  color: var(--color-teal);
   transition: all 0.3s;
 }
 
 .featureCard:hover .featureIcon {
-  background: #2C8894;
-  color: white;
+  background: var(--color-gold);
+  color: var(--color-teal-deep);
 }
 
 .servicesSection {
-  background: #F8FAFC;
+  background: #f8fafc;
 }
 
 .serviceImageWrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
 }
 
 .serviceImageWrapper :global(img) {
@@ -475,28 +550,93 @@
   display: block;
 }
 
+/* Efecto premium: calidez ámbar + leve velo teal (espejo del hero) */
+.serviceImageWrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to bottom left, rgba(212, 175, 55, 0.18), transparent 55%),
+    linear-gradient(to top, rgba(16, 63, 74, 0.25), transparent 45%);
+  pointer-events: none;
+}
+
+.serviceItem {
+  padding: 12px;
+  border-radius: var(--radius-input);
+  transition: background 0.25s ease;
+  cursor: default;
+}
+
+.serviceItem:hover {
+  background: var(--surface-teal-soft);
+}
+
 .serviceIcon {
   width: 56px;
   height: 56px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2C8894;
+  color: var(--color-teal);
   flex-shrink: 0;
+  transition:
+    color 0.25s ease,
+    background 0.25s ease;
+}
+
+.serviceItem:hover .serviceIcon {
+  background: var(--color-gold);
+  color: var(--color-teal-deep);
 }
 
 .testimonialSection {
-  background: #2C8894;
+  background: linear-gradient(
+    135deg,
+    var(--color-teal) 0%,
+    var(--color-teal-dark) 100%
+  );
   position: relative;
   overflow: hidden;
   min-height: auto;
 }
 
+/* Contenedor compacto — menos altura que el resto de secciones */
+.testimonialContainer {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Comillas grandes que enmarcan el testimonio */
+.testimonialQuote {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 7vw, 4.5rem);
+  line-height: 0.7;
+  color: var(--color-snow);
+  opacity: 0.15;
+  margin-bottom: -0.5rem;
+}
+
+/* Avatar con borde dorado — envuelve la foto de la reseña */
+.testimonialAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid var(--color-gold);
+  overflow: hidden;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
 .testimonialSection::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
@@ -514,24 +654,39 @@
 }
 
 .contactCard {
-  background: linear-gradient(to right, #f8f9fa, #e9ecef);
-  border: 1px solid #eaeaea;
+  background: var(--surface-warm);
+  border: none;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Sección Empleo — fondo teal muy claro para separarla del Contacto */
+.employmentCard {
+  background: var(--surface-teal-soft);
 }
 
 .contactInput {
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: white;
+  padding: 14px 16px;
+  border-radius: var(--radius-input);
+  border: none;
+  background: var(--color-mist);
+  font-family: var(--font-sans);
   font-size: 1rem;
   transition: all 0.2s;
 }
 
 .contactInput:focus {
   outline: none;
-  border-color: #2C8894;
-  box-shadow: 0 0 0 3px rgba(44, 136, 148, 0.1);
+  box-shadow: 0 0 0 3px rgba(44, 136, 148, 0.15);
+}
+
+.privacyNote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--color-body);
 }
 
 /* Footer */
@@ -563,11 +718,11 @@
   .bentoGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .bentoLarge {
     grid-column: span 2;
   }
-  
+
   .bentoWide {
     grid-column: span 2;
   }
@@ -578,18 +733,18 @@
     padding-left: 12px;
     padding-right: 12px;
   }
-  
+
   .navbarGroup {
     min-height: 60px;
     height: 60px !important;
     justify-content: space-between !important;
   }
-  
+
   .navbarLogo {
     width: clamp(100px, 18vw, 100px) !important;
     height: auto !important;
   }
-  
+
   .mobileLoginGroup {
     display: flex !important;
     visibility: visible !important;
@@ -597,7 +752,7 @@
     position: relative;
     z-index: 10;
   }
-  
+
   .mobileLoginButton {
     display: flex !important;
     visibility: visible !important;
@@ -605,53 +760,47 @@
     font-size: 0.875rem;
     padding: 8px 16px;
   }
-  
+
   .navbar a:not(.ctaButton) {
     display: none;
   }
-  
+
   .hero {
     padding-top: 80px;
     min-height: auto;
     padding-bottom: 40px;
     overflow-x: hidden;
   }
-  
+
   .heroContainer {
     padding-top: 40px;
     padding-bottom: 40px;
     padding-left: 12px;
     padding-right: 12px;
   }
-  
+
   .heroTitle {
-    font-size: 2rem;
-    line-height: 1.2;
+    line-height: 1.15;
   }
-  
+
   .heroSubtitle {
     font-size: 0.95rem;
     line-height: 1.6;
   }
-  
-  .sectionTitle {
-    font-size: 1.75rem;
-    line-height: 1.3;
-  }
-  
+
   .sectionContainer {
     padding-top: 40px;
     padding-bottom: 40px;
     padding-left: 12px;
     padding-right: 12px;
   }
-  
+
   .heroImageWrapper {
     margin-top: 24px;
     width: 100%;
     overflow: hidden;
   }
-  
+
   .heroImageWrapper :global(img) {
     width: 100% !important;
     height: auto !important;
@@ -659,39 +808,46 @@
     max-height: 400px;
     object-fit: cover;
   }
-  
+
   .serviceImageWrapper {
     width: 100%;
     overflow: hidden;
   }
-  
+
   .serviceImageWrapper :global(img) {
     width: 100% !important;
     height: auto !important;
     max-width: 100% !important;
   }
-  
-  .heroButtons {
+
+  .faqSticky {
+    position: static;
+    top: auto;
+    margin-bottom: 8px;
+  }
+
+  .heroButtons,
+  .heroTrust {
     justify-content: center;
   }
-  
+
   .heroButton {
     width: 100%;
     max-width: 100%;
   }
-  
+
   .footerContainer {
     padding-top: 30px;
     padding-bottom: 30px;
     padding-left: 12px;
     padding-right: 12px;
   }
-  
+
   .bentoGrid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .bentoLarge,
   .bentoMedium,
   .bentoSmall,
@@ -699,48 +855,48 @@
     grid-column: span 1;
     grid-row: span 1;
   }
-  
+
   .bentoCard {
     padding: 20px;
   }
-  
+
   .cardStats {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .cardStats > div {
     width: 100%;
   }
-  
+
   .previewCard {
     overflow-x: auto;
   }
-  
+
   .previewTable {
     min-width: 600px;
   }
-  
+
   .timelineCard {
     padding: 24px;
   }
-  
+
   .securityImagePlaceholder {
     height: 300px;
   }
-  
+
   .ctaCard {
     padding: 40px 24px;
   }
-  
+
   .ctaCard h2 {
     font-size: 1.5rem;
   }
-  
+
   .footer {
     padding: 24px 16px;
   }
-  
+
   .footer > div {
     flex-direction: column;
     gap: 16px;
@@ -753,45 +909,35 @@
     padding-left: 8px;
     padding-right: 8px;
   }
-  
-  .heroTitle {
-    font-size: 1.75rem;
-    line-height: 1.2;
-  }
-  
-  .sectionTitle {
-    font-size: 1.5rem;
-    line-height: 1.3;
-  }
-  
+
   .bentoCard {
     padding: 16px;
   }
-  
+
   .ctaButton {
     font-size: 0.9rem;
     padding: 10px 20px;
   }
-  
+
   .heroSubtitle {
     font-size: 0.9rem;
   }
-  
+
   .contactInput {
     font-size: 0.9rem;
     padding: 10px 14px;
   }
-  
+
   .footerContainer {
     padding-top: 24px;
     padding-bottom: 24px;
   }
-  
+
   .footer img {
     max-width: 150px;
     height: auto;
   }
-  
+
   .sectionContainer {
     padding-top: 30px;
     padding-bottom: 30px;
