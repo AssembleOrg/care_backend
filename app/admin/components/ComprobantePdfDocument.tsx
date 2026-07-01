@@ -84,9 +84,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#334155',
   },
-  colFechas: { width: '40%' },
-  colCuidadores: { width: '40%' },
-  colHoras: { width: '20%' },
   totalSection: {
     marginTop: 20,
     flexDirection: 'row',
@@ -123,11 +120,9 @@ const styles = StyleSheet.create({
 });
 
 export interface FilaPdfData {
-  periodo: string;
-  cuidadorNombre: string;
+  descripcion: string;
   horas: number;
-  precioPorHora: number;
-  subtotal: number;
+  total: number;
 }
 
 export interface ComprobantePdfProps {
@@ -144,7 +139,7 @@ export const ComprobantePdfDocument: React.FC<ComprobantePdfProps> = ({
   filas,
 }) => {
   const totalHorasGenerales = filas.reduce((acc, curr) => acc + curr.horas, 0);
-  const totalLiquidacion = filas.reduce((acc, curr) => acc + curr.subtotal, 0);
+  const totalLiquidacion = filas.reduce((acc, curr) => acc + curr.total, 0);
 
   return (
     <Document>
@@ -174,25 +169,23 @@ export const ComprobantePdfDocument: React.FC<ComprobantePdfProps> = ({
 
         <View style={styles.table}>
           <View style={styles.tableRowHeader}>
-            <View style={[styles.tableColHeader, { width: '30%' }]}><Text>Período de Guardia</Text></View>
-            <View style={[styles.tableColHeader, { width: '30%' }]}><Text>Cuidador</Text></View>
-            <View style={[styles.tableColHeader, { width: '15%' }]}><Text>Horas</Text></View>
-            <View style={[styles.tableColHeader, { width: '25%' }]}><Text>Precio x Hora</Text></View>
+            <View style={[styles.tableColHeader, { width: '50%' }]}><Text>Descripción</Text></View>
+            <View style={[styles.tableColHeader, { width: '25%' }]}><Text>Cantidad de Horas</Text></View>
+            <View style={[styles.tableColHeader, { width: '25%' }]}><Text>Total</Text></View>
           </View>
 
           {filas.map((fila, index) => (
             <View style={styles.tableRow} key={index}>
-              <View style={[styles.tableCol, { width: '30%' }]}><Text>{fila.periodo}</Text></View>
-              <View style={[styles.tableCol, { width: '30%' }]}><Text>{fila.cuidadorNombre}</Text></View>
-              <View style={[styles.tableCol, { width: '15%' }]}><Text>{fila.horas.toFixed(2)}h</Text></View>
-              <View style={[styles.tableCol, { width: '25%' }]}><Text>${fila.precioPorHora.toLocaleString('es-AR', { minimumFractionDigits: 2, useGrouping: true })}</Text></View>
+              <View style={[styles.tableCol, { width: '50%' }]}><Text>{fila.descripcion}</Text></View>
+              <View style={[styles.tableCol, { width: '25%' }]}><Text>{fila.horas.toFixed(2)}h</Text></View>
+              <View style={[styles.tableCol, { width: '25%' }]}><Text>${fila.total.toLocaleString('es-AR', { minimumFractionDigits: 2, useGrouping: true })}</Text></View>
             </View>
           ))}
-          
+
           {filas.length === 0 && (
              <View style={styles.tableRow}>
                 <View style={{ width: '100%', padding: 8, fontSize: 10, textAlign: 'center' }}>
-                   <Text>No hubo guardias registradas en este período.</Text>
+                   <Text>No hay detalle registrado en este período.</Text>
                 </View>
              </View>
           )}

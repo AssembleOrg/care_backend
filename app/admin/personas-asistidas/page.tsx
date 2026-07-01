@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect } from '@mantine/core';
+import { Container, Title, Button, Table, Modal, TextInput, Textarea, NumberInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
@@ -59,60 +59,42 @@ export default function PersonasAsistidasPage() {
   const [comprobantePersona, setComprobantePersona] = useState<PersonaAsistida | null>(null);
   const [comprobanteDesde, setComprobanteDesde] = useState<Date | null>(null);
   const [comprobanteHasta, setComprobanteHasta] = useState<Date | null>(null);
+  const [comprobanteDescripcion, setComprobanteDescripcion] = useState('');
+  const [comprobanteHoras, setComprobanteHoras] = useState<number | ''>('');
+  const [comprobanteTotal, setComprobanteTotal] = useState<number | ''>('');
   const [generandoPdf, setGenerandoPdf] = useState(false);
 
   const handleOpenComprobante = (persona: PersonaAsistida) => {
     setComprobantePersona(persona);
     setComprobanteDesde(null);
     setComprobanteHasta(null);
+    setComprobanteDescripcion('');
+    setComprobanteHoras('');
+    setComprobanteTotal('');
     openComprobanteModal();
   };
 
+  const comprobanteValido =
+    !!comprobantePersona &&
+    !!comprobanteDesde &&
+    !!comprobanteHasta &&
+    comprobanteDescripcion.trim() !== '' &&
+    comprobanteHoras !== '' &&
+    comprobanteTotal !== '';
+
   const handleGenerarComprobante = async () => {
     if (!comprobantePersona || !comprobanteDesde || !comprobanteHasta) return;
-    
+    if (comprobanteDescripcion.trim() === '' || comprobanteHoras === '' || comprobanteTotal === '') return;
+
     setGenerandoPdf(true);
     try {
-      const response = await fetch(`/api/v1/asignaciones?all=true&personaId=${comprobantePersona.id}`);
-      const data = await response.json();
-      
-      if (!data.ok) throw new Error('Error al obtener asignaciones');
-      
-      const asignaciones = data.data as any[];
-      
-      // Filtrar las asignaciones que se solapan con el periodo
-      const asignacionesFiltradas = asignaciones.filter(asig => {
-        const asigInicio = new Date(asig.fechaInicio);
-        const asigFin = asig.fechaFin ? new Date(asig.fechaFin) : new Date(8640000000000000); // Max date if no end date
-        
-        // Return true if ranges overlap
-        return asigInicio <= comprobanteHasta && asigFin >= comprobanteDesde;
-      });
-
-      // Mapear al modelo tabular del PDF (una fila por cuidador/guardia)
-      const filasPdf: FilaPdfData[] = [];
-      asignacionesFiltradas.forEach(asig => {
-        const dStrInicio = new Date(asig.fechaInicio).toLocaleDateString('es-AR');
-        const dStrFin = asig.fechaFin ? new Date(asig.fechaFin).toLocaleDateString('es-AR') : '';
-        const periodo = `${dStrInicio}${dStrFin ? ` - ${dStrFin}` : ''}`;
-
-        if (asig.horasPorCuidador) {
-          asig.cuidadoresIds.forEach((id: string, index: number) => {
-            const stats = asig.horasPorCuidador[id];
-            if (stats) {
-              const horas = stats.horas || 0;
-              const precioPorHora = stats.precioPorHora || 0;
-              filasPdf.push({
-                periodo,
-                cuidadorNombre: asig.cuidadoresNombres?.[index] || 'Sin nombre',
-                horas,
-                precioPorHora,
-                subtotal: horas * precioPorHora,
-              });
-            }
-          });
-        }
-      });
+      const filasPdf: FilaPdfData[] = [
+        {
+          descripcion: comprobanteDescripcion.trim(),
+          horas: Number(comprobanteHoras),
+          total: Number(comprobanteTotal),
+        },
+      ];
 
       const blob = await pdf(
         <ComprobantePdfDocument 
@@ -831,6 +813,36 @@ export default function PersonasAsistidasPage() {
               }}
               minDate={comprobanteDesde || undefined}
             />
+            <Textarea
+              label="Descripción"
+              required
+              placeholder="Descripción del servicio"
+              autosize
+              minRows={2}
+              value={comprobanteDescripcion}
+              onChange={(e) => setComprobanteDescripcion(e.currentTarget.value)}
+            />
+            <NumberInput
+              label="Cantidad de Horas"
+              required
+              placeholder="0"
+              min={0}
+              decimalScale={2}
+              value={comprobanteHoras}
+              onChange={(val) => setComprobanteHoras(val === '' ? '' : Number(val))}
+            />
+            <NumberInput
+              label="Total"
+              required
+              placeholder="0"
+              min={0}
+              decimalScale={2}
+              prefix="$ "
+              thousandSeparator="."
+              decimalSeparator=","
+              value={comprobanteTotal}
+              onChange={(val) => setComprobanteTotal(val === '' ? '' : Number(val))}
+            />
             <Group justify="flex-end" mt="md">
               <Button variant="subtle" onClick={closeComprobanteModal}>
                 Cancelar
@@ -839,7 +851,7 @@ export default function PersonasAsistidasPage() {
                 color="fucsia"
                 onClick={handleGenerarComprobante}
                 loading={generandoPdf}
-                disabled={!comprobanteDesde || !comprobanteHasta || generandoPdf}
+                disabled={!comprobanteValido || generandoPdf}
               >
                 Generar Comprobante
               </Button>
