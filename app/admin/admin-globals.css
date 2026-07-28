@@ -177,13 +177,31 @@ body.admin-active .mantine-Select-input,
 body.admin-active .mantine-Textarea-input,
 body.admin-active .mantine-DateInput-input,
 body.admin-active .mantine-MultiSelect-input,
+/* En PasswordInput el input real es `innerInput`; `input` es el envoltorio que
+   además contiene el ojito. Sin él, la caja quedaba blanca con texto claro. */
+body.admin-active .mantine-PasswordInput-input,
 body.admin-active input[type="text"],
 body.admin-active input[type="email"],
 body.admin-active input[type="number"],
 body.admin-active input[type="time"],
+body.admin-active input[type="password"],
 body.admin-active textarea {
   background: var(--admin-bg);
   border-color: var(--admin-border-strong);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-PasswordInput-innerInput {
+  background: transparent;
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-PasswordInput-visibilityToggle {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active .mantine-PasswordInput-visibilityToggle:hover {
+  background: var(--admin-surface-2);
   color: var(--admin-text);
 }
 
@@ -193,6 +211,8 @@ body.admin-active .mantine-Select-input:focus,
 body.admin-active .mantine-Textarea-input:focus,
 body.admin-active .mantine-DateInput-input:focus,
 body.admin-active .mantine-MultiSelect-input:focus,
+body.admin-active .mantine-PasswordInput-input:focus,
+body.admin-active .mantine-PasswordInput-input:focus-within,
 body.admin-active input[type="text"]:focus,
 body.admin-active input[type="email"]:focus,
 body.admin-active input[type="number"]:focus,
@@ -214,6 +234,7 @@ body.admin-active .mantine-Select-label,
 body.admin-active .mantine-Textarea-label,
 body.admin-active .mantine-DateInput-label,
 body.admin-active .mantine-MultiSelect-label,
+body.admin-active .mantine-PasswordInput-label,
 body.admin-active .mantine-Checkbox-label {
   color: var(--admin-text);
   font-weight: 500;
@@ -267,6 +288,66 @@ body.admin-active .mantine-Menu-label {
 
 body.admin-active .mantine-Menu-divider {
   border-color: var(--admin-border);
+}
+
+/* ── §8b Calendario (DateInput / DatePickerInput) ──
+   El popover del calendario es un `.mantine-Popover-dropdown` pelado: no lleva
+   clase del componente, así que la regla de §8 no lo alcanzaba y quedaba con
+   fondo blanco y los días en --admin-text-dimmed encima: ilegible.
+   Se lo trae al esquema oscuro del panel, igual que el resto de los dropdowns.
+   El `:has()` es la única forma de distinguirlo de otros popovers. */
+body.admin-active .mantine-Popover-dropdown:has(.mantine-DateInput-month),
+body.admin-active .mantine-Popover-dropdown:has(.mantine-DatePickerInput-month),
+body.admin-active .mantine-Popover-dropdown:has(.mantine-MonthPickerInput-month),
+body.admin-active .mantine-Popover-dropdown:has([class*="-calendarHeader"]) {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+}
+
+/* Los selectores por prefijo cubren DateInput, DatePickerInput y MonthPickerInput
+   sin repetir el bloque tres veces. */
+body.admin-active [class*="-calendarHeaderLevel"],
+body.admin-active [class*="-calendarHeaderControl"],
+body.admin-active [class*="-pickerControl"],
+body.admin-active [class*="-monthCell"] [class*="-day"] {
+  color: var(--admin-text);
+}
+
+body.admin-active [class*="-weekdaysRow"] [class*="-weekday"] {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active [class*="-calendarHeaderControl"]:hover,
+body.admin-active [class*="-monthCell"] [class*="-day"]:hover,
+body.admin-active [class*="-pickerControl"]:hover {
+  background: var(--admin-surface-2);
+}
+
+/* Días del mes anterior/siguiente y deshabilitados: presentes pero apagados. */
+body.admin-active [class*="-day"][data-outside],
+body.admin-active [class*="-day"]:disabled,
+body.admin-active [class*="-day"][data-disabled] {
+  color: var(--admin-text-muted);
+  opacity: 0.55;
+}
+
+/* Mantine pinta los fines de semana en rojo del tema, que sobre fondo oscuro
+   baja de 4.5:1. Se usa el rojo del panel, medido para este fondo. */
+body.admin-active [class*="-day"][data-weekend] {
+  color: var(--admin-danger);
+}
+
+body.admin-active [class*="-day"][data-today] {
+  border: 1px solid var(--admin-accent-text);
+}
+
+/* El seleccionado gana siempre: va después de outside/weekend a propósito. */
+body.admin-active [class*="-day"][data-selected],
+body.admin-active [class*="-day"][data-in-range],
+body.admin-active [class*="-pickerControl"][data-selected] {
+  background: var(--admin-accent);
+  color: var(--admin-on-accent);
+  opacity: 1;
 }
 
 /* ── §9 Pills del MultiSelect ────────────────
