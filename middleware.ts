@@ -8,10 +8,11 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Only run the auth/session middleware on protected admin routes.
-     * Public pages and static assets skip the Supabase getUser() network
-     * call, which was previously executed on every single request.
+     * Only run the auth/session middleware on protected areas (admin panel
+     * and employee portal). Public pages and static assets skip the Supabase
+     * getUser() network call, which was previously executed on every request.
      */
     '/admin/:path*',
+    '/empleado/:path*',
   ],
 };

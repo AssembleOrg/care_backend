@@ -19,6 +19,10 @@ const createSchema = z.object({
   telefono: z.string().optional(),
   direccion: z.string().optional(),
   telefonoContactoEmergencia: z.string().optional(),
+  // Punto del domicilio para validar el fichaje del cuidador.
+  lat: z.number().min(-90).max(90).optional().nullable(),
+  lng: z.number().min(-180).max(180).optional().nullable(),
+  radioMetros: z.number().int().min(20).max(1000).optional(),
 });
 
 async function handleGET(request: NextRequest) {
@@ -87,6 +91,9 @@ async function handlePOST(request: NextRequest) {
       direccionHash,
       telefonoContactoEmergenciaEnc,
       telefonoContactoEmergenciaHash,
+      lat: validated.lat ?? null,
+      lng: validated.lng ?? null,
+      radioMetros: validated.radioMetros ?? 50,
     });
 
     // Audit

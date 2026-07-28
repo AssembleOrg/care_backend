@@ -1,11 +1,11 @@
 'use client';
 
-import { Container, Title, Paper, Stack, Group, Text, Select, NumberInput, Button, Card, SimpleGrid, Divider } from '@mantine/core';
+import { Container, Title, Paper, Stack, Group, Text, Select, NumberInput, Button, Card, SimpleGrid, Divider, Modal, Table, Badge, Loader, Alert, Tooltip, ActionIcon } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import { parseApiError } from '../utils/parseApiError';
-import { IconCalculator, IconCheck, IconCalendar, IconCurrencyDollar } from '@tabler/icons-react';
+import { IconCalculator, IconCheck, IconCalendar, IconCurrencyDollar, IconClockHour4, IconAlertTriangle } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 
@@ -16,6 +16,25 @@ interface Cuidador {
   nombreCompleto: string;
 }
 
+interface FichajeResumen {
+  id: string;
+  personaNombre: string;
+  entradaAt: string;
+  salidaAt: string;
+  horas: number;
+  pendienteDeRevision: boolean;
+}
+
+interface ResumenHoras {
+  desde: string | null;
+  hasta: string | null;
+  totalHoras: number;
+  horasPendientes: number;
+  turnosSinCerrar: number;
+  ultimaLiquidacion: { fecha: string; semanaFin: string; horasTrabajadas: number } | null;
+  detalle: FichajeResumen[];
+}
+
 export default function LiquidacionesPage() {
   const [cuidadores, setCuidadores] = useState<Cuidador[]>([]);
   const [cuidadorId, setCuidadorId] = useState<string>('');
@@ -24,6 +43,9 @@ export default function LiquidacionesPage() {
   const [fechaFin, setFechaFin] = useState<Date | null>(new Date());
   const [horasTrabajadas, setHorasTrabajadas] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [resumenAbierto, setResumenAbierto] = useState(false);
+  const [resumen, setResumen] = useState<ResumenHoras | null>(null);
+  const [cargandoResumen, setCargandoResumen] = useState(false);
 
   useEffect(() => {
     fetch('/api/v1/cuidadores?all=true')
@@ -60,6 +82,41 @@ export default function LiquidacionesPage() {
   const totalMonto = useMemo(() => {
     return horasTrabajadas * precioPorHora;
   }, [horasTrabajadas, precioPorHora]);
+
+  // Horas fichadas desde la última liquidación del cuidador seleccionado.
+  const abrirResumen = async () => {
+    if (!cuidadorId) {
+      notifications.show({ title: 'Falta el cuidador', message: 'Elegí primero a quién vas a liquidar', color: 'red' });
+      return;
+    }
+    setResumenAbierto(true);
+    setCargandoResumen(true);
+    setResumen(null);
+    try {
+      const res = await fetch(`/api/v1/fichajes/resumen?cuidadorId=${cuidadorId}`);
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error?.message || 'No se pudieron cargar las horas fichadas');
+      setResumen(data.data);
+    } catch (error: unknown) {
+      notifications.show({ title: 'Error', message: parseApiError(error), color: 'red' });
+      setResumenAbierto(false);
+    } finally {
+      setCargandoResumen(false);
+    }
+  };
+
+  const usarHorasFichadas = () => {
+    if (!resumen) return;
+    setHorasTrabajadas(resumen.totalHoras);
+    if (resumen.desde) setFechaInicio(new Date(resumen.desde));
+    if (resumen.hasta) setFechaFin(new Date(resumen.hasta));
+    setResumenAbierto(false);
+    notifications.show({
+      title: 'Horas cargadas',
+      message: `Se cargaron ${resumen.totalHoras} horas fichadas. Podés ajustarlas antes de liquidar.`,
+      color: 'green',
+    });
+  };
 
   const handleLiquidar = async () => {
     if (!cuidadorId) {
@@ -185,15 +242,30 @@ export default function LiquidacionesPage() {
               <Title order={3}>Configuración de Liquidación</Title>
             </Group>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-              <Select
-                label="Cuidador"
-                required
-                placeholder="Seleccionar cuidador"
-                data={cuidadores.map(c => ({ value: c.id, label: c.nombreCompleto }))}
-                value={cuidadorId}
-                onChange={(value) => setCuidadorId(value || '')}
-                searchable
-              />
+              <Group align="flex-end" gap="xs" wrap="nowrap">
+                <Select
+                  label="Cuidador"
+                  required
+                  placeholder="Seleccionar cuidador"
+                  data={cuidadores.map(c => ({ value: c.id, label: c.nombreCompleto }))}
+                  value={cuidadorId}
+                  onChange={(value) => setCuidadorId(value || '')}
+                  searchable
+                  style={{ flex: 1 }}
+                />
+                <Tooltip label="Ver horas fichadas desde la última liquidación">
+                  <ActionIcon
+                    size={36}
+                    variant="light"
+                    color="cyan"
+                    onClick={abrirResumen}
+                    disabled={!cuidadorId}
+                    aria-label="Ver horas fichadas"
+                  >
+                    <IconClockHour4 size={20} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
               <NumberInput
                 label="Precio por hora"
                 required
@@ -296,6 +368,102 @@ export default function LiquidacionesPage() {
           </Stack>
         </Card>
       </Stack>
+
+      <Modal
+        opened={resumenAbierto}
+        onClose={() => setResumenAbierto(false)}
+        title="Horas fichadas desde la última liquidación"
+        size="lg"
+        centered
+      >
+        {cargandoResumen ? (
+          <Group justify="center" py="xl">
+            <Loader />
+          </Group>
+        ) : resumen ? (
+          <Stack>
+            <Text size="sm" c="dimmed">
+              {resumen.ultimaLiquidacion
+                ? `Última liquidación: hasta el ${dayjs(resumen.ultimaLiquidacion.semanaFin).format('DD/MM/YYYY')} (${resumen.ultimaLiquidacion.horasTrabajadas} h).`
+                : 'Este cuidador todavía no tiene liquidaciones: se muestran todos sus fichajes.'}
+            </Text>
+
+            <SimpleGrid cols={{ base: 1, sm: 2 }}>
+              <Card withBorder padding="sm">
+                <Text size="xs" c="dimmed">
+                  Total fichado
+                </Text>
+                <Text size="xl" fw={700} c="cyan">
+                  {resumen.totalHoras} h
+                </Text>
+              </Card>
+              <Card withBorder padding="sm">
+                <Text size="xs" c="dimmed">
+                  Período
+                </Text>
+                <Text size="sm" fw={600}>
+                  {resumen.desde ? dayjs(resumen.desde).format('DD/MM/YYYY') : '-'} →{' '}
+                  {resumen.hasta ? dayjs(resumen.hasta).format('DD/MM/YYYY') : '-'}
+                </Text>
+              </Card>
+            </SimpleGrid>
+
+            {resumen.horasPendientes > 0 && (
+              <Alert color="yellow" icon={<IconAlertTriangle size={16} />} py="xs">
+                {resumen.horasPendientes} h vienen de fichajes fuera de radio todavía sin revisar. Están incluidas en el
+                total.
+              </Alert>
+            )}
+            {resumen.turnosSinCerrar > 0 && (
+              <Alert color="orange" icon={<IconAlertTriangle size={16} />} py="xs">
+                Hay {resumen.turnosSinCerrar} turno(s) sin marcar la salida: esas horas no se cuentan.
+              </Alert>
+            )}
+
+            {resumen.detalle.length === 0 ? (
+              <Text c="dimmed" ta="center" py="md">
+                No hay fichajes cerrados en el período.
+              </Text>
+            ) : (
+              <Table.ScrollContainer minWidth={480} mah={320}>
+                <Table highlightOnHover striped>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Día</Table.Th>
+                      <Table.Th>Persona</Table.Th>
+                      <Table.Th>Horario</Table.Th>
+                      <Table.Th>Horas</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {resumen.detalle.map((d) => (
+                      <Table.Tr key={d.id}>
+                        <Table.Td>{dayjs(d.entradaAt).format('DD/MM/YYYY')}</Table.Td>
+                        <Table.Td>
+                          {d.personaNombre}
+                          {d.pendienteDeRevision && (
+                            <Badge color="yellow" variant="light" size="xs" ml={6}>
+                              a revisar
+                            </Badge>
+                          )}
+                        </Table.Td>
+                        <Table.Td>
+                          {dayjs(d.entradaAt).format('HH:mm')} - {dayjs(d.salidaAt).format('HH:mm')}
+                        </Table.Td>
+                        <Table.Td>{d.horas}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </Table.ScrollContainer>
+            )}
+
+            <Button onClick={usarHorasFichadas} disabled={resumen.totalHoras <= 0} leftSection={<IconCheck size={18} />}>
+              Usar estas horas ({resumen.totalHoras} h)
+            </Button>
+          </Stack>
+        ) : null}
+      </Modal>
     </Container>
   );
 }

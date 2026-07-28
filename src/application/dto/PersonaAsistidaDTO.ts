@@ -53,6 +53,15 @@ export class PersonaAsistidaDTO {
   telefonoContactoEmergencia?: string | null;
 
   @Expose()
+  lat?: number | null;
+
+  @Expose()
+  lng?: number | null;
+
+  @Expose()
+  radioMetros?: number;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()

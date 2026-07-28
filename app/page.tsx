@@ -248,7 +248,7 @@ export default function HomePage() {
                   Evaluación Gratuita
                 </Button>
               </Link>
-              <Link href="/admin/login" aria-label="Iniciar sesión (admin)">
+              <Link href="/login" aria-label="Iniciar sesión (admin)">
                 <ActionIcon
                   variant="subtle"
                   color="primary"
@@ -328,7 +328,7 @@ export default function HomePage() {
               Contacto
             </Anchor>
             <Link
-              href="/admin/login"
+              href="/login"
               onClick={closeDrawer}
               style={{ textDecoration: "none" }}
             >

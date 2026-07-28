@@ -135,6 +135,7 @@ export default function AdminLayout({
     // Cleanup: sacar la clase al salir del área de admin (nav / unmount)
     return () => {
       const currentPath = window.location.pathname;
+      // El login vive fuera de /admin, así que alcanza con el prefijo.
       const isGoingToAdminPage =
         currentPath.startsWith("/admin") && currentPath !== "/admin/login";
       if (!isGoingToAdminPage) {
@@ -151,13 +152,14 @@ export default function AdminLayout({
     );
   }
 
+  // /admin/login quedó como alias que redirige a /login: sin chrome del panel.
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/login");
     router.refresh();
   };
 
@@ -183,6 +185,8 @@ export default function AdminLayout({
       href: "/admin/solicitudes-empleo",
     },
     { label: "Mensajes de Contacto", icon: "mail", href: "/admin/contacto" },
+    { label: "Presentismo", icon: "schedule", href: "/admin/presentismo" },
+    { label: "Usuarios", icon: "manage_accounts", href: "/admin/usuarios" },
     { label: "Bot de WhatsApp", icon: "smartphone", href: "/admin/whatsapp" },
   ];
 

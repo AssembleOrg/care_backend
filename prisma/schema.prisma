@@ -22,6 +22,8 @@ model Cuidador {
   asignaciones      AsignacionCuidador[]
   pagos             Pago[]
   personasAsistidas PersonaCuidador[]
+  usuario           Usuario?
+  fichajes          Fichaje[]
 }
 
 model PersonaAsistida {
@@ -35,12 +37,19 @@ model PersonaAsistida {
   direccionHash                  String?
   telefonoContactoEmergenciaEnc  String?
   telefonoContactoEmergenciaHash String?
+  // Punto exacto del domicilio donde se cuida a la persona. Se usa para
+  // validar la distancia del fichaje del cuidador (presentismo).
+  lat                            Float?
+  lng                            Float?
+  // Radio tolerado en metros para dar un fichaje por "en rango".
+  radioMetros                    Int               @default(50)
   createdAt                      DateTime          @default(now())
   updatedAt                      DateTime          @updatedAt
   asignaciones                   Asignacion[]
   pagos                          Pago[]
   cuidadores                     PersonaCuidador[]
   contratos                      Contrato[]
+  fichajes                       Fichaje[]
 }
 
 model PersonaCuidador {
@@ -73,6 +82,7 @@ model Asignacion {
   persona           PersonaAsistida      @relation(fields: [personaId], references: [id], onDelete: Cascade)
   cuidadores        AsignacionCuidador[]
   pagos             Pago[]
+  fichajes          Fichaje[]
 }
 
 model AsignacionCuidador {
@@ -204,4 +214,81 @@ model FormSubmissionLog {
   createdAt DateTime @default(now())
 
   @@index([routeKey, ipHash, createdAt])
+}
+
+enum RolUsuario {
+  ADMIN
+  EMPLEADO
+}
+
+// Espejo local de auth.users de Supabase: acá vive el rol y el bloqueo.
+// `id` es el uid de Supabase Auth (no se genera acá). Un usuario EMPLEADO
+// debería tener `cuidadorId` para poder fichar.
+model Usuario {
+  id                String     @id
+  email             String     @unique
+  nombre            String?
+  rol               RolUsuario @default(EMPLEADO)
+  activo            Boolean    @default(true)
+  cuidadorId        String?    @unique
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  cuidador          Cuidador?  @relation(fields: [cuidadorId], references: [id], onDelete: SetNull)
+  fichajes          Fichaje[]  @relation("FichajeUsuario")
+  fichajesRevisados Fichaje[]  @relation("FichajeRevisor")
+
+  @@index([rol])
+}
+
+enum EstadoRevisionFichaje {
+  NO_REQUIERE // entrada y salida dentro del radio
+  PENDIENTE   // alguna marca fuera de radio, esperando decisión del admin
+  APROBADO
+  RECHAZADO
+}
+
+// Un turno de trabajo: una fila por par entrada/salida. La salida se completa
+// sobre la misma fila. Las distancias se calculan SIEMPRE en el servidor
+// contra las coordenadas de la PersonaAsistida.
+model Fichaje {
+  id                String                @id @default(uuid())
+  usuarioId         String
+  cuidadorId        String
+  personaId         String
+  asignacionId      String?
+
+  entradaAt         DateTime
+  entradaLat        Float
+  entradaLng        Float
+  entradaPrecisionM Float?
+  entradaDistanciaM Float
+  entradaEnRango    Boolean
+
+  salidaAt          DateTime?
+  salidaLat         Float?
+  salidaLng         Float?
+  salidaPrecisionM  Float?
+  salidaDistanciaM  Float?
+  salidaEnRango     Boolean?
+
+  revision          EstadoRevisionFichaje @default(NO_REQUIERE)
+  revisadoPorId     String?
+  revisadoAt        DateTime?
+  notaRevision      String?
+
+  userAgent         String?
+  ipHash            String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  usuario           Usuario               @relation("FichajeUsuario", fields: [usuarioId], references: [id], onDelete: Cascade)
+  revisadoPor       Usuario?              @relation("FichajeRevisor", fields: [revisadoPorId], references: [id], onDelete: SetNull)
+  cuidador          Cuidador              @relation(fields: [cuidadorId], references: [id], onDelete: Cascade)
+  persona           PersonaAsistida       @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  asignacion        Asignacion?           @relation(fields: [asignacionId], references: [id], onDelete: SetNull)
+
+  @@index([cuidadorId, entradaAt])
+  @@index([personaId, entradaAt])
+  @@index([usuarioId, entradaAt])
+  @@index([revision])
 }
