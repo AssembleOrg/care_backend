@@ -448,19 +448,19 @@ export default function EmpleadoPage() {
             >
               {marca.tipo === 'salida' ? 'Confirmar salida' : 'Confirmar entrada'}
             </Button>
-            <Group grow>
-              <Button
-                variant="light"
-                leftSection={<IconRefresh size={16} />}
-                loading={ubicando}
-                onClick={() => prepararMarca(marca.tipo)}
-              >
-                Actualizar ubicación
-              </Button>
-              <Button variant="subtle" color="gray" onClick={() => setMarca(null)} disabled={marcando}>
-                Cancelar
-              </Button>
-            </Group>
+            {/* Apilados y no en fila: en un celular angosto "Actualizar
+                ubicación" se cortaba a la mitad. */}
+            <Button
+              variant="light"
+              leftSection={<IconRefresh size={16} />}
+              loading={ubicando}
+              onClick={() => prepararMarca(marca.tipo)}
+            >
+              Actualizar ubicación
+            </Button>
+            <Button variant="subtle" color="gray" onClick={() => setMarca(null)} disabled={marcando}>
+              Cancelar
+            </Button>
           </Stack>
         )}
       </Modal>

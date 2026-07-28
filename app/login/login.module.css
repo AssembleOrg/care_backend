@@ -409,7 +409,7 @@
 
    Los tokens se redeclaran acá porque el login NO recibe `body.admin-active`
    (admin/layout.tsx retorna antes para esta ruta). Mismos valores que
-   admin-globals.css §1 — si cambian allá, cambiarlos acá. Ver design.md §2. */
+   panel-globals.css §1 — si cambian allá, cambiarlos acá. Ver design.md §2. */
 .page {
   --admin-bg: #0b2b31;
   --admin-surface: #103f4a;
@@ -469,7 +469,7 @@
 }
 
 .errorAlert {
-  color: #ff9ea1; /* danger sobre oscuro; ver admin-globals.css §1 */
+  color: #ff9ea1; /* danger sobre oscuro; ver panel-globals.css §1 */
   background: rgba(229, 72, 77, 0.14);
   border-color: rgba(229, 72, 77, 0.3);
 }

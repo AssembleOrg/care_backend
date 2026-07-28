@@ -1,26 +1,31 @@
 /* ──────────────────────────────────────────────
-   Panel admin — tokens y overrides de Mantine
-   Ver design.md §1-§3.
+   Zonas privadas (panel de administración y portal del empleado):
+   tokens y overrides de Mantine. Ver design.md §1-§3.
 
    CONTRATO DE SCOPING (no romper):
-   Todo en este archivo cuelga de `body.admin-active`, la marca que
-   admin/layout.tsx pone/saca al entrar y salir de /admin. Sin ese scope el
-   CSS se filtra a la landing pública (ya pasó: pintó el hero de azul).
+   Todo en este archivo cuelga de `body.panel-oscuro`, la marca que ponen y
+   sacan admin/layout.tsx y empleado/layout.tsx al entrar y salir de su área.
+   Sin ese scope el CSS se filtra a la landing pública (ya pasó: pintó el hero
+   de azul).
 
-   El panel es SOLO OSCURO. No hay bloque de modo claro: el toggle del layout
-   quedó inerte a propósito. Si volviera a haber dos modos, volvería el bug de
+   `admin-active` es otra clase, más chica: sólo la usan los .module.css del
+   chrome del panel (sidebar, topbar). El portal del empleado comparte estos
+   tokens pero no ese chrome.
+
+   Es SOLO OSCURO. No hay bloque de modo claro: el toggle del layout quedó
+   inerte a propósito. Si volviera a haber dos modos, volvería el bug de
    cascada que hacía ilegible el panel (dos bloques de igual especificidad,
    ganaba el último del archivo).
 
-   El login NO recibe `admin-active` (layout.tsx retorna antes para esa ruta):
-   se estiliza por su cuenta en login/login.module.css.
+   El login NO recibe estas clases (su layout retorna antes): se estiliza por
+   su cuenta en login/login.module.css.
    ────────────────────────────────────────────── */
 
 /* ── §1 Tokens ──────────────────────────────────
    Derivados de la marca (--color-teal-* de app/globals.css, que este archivo
    solo LEE, nunca modifica). Para recolorear el panel, tocar solo este bloque.
    Todos los pares texto/fondo verificados a ≥4.5:1 (WCAG AA). */
-body.admin-active {
+body.panel-oscuro {
   /* Superficies */
   --admin-bg: #0b2b31; /* fondo base */
   --admin-surface: #103f4a; /* cards, modales, paper, dropdowns */
@@ -57,7 +62,7 @@ body.admin-active {
   /* ── §2 Mapeo de Mantine ─────────────────────
      `!important` deliberado: app/globals.css declara --mantine-color-text en
      :root con !important para la landing. Ese archivo es intocable, así que
-     acá se gana por especificidad — body.admin-active (0,2,0) > :root (0,1,0).
+     acá se gana por especificidad — body.panel-oscuro (0,2,0) > :root (0,1,0).
      Sin esto, todo componente Mantine sin override explícito hereda texto
      #1a1a2e sobre fondo oscuro: contraste 1.1:1, ilegible. */
   --mantine-color-text: var(--admin-text) !important;
@@ -66,14 +71,14 @@ body.admin-active {
 }
 
 /* ── §3 Tipografía base ─────────────────────── */
-body.admin-active .mantine-Text-root,
-body.admin-active .mantine-Title-root,
-body.admin-active h1,
-body.admin-active h2,
-body.admin-active h3,
-body.admin-active h4,
-body.admin-active h5,
-body.admin-active h6 {
+body.panel-oscuro .mantine-Text-root,
+body.panel-oscuro .mantine-Title-root,
+body.panel-oscuro h1,
+body.panel-oscuro h2,
+body.panel-oscuro h3,
+body.panel-oscuro h4,
+body.panel-oscuro h5,
+body.panel-oscuro h6 {
   color: var(--admin-text);
 }
 
@@ -82,211 +87,211 @@ body.admin-active h6 {
    así que alcanza al admin y le gana a una regla normal. Ese archivo es de la
    landing y no se toca. Sin esto el texto secundario queda gris oscuro sobre
    fondo oscuro (~1.9:1). Mismo motivo para el Anchor. */
-body.admin-active .mantine-Text-root[data-c="dimmed"],
-body.admin-active .mantine-Anchor-root[data-c="dimmed"] {
+body.panel-oscuro .mantine-Text-root[data-c="dimmed"],
+body.panel-oscuro .mantine-Anchor-root[data-c="dimmed"] {
   color: var(--admin-text-dimmed) !important;
 }
 
-body.admin-active .mantine-Container-root,
-body.admin-active .mantine-Stack-root,
-body.admin-active .mantine-Group-root {
+body.panel-oscuro .mantine-Container-root,
+body.panel-oscuro .mantine-Stack-root,
+body.panel-oscuro .mantine-Group-root {
   color: var(--admin-text);
 }
 
 /* ── §4 Superficies ─────────────────────────── */
-body.admin-active .mantine-Paper-root,
-body.admin-active .mantine-Card-root {
+body.panel-oscuro .mantine-Paper-root,
+body.panel-oscuro .mantine-Card-root {
   background: var(--admin-surface);
   border-color: var(--admin-border);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Divider-root {
+body.panel-oscuro .mantine-Divider-root {
   border-color: var(--admin-border);
 }
 
 /* ── §5 Tablas ──────────────────────────────── */
-body.admin-active .mantine-Table-root {
+body.panel-oscuro .mantine-Table-root {
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Table-thead {
+body.panel-oscuro .mantine-Table-thead {
   background: var(--admin-bg);
 }
 
-body.admin-active .mantine-Table-th {
+body.panel-oscuro .mantine-Table-th {
   color: var(--admin-text);
   border-bottom-color: var(--admin-border);
   font-weight: 600;
 }
 
-body.admin-active .mantine-Table-td {
+body.panel-oscuro .mantine-Table-td {
   color: var(--admin-text);
   border-bottom-color: var(--admin-border);
 }
 
-body.admin-active .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
+body.panel-oscuro .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-Table-tr:hover {
+body.panel-oscuro .mantine-Table-tr:hover {
   background: var(--admin-surface-2);
 }
 
 /* ── §6 Modales ─────────────────────────────── */
-body.admin-active .mantine-Modal-content,
-body.admin-active .mantine-Modal-header {
+body.panel-oscuro .mantine-Modal-content,
+body.panel-oscuro .mantine-Modal-header {
   background: var(--admin-surface);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Modal-content {
+body.panel-oscuro .mantine-Modal-content {
   border: 1px solid var(--admin-border);
 }
 
-body.admin-active .mantine-Modal-header {
+body.panel-oscuro .mantine-Modal-header {
   border-bottom: 1px solid var(--admin-border);
 }
 
-body.admin-active .mantine-Modal-title {
+body.panel-oscuro .mantine-Modal-title {
   color: var(--admin-text);
   font-weight: 600;
 }
 
-body.admin-active .mantine-Modal-body {
+body.panel-oscuro .mantine-Modal-body {
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
+body.panel-oscuro .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-Modal-close {
+body.panel-oscuro .mantine-Modal-close {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-Modal-close:hover {
+body.panel-oscuro .mantine-Modal-close:hover {
   background: var(--admin-surface-2);
   color: var(--admin-text);
 }
 
 /* ── §7 Inputs ──────────────────────────────── */
-body.admin-active .mantine-TextInput-input,
-body.admin-active .mantine-NumberInput-input,
-body.admin-active .mantine-Select-input,
-body.admin-active .mantine-Textarea-input,
-body.admin-active .mantine-DateInput-input,
-body.admin-active .mantine-MultiSelect-input,
+body.panel-oscuro .mantine-TextInput-input,
+body.panel-oscuro .mantine-NumberInput-input,
+body.panel-oscuro .mantine-Select-input,
+body.panel-oscuro .mantine-Textarea-input,
+body.panel-oscuro .mantine-DateInput-input,
+body.panel-oscuro .mantine-MultiSelect-input,
 /* En PasswordInput el input real es `innerInput`; `input` es el envoltorio que
    además contiene el ojito. Sin él, la caja quedaba blanca con texto claro. */
-body.admin-active .mantine-PasswordInput-input,
-body.admin-active input[type="text"],
-body.admin-active input[type="email"],
-body.admin-active input[type="number"],
-body.admin-active input[type="time"],
-body.admin-active input[type="password"],
-body.admin-active textarea {
+body.panel-oscuro .mantine-PasswordInput-input,
+body.panel-oscuro input[type="text"],
+body.panel-oscuro input[type="email"],
+body.panel-oscuro input[type="number"],
+body.panel-oscuro input[type="time"],
+body.panel-oscuro input[type="password"],
+body.panel-oscuro textarea {
   background: var(--admin-bg);
   border-color: var(--admin-border-strong);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-PasswordInput-innerInput {
+body.panel-oscuro .mantine-PasswordInput-innerInput {
   background: transparent;
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-PasswordInput-visibilityToggle {
+body.panel-oscuro .mantine-PasswordInput-visibilityToggle {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-PasswordInput-visibilityToggle:hover {
+body.panel-oscuro .mantine-PasswordInput-visibilityToggle:hover {
   background: var(--admin-surface-2);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-TextInput-input:focus,
-body.admin-active .mantine-NumberInput-input:focus,
-body.admin-active .mantine-Select-input:focus,
-body.admin-active .mantine-Textarea-input:focus,
-body.admin-active .mantine-DateInput-input:focus,
-body.admin-active .mantine-MultiSelect-input:focus,
-body.admin-active .mantine-PasswordInput-input:focus,
-body.admin-active .mantine-PasswordInput-input:focus-within,
-body.admin-active input[type="text"]:focus,
-body.admin-active input[type="email"]:focus,
-body.admin-active input[type="number"]:focus,
-body.admin-active input[type="time"]:focus,
-body.admin-active textarea:focus {
+body.panel-oscuro .mantine-TextInput-input:focus,
+body.panel-oscuro .mantine-NumberInput-input:focus,
+body.panel-oscuro .mantine-Select-input:focus,
+body.panel-oscuro .mantine-Textarea-input:focus,
+body.panel-oscuro .mantine-DateInput-input:focus,
+body.panel-oscuro .mantine-MultiSelect-input:focus,
+body.panel-oscuro .mantine-PasswordInput-input:focus,
+body.panel-oscuro .mantine-PasswordInput-input:focus-within,
+body.panel-oscuro input[type="text"]:focus,
+body.panel-oscuro input[type="email"]:focus,
+body.panel-oscuro input[type="number"]:focus,
+body.panel-oscuro input[type="time"]:focus,
+body.panel-oscuro textarea:focus {
   border-color: var(--admin-accent-text);
   outline: none;
 }
 
-body.admin-active input:disabled,
-body.admin-active textarea:disabled {
+body.panel-oscuro input:disabled,
+body.panel-oscuro textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-body.admin-active .mantine-TextInput-label,
-body.admin-active .mantine-NumberInput-label,
-body.admin-active .mantine-Select-label,
-body.admin-active .mantine-Textarea-label,
-body.admin-active .mantine-DateInput-label,
-body.admin-active .mantine-MultiSelect-label,
-body.admin-active .mantine-PasswordInput-label,
-body.admin-active .mantine-Checkbox-label {
+body.panel-oscuro .mantine-TextInput-label,
+body.panel-oscuro .mantine-NumberInput-label,
+body.panel-oscuro .mantine-Select-label,
+body.panel-oscuro .mantine-Textarea-label,
+body.panel-oscuro .mantine-DateInput-label,
+body.panel-oscuro .mantine-MultiSelect-label,
+body.panel-oscuro .mantine-PasswordInput-label,
+body.panel-oscuro .mantine-Checkbox-label {
   color: var(--admin-text);
   font-weight: 500;
 }
 
-body.admin-active input::placeholder,
-body.admin-active textarea::placeholder {
+body.panel-oscuro input::placeholder,
+body.panel-oscuro textarea::placeholder {
   color: var(--admin-text-muted);
 }
 
 /* ── §8 Dropdowns (Select / MultiSelect / Menu) ── */
-body.admin-active .mantine-Select-dropdown,
-body.admin-active .mantine-MultiSelect-dropdown,
-body.admin-active .mantine-Menu-dropdown {
+body.panel-oscuro .mantine-Select-dropdown,
+body.panel-oscuro .mantine-MultiSelect-dropdown,
+body.panel-oscuro .mantine-Menu-dropdown {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
 }
 
-body.admin-active .mantine-Select-option,
-body.admin-active .mantine-MultiSelect-option,
-body.admin-active .mantine-Menu-item {
+body.panel-oscuro .mantine-Select-option,
+body.panel-oscuro .mantine-MultiSelect-option,
+body.panel-oscuro .mantine-Menu-item {
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Select-option:hover,
-body.admin-active .mantine-MultiSelect-option:hover,
-body.admin-active .mantine-MultiSelect-option[data-hovered],
-body.admin-active .mantine-Menu-item:hover,
-body.admin-active .mantine-Menu-item[data-hovered] {
+body.panel-oscuro .mantine-Select-option:hover,
+body.panel-oscuro .mantine-MultiSelect-option:hover,
+body.panel-oscuro .mantine-MultiSelect-option[data-hovered],
+body.panel-oscuro .mantine-Menu-item:hover,
+body.panel-oscuro .mantine-Menu-item[data-hovered] {
   background: var(--admin-surface-2);
 }
 
-body.admin-active .mantine-Select-option[data-selected],
-body.admin-active .mantine-MultiSelect-option[data-selected] {
+body.panel-oscuro .mantine-Select-option[data-selected],
+body.panel-oscuro .mantine-MultiSelect-option[data-selected] {
   background: var(--admin-accent);
   color: var(--admin-on-accent);
 }
 
-body.admin-active .mantine-Menu-item[data-hovered][data-color="red"] {
+body.panel-oscuro .mantine-Menu-item[data-hovered][data-color="red"] {
   background: var(--admin-danger-soft);
   color: var(--admin-danger);
 }
 
-body.admin-active .mantine-Menu-item[data-color="red"] {
+body.panel-oscuro .mantine-Menu-item[data-color="red"] {
   color: var(--admin-danger);
 }
 
-body.admin-active .mantine-Menu-label {
+body.panel-oscuro .mantine-Menu-label {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-Menu-divider {
+body.panel-oscuro .mantine-Menu-divider {
   border-color: var(--admin-border);
 }
 
@@ -296,55 +301,55 @@ body.admin-active .mantine-Menu-divider {
    fondo blanco y los días en --admin-text-dimmed encima: ilegible.
    Se lo trae al esquema oscuro del panel, igual que el resto de los dropdowns.
    El `:has()` es la única forma de distinguirlo de otros popovers. */
-body.admin-active .mantine-Popover-dropdown:has(.mantine-DateInput-month),
-body.admin-active .mantine-Popover-dropdown:has(.mantine-DatePickerInput-month),
-body.admin-active .mantine-Popover-dropdown:has(.mantine-MonthPickerInput-month),
-body.admin-active .mantine-Popover-dropdown:has([class*="-calendarHeader"]) {
+body.panel-oscuro .mantine-Popover-dropdown:has(.mantine-DateInput-month),
+body.panel-oscuro .mantine-Popover-dropdown:has(.mantine-DatePickerInput-month),
+body.panel-oscuro .mantine-Popover-dropdown:has(.mantine-MonthPickerInput-month),
+body.panel-oscuro .mantine-Popover-dropdown:has([class*="-calendarHeader"]) {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
 }
 
 /* Los selectores por prefijo cubren DateInput, DatePickerInput y MonthPickerInput
    sin repetir el bloque tres veces. */
-body.admin-active [class*="-calendarHeaderLevel"],
-body.admin-active [class*="-calendarHeaderControl"],
-body.admin-active [class*="-pickerControl"],
-body.admin-active [class*="-monthCell"] [class*="-day"] {
+body.panel-oscuro [class*="-calendarHeaderLevel"],
+body.panel-oscuro [class*="-calendarHeaderControl"],
+body.panel-oscuro [class*="-pickerControl"],
+body.panel-oscuro [class*="-monthCell"] [class*="-day"] {
   color: var(--admin-text);
 }
 
-body.admin-active [class*="-weekdaysRow"] [class*="-weekday"] {
+body.panel-oscuro [class*="-weekdaysRow"] [class*="-weekday"] {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active [class*="-calendarHeaderControl"]:hover,
-body.admin-active [class*="-monthCell"] [class*="-day"]:hover,
-body.admin-active [class*="-pickerControl"]:hover {
+body.panel-oscuro [class*="-calendarHeaderControl"]:hover,
+body.panel-oscuro [class*="-monthCell"] [class*="-day"]:hover,
+body.panel-oscuro [class*="-pickerControl"]:hover {
   background: var(--admin-surface-2);
 }
 
 /* Días del mes anterior/siguiente y deshabilitados: presentes pero apagados. */
-body.admin-active [class*="-day"][data-outside],
-body.admin-active [class*="-day"]:disabled,
-body.admin-active [class*="-day"][data-disabled] {
+body.panel-oscuro [class*="-day"][data-outside],
+body.panel-oscuro [class*="-day"]:disabled,
+body.panel-oscuro [class*="-day"][data-disabled] {
   color: var(--admin-text-muted);
   opacity: 0.55;
 }
 
 /* Mantine pinta los fines de semana en rojo del tema, que sobre fondo oscuro
    baja de 4.5:1. Se usa el rojo del panel, medido para este fondo. */
-body.admin-active [class*="-day"][data-weekend] {
+body.panel-oscuro [class*="-day"][data-weekend] {
   color: var(--admin-danger);
 }
 
-body.admin-active [class*="-day"][data-today] {
+body.panel-oscuro [class*="-day"][data-today] {
   border: 1px solid var(--admin-accent-text);
 }
 
 /* El seleccionado gana siempre: va después de outside/weekend a propósito. */
-body.admin-active [class*="-day"][data-selected],
-body.admin-active [class*="-day"][data-in-range],
-body.admin-active [class*="-pickerControl"][data-selected] {
+body.panel-oscuro [class*="-day"][data-selected],
+body.panel-oscuro [class*="-day"][data-in-range],
+body.panel-oscuro [class*="-pickerControl"][data-selected] {
   background: var(--admin-accent);
   color: var(--admin-on-accent);
   opacity: 1;
@@ -354,28 +359,28 @@ body.admin-active [class*="-pickerControl"][data-selected] {
    Antes había 8 bloques casi idénticos con selectores [class*="value"] y
    `> div > div`, la mitad SIN scope — se filtraban a la landing. Mantine 8
    usa .mantine-Pill-* dentro del MultiSelect, así que alcanza con esto. */
-body.admin-active .mantine-MultiSelect-pill,
-body.admin-active .mantine-MultiSelect-input .mantine-Pill-root {
+body.panel-oscuro .mantine-MultiSelect-pill,
+body.panel-oscuro .mantine-MultiSelect-input .mantine-Pill-root {
   background: var(--admin-accent);
   color: var(--admin-on-accent);
   border: none;
   border-radius: 6px;
 }
 
-body.admin-active .mantine-MultiSelect-pill .mantine-Pill-label,
-body.admin-active .mantine-MultiSelect-pill .mantine-Pill-remove,
-body.admin-active .mantine-MultiSelect-input .mantine-Pill-root .mantine-Pill-label,
-body.admin-active .mantine-MultiSelect-input .mantine-Pill-root .mantine-Pill-remove {
+body.panel-oscuro .mantine-MultiSelect-pill .mantine-Pill-label,
+body.panel-oscuro .mantine-MultiSelect-pill .mantine-Pill-remove,
+body.panel-oscuro .mantine-MultiSelect-input .mantine-Pill-root .mantine-Pill-label,
+body.panel-oscuro .mantine-MultiSelect-input .mantine-Pill-root .mantine-Pill-remove {
   color: var(--admin-on-accent);
 }
 
-body.admin-active .mantine-MultiSelect-pill .mantine-Pill-remove:hover {
+body.panel-oscuro .mantine-MultiSelect-pill .mantine-Pill-remove:hover {
   background: rgba(255, 255, 255, 0.25);
 }
 
 /* Separación entre pills (Mantine no la trae por defecto) */
-body.admin-active .mantine-MultiSelect-pillsList,
-body.admin-active .mantine-MultiSelect-input .mantine-PillGroup-group {
+body.panel-oscuro .mantine-MultiSelect-pillsList,
+body.panel-oscuro .mantine-MultiSelect-input .mantine-PillGroup-group {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -383,80 +388,80 @@ body.admin-active .mantine-MultiSelect-input .mantine-PillGroup-group {
 }
 
 /* Con pills cargados el placeholder estorba */
-body.admin-active
+body.panel-oscuro
   .mantine-MultiSelect-input:has(.mantine-Pill-root)
   .mantine-MultiSelect-inputField::placeholder {
   opacity: 0;
 }
 
 /* ── §10 Botones, badges, iconos ────────────── */
-body.admin-active .mantine-Button-root {
+body.panel-oscuro .mantine-Button-root {
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Button-root[data-variant="light"] {
+body.panel-oscuro .mantine-Button-root[data-variant="light"] {
   background: var(--admin-accent-soft);
   color: var(--admin-accent-text);
 }
 
-body.admin-active .mantine-Button-root[data-variant="light"]:hover {
+body.panel-oscuro .mantine-Button-root[data-variant="light"]:hover {
   background: var(--admin-accent);
   color: var(--admin-on-accent);
 }
 
-body.admin-active .mantine-Button-root[data-variant="subtle"] {
+body.panel-oscuro .mantine-Button-root[data-variant="subtle"] {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-Button-root[data-variant="subtle"]:hover {
+body.panel-oscuro .mantine-Button-root[data-variant="subtle"]:hover {
   background: var(--admin-surface-2);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Badge-root {
+body.panel-oscuro .mantine-Badge-root {
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Badge-root[data-variant="light"] {
+body.panel-oscuro .mantine-Badge-root[data-variant="light"] {
   background: var(--admin-accent-soft);
   color: var(--admin-accent-text);
 }
 
-body.admin-active .mantine-ActionIcon-root {
+body.panel-oscuro .mantine-ActionIcon-root {
   color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-ActionIcon-root:hover {
+body.panel-oscuro .mantine-ActionIcon-root:hover {
   background: var(--admin-surface-2);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Checkbox-input {
+body.panel-oscuro .mantine-Checkbox-input {
   background: var(--admin-bg);
   border-color: var(--admin-border-strong);
 }
 
-body.admin-active .mantine-Checkbox-input:checked {
+body.panel-oscuro .mantine-Checkbox-input:checked {
   background: var(--admin-accent);
   border-color: var(--admin-accent);
 }
 
 /* ── §11 Paginación ─────────────────────────── */
-body.admin-active .mantine-Pagination-root {
+body.panel-oscuro .mantine-Pagination-root {
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Pagination-control {
+body.panel-oscuro .mantine-Pagination-control {
   background: var(--admin-surface);
   border-color: var(--admin-border);
   color: var(--admin-text);
 }
 
-body.admin-active .mantine-Pagination-control:hover {
+body.panel-oscuro .mantine-Pagination-control:hover {
   background: var(--admin-surface-2);
 }
 
-body.admin-active .mantine-Pagination-control[data-active] {
+body.panel-oscuro .mantine-Pagination-control[data-active] {
   background: var(--admin-accent);
   border-color: var(--admin-accent);
   color: var(--admin-on-accent);
@@ -466,7 +471,7 @@ body.admin-active .mantine-Pagination-control[data-active] {
    Se renderizan en un portal fuera de .adminContainer, pero siguen dentro de
    <body>, así que el scope alcanza. `!important` acá es necesario: Mantine
    aplica los colores de variant/color inline sobre el root. */
-body.admin-active .mantine-Notification-root {
+body.panel-oscuro .mantine-Notification-root {
   position: fixed !important;
   top: 20px !important;
   right: 20px !important;
@@ -479,14 +484,14 @@ body.admin-active .mantine-Notification-root {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
 }
 
-body.admin-active .mantine-Notification-title {
+body.panel-oscuro .mantine-Notification-title {
   color: var(--admin-text) !important;
   font-weight: 600 !important;
   font-size: 18px !important;
   margin-bottom: 8px !important;
 }
 
-body.admin-active .mantine-Notification-description {
+body.panel-oscuro .mantine-Notification-description {
   color: var(--admin-text-dimmed) !important;
   font-weight: 400 !important;
   font-size: 15px !important;
@@ -494,48 +499,48 @@ body.admin-active .mantine-Notification-description {
 }
 
 @media (min-width: 768px) {
-  body.admin-active .mantine-Notification-title {
+  body.panel-oscuro .mantine-Notification-title {
     font-size: 20px !important;
     margin-bottom: 10px !important;
   }
 
-  body.admin-active .mantine-Notification-description {
+  body.panel-oscuro .mantine-Notification-description {
     font-size: 16px !important;
     line-height: 1.6 !important;
   }
 }
 
-body.admin-active .mantine-Notification-root[data-color="red"] {
+body.panel-oscuro .mantine-Notification-root[data-color="red"] {
   background: var(--admin-danger-fill) !important;
   border-color: var(--admin-danger-fill) !important;
 }
 
-body.admin-active .mantine-Notification-root[data-color="green"] {
+body.panel-oscuro .mantine-Notification-root[data-color="green"] {
   background: var(--admin-success-fill) !important;
   border-color: var(--admin-success-fill) !important;
 }
 
-body.admin-active .mantine-Notification-root[data-color="red"]
+body.panel-oscuro .mantine-Notification-root[data-color="red"]
   .mantine-Notification-title,
-body.admin-active .mantine-Notification-root[data-color="red"]
+body.panel-oscuro .mantine-Notification-root[data-color="red"]
   .mantine-Notification-description,
-body.admin-active .mantine-Notification-root[data-color="green"]
+body.panel-oscuro .mantine-Notification-root[data-color="green"]
   .mantine-Notification-title,
-body.admin-active .mantine-Notification-root[data-color="green"]
+body.panel-oscuro .mantine-Notification-root[data-color="green"]
   .mantine-Notification-description {
   color: var(--admin-on-accent) !important;
 }
 
 /* ── §13 Cursor de carga ─────────────────────
    Estaba en globals.css sin scope; vive acá porque solo aplica al panel. */
-body.admin-active button:disabled,
-body.admin-active button[data-loading],
-body.admin-active .mantine-Button-root[data-loading],
-body.admin-active .mantine-ActionIcon-root[data-loading] {
+body.panel-oscuro button:disabled,
+body.panel-oscuro button[data-loading],
+body.panel-oscuro .mantine-Button-root[data-loading],
+body.panel-oscuro .mantine-ActionIcon-root[data-loading] {
   cursor: wait !important;
 }
 
-body.admin-active .mantine-Button-root[data-loading="true"],
-body.admin-active .mantine-ActionIcon-root[data-loading="true"] {
+body.panel-oscuro .mantine-Button-root[data-loading="true"],
+body.panel-oscuro .mantine-ActionIcon-root[data-loading="true"] {
   pointer-events: none;
 }

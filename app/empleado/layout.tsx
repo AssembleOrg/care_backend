@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, Group, Text, Button, Paper } from '@mantine/core';
+import { Container, Group, Text, Button } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
 import { createClient } from '@/src/infrastructure/supabase/client';
+import '../panel-globals.css';
+import styles from './empleado.module.css';
 
 export default function EmpleadoLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -12,14 +14,26 @@ export default function EmpleadoLayout({ children }: { children: React.ReactNode
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    let vivo = true;
-    supabase.auth.getUser().then(({ data }) => {
-      if (vivo) setEmail(data.user?.email ?? null);
+    // La suscripción emite INITIAL_SESSION al montarse, así que también cubre
+    // la carga inicial sin tener que pedir el usuario por separado.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_evento, session) => {
+      setEmail(session?.user?.email ?? null);
     });
-    return () => {
-      vivo = false;
-    };
+    return () => subscription.unsubscribe();
   }, [supabase]);
+
+  useEffect(() => {
+    // Mismos tokens que el panel: el portal es parte del sistema, no una web
+    // aparte. Va en el body porque los modales se renderizan en un portal.
+    document.body.classList.add('panel-oscuro');
+    return () => {
+      if (!window.location.pathname.startsWith('/empleado')) {
+        document.body.classList.remove('panel-oscuro');
+      }
+    };
+  }, []);
 
   const salir = async () => {
     await supabase.auth.signOut();
@@ -28,24 +42,28 @@ export default function EmpleadoLayout({ children }: { children: React.ReactNode
   };
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#f6f7fb' }}>
-      <Paper shadow="xs" p="sm" radius={0} style={{ position: 'sticky', top: 0, zIndex: 10 }}>
+    <div className={styles.page}>
+      <header className={styles.topbar}>
         <Container size="sm" px="xs">
           <Group justify="space-between" wrap="nowrap">
-            <div style={{ minWidth: 0 }}>
-              <Text fw={700} size="sm">
-                Care By Dani
-              </Text>
-              <Text size="xs" c="dimmed" truncate>
-                {email ?? '...'}
-              </Text>
-            </div>
+            <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+              <span className={`material-icons ${styles.logoIcon}`}>medical_services</span>
+              <div style={{ minWidth: 0 }}>
+                <Text fw={700} size="sm" className={styles.logoTitle}>
+                  CareByDani
+                </Text>
+                <Text size="xs" truncate className={styles.email}>
+                  {email ?? '...'}
+                </Text>
+              </div>
+            </Group>
             <Button variant="subtle" size="xs" leftSection={<IconLogout size={16} />} onClick={salir}>
               Salir
             </Button>
           </Group>
         </Container>
-      </Paper>
+      </header>
+
       <Container size="sm" py="md" px="xs">
         {children}
       </Container>

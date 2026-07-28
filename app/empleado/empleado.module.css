@@ -1,0 +1,35 @@
+/* Portal del empleado. Usa los mismos tokens que el panel (panel-globals.css,
+   bajo body.panel-oscuro), pero sin su chrome: acá no hay sidebar, es una sola
+   pantalla pensada para el celular. */
+
+.page {
+  min-height: 100dvh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 10px 0;
+  background: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-border);
+  /* El contenido pasa por debajo al hacer scroll: conviene despegarlo. */
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
+}
+
+.logoIcon {
+  color: var(--admin-accent-text);
+  font-size: 28px;
+}
+
+.logoTitle {
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.email {
+  color: var(--admin-text-dimmed);
+}

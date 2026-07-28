@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Menu, UnstyledButton } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import styles from "./admin.module.css";
-import "./admin-globals.css";
+import "../panel-globals.css";
 
 /** Eventos que las vistas de listas escuchan para refrescar en vivo. */
 export const REALTIME_EVENTS = {
@@ -126,20 +126,20 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (mounted) {
-      // Marca de scope: el CSS del admin (admin-globals.css y los .module.css)
-      // solo aplica bajo body.admin-active, para que no se filtre a la landing.
-      // También alcanza a modales y dropdowns, que se renderizan en un portal
-      // fuera de .adminContainer pero dentro de <body>. Ver design.md §2.
-      document.body.classList.add("admin-active");
+      // Marcas de scope: `panel-oscuro` trae los tokens y overrides de Mantine
+      // (compartidos con el portal del empleado) y `admin-active` el chrome
+      // propio del panel. Se ponen en el body porque modales y dropdowns se
+      // renderizan en un portal fuera de .adminContainer. Ver design.md §2.
+      document.body.classList.add("panel-oscuro", "admin-active");
     }
-    // Cleanup: sacar la clase al salir del área de admin (nav / unmount)
+    // Cleanup: sacar las clases al salir del área de admin (nav / unmount)
     return () => {
       const currentPath = window.location.pathname;
       // El login vive fuera de /admin, así que alcanza con el prefijo.
       const isGoingToAdminPage =
         currentPath.startsWith("/admin") && currentPath !== "/admin/login";
       if (!isGoingToAdminPage) {
-        document.body.classList.remove("admin-active");
+        document.body.classList.remove("panel-oscuro", "admin-active");
       }
     };
   }, [mounted, pathname]);
