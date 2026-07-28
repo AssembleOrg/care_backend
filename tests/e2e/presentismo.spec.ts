@@ -143,9 +143,15 @@ test.describe('Presentismo end-to-end', () => {
     await loginComo(page, EMPLEADO_EMAIL, EMPLEADO_PASS, /\/empleado$/);
     await expect(page.getByText(PERSONA)).toBeVisible();
 
+    // Antes de que quede registrado hay que ver dónde estamos en el mapa.
     await page.getByRole('button', { name: 'Marcar entrada' }).click();
+    const confirmarEntrada = page.getByRole('dialog');
+    await expect(confirmarEntrada.getByRole('heading', { name: 'Confirmar entrada' })).toBeVisible({ timeout: 30_000 });
+    await expect(confirmarEntrada.locator('.leaflet-container')).toBeVisible();
+    await expect(confirmarEntrada.getByText(/Estás a \d+ m del domicilio, dentro de los \d+ m/)).toBeVisible();
+
+    await confirmarEntrada.getByRole('button', { name: 'Confirmar entrada' }).click();
     await expect(page.getByText(/Entrada registrada/i)).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText(/Estás a \d+ m del domicilio/)).toBeVisible();
     await expect(page.getByText('Turno abierto')).toBeVisible();
 
     // El turno se envejece 3 horas para que la liquidación tenga horas reales.
@@ -158,6 +164,12 @@ test.describe('Presentismo end-to-end', () => {
     await contexto.setGeolocation({ latitude: ctx.lat! + 300 / 111_320, longitude: ctx.lng! });
     await page.reload();
     await page.getByRole('button', { name: 'Marcar salida' }).click();
+    const confirmarSalida = page.getByRole('dialog');
+    await expect(confirmarSalida.getByRole('heading', { name: 'Confirmar salida' })).toBeVisible({ timeout: 30_000 });
+    // El mapa ya avisa que está lejos, antes de registrar nada.
+    await expect(confirmarSalida.getByText(/más de los \d+ m permitidos/)).toBeVisible();
+
+    await confirmarSalida.getByRole('button', { name: 'Confirmar salida' }).click();
     await expect(page.getByText(/Salida registrada/i)).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/se registró igual y la administración lo va a revisar/i)).toBeVisible();
 

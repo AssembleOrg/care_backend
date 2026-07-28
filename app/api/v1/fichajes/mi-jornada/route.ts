@@ -54,7 +54,11 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
       }),
       prisma.fichaje.findFirst({
         where: { cuidadorId, salidaAt: null },
-        include: { persona: { select: { id: true, nombreCompleto: true } } },
+        include: {
+          // lat/lng van también acá: el mapa de confirmación de la salida los
+          // necesita sin tener que buscar la persona en el listado.
+          persona: { select: { id: true, nombreCompleto: true, lat: true, lng: true, radioMetros: true } },
+        },
         orderBy: { entradaAt: 'desc' },
       }),
       prisma.fichaje.findMany({
@@ -119,6 +123,9 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
               id: turnoAbierto.id,
               personaId: turnoAbierto.personaId,
               personaNombre: turnoAbierto.persona.nombreCompleto,
+              lat: turnoAbierto.persona.lat,
+              lng: turnoAbierto.persona.lng,
+              radioMetros: turnoAbierto.persona.radioMetros,
               entradaAt: turnoAbierto.entradaAt.toISOString(),
               entradaDistanciaM: Math.round(turnoAbierto.entradaDistanciaM),
               entradaEnRango: turnoAbierto.entradaEnRango,

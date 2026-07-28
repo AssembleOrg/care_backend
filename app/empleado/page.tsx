@@ -13,13 +13,26 @@ import {
   Loader,
   Divider,
   Radio,
+  Modal,
 } from '@mantine/core';
+import dynamic from 'next/dynamic';
 import { notifications } from '@mantine/notifications';
-import { IconMapPin, IconLogin2, IconLogout2, IconAlertTriangle, IconClock } from '@tabler/icons-react';
+import { IconMapPin, IconLogin2, IconLogout2, IconAlertTriangle, IconClock, IconRefresh } from '@tabler/icons-react';
+import { haversineMetros } from '@/src/domain/geo';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 
 dayjs.locale('es');
+
+// Leaflet toca `window` al importarse: sólo en el cliente.
+const LeafletMap = dynamic(() => import('@/src/presentation/components/mapa/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <Group justify="center" style={{ height: 260 }}>
+      <Loader />
+    </Group>
+  ),
+});
 
 interface Horario {
   diaSemana: number;
@@ -41,9 +54,24 @@ interface TurnoAbierto {
   id: string;
   personaId: string;
   personaNombre: string;
+  lat: number | null;
+  lng: number | null;
+  radioMetros: number;
   entradaAt: string;
   entradaDistanciaM: number;
   entradaEnRango: boolean;
+}
+
+/** Lo que se muestra en el mapa antes de confirmar la marca. */
+interface MarcaPendiente {
+  tipo: 'entrada' | 'salida';
+  personaId: string;
+  personaNombre: string;
+  destino: { lat: number; lng: number } | null;
+  radioMetros: number;
+  posicion: { lat: number; lng: number };
+  precision: number | null;
+  distancia: number | null;
 }
 
 interface FichajeCerrado {
@@ -94,8 +122,10 @@ export default function EmpleadoPage() {
   const [jornada, setJornada] = useState<Jornada | null>(null);
   const [loading, setLoading] = useState(true);
   const [marcando, setMarcando] = useState(false);
+  const [ubicando, setUbicando] = useState(false);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [personaId, setPersonaId] = useState<string>('');
+  const [marca, setMarca] = useState<MarcaPendiente | null>(null);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -117,20 +147,65 @@ export default function EmpleadoPage() {
     cargar();
   }, [cargar]);
 
-  const marcar = async (tipo: 'entrada' | 'salida') => {
+  /** Toma la ubicación y la muestra en el mapa: recién ahí se confirma. */
+  const prepararMarca = async (tipo: 'entrada' | 'salida') => {
     if (tipo === 'entrada' && !personaId) {
       notifications.show({ title: 'Falta elegir', message: 'Elegí a quién vas a cuidar', color: 'red' });
       return;
     }
 
-    setMarcando(true);
+    setUbicando(true);
     try {
       const pos = await obtenerUbicacion();
+      const posicion = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const precision = Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null;
+
+      const turno = jornada?.turnoAbierto ?? null;
+      const persona = jornada?.personas.find((p) => p.id === personaId) ?? null;
+
+      const destino =
+        tipo === 'salida'
+          ? turno?.lat != null && turno.lng != null
+            ? { lat: turno.lat, lng: turno.lng }
+            : null
+          : persona?.lat != null && persona.lng != null
+            ? { lat: persona.lat, lng: persona.lng }
+            : null;
+
+      setMarca({
+        tipo,
+        personaId: tipo === 'salida' ? (turno?.personaId ?? '') : personaId,
+        personaNombre: tipo === 'salida' ? (turno?.personaNombre ?? '') : (persona?.nombreCompleto ?? ''),
+        destino,
+        radioMetros: tipo === 'salida' ? (turno?.radioMetros ?? 50) : (persona?.radioMetros ?? 50),
+        posicion,
+        precision,
+        // Referencia para el empleado; la distancia que vale la calcula el servidor.
+        distancia: destino ? Math.round(haversineMetros(destino, posicion)) : null,
+      });
+    } catch (error: unknown) {
+      notifications.show({
+        title: 'Sin ubicación',
+        message: error instanceof Error ? error.message : 'No se pudo obtener la ubicación',
+        color: 'red',
+        autoClose: 8000,
+      });
+    } finally {
+      setUbicando(false);
+    }
+  };
+
+  const confirmarMarca = async () => {
+    if (!marca) return;
+    const tipo = marca.tipo;
+
+    setMarcando(true);
+    try {
       const cuerpo = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        precision: Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null,
-        ...(tipo === 'entrada' ? { personaId } : {}),
+        lat: marca.posicion.lat,
+        lng: marca.posicion.lng,
+        precision: marca.precision,
+        ...(tipo === 'entrada' ? { personaId: marca.personaId } : {}),
       };
 
       const url = tipo === 'entrada' ? '/api/v1/fichajes' : '/api/v1/fichajes/salida';
@@ -152,6 +227,7 @@ export default function EmpleadoPage() {
         autoClose: 8000,
       });
 
+      setMarca(null);
       cargar();
     } catch (error: unknown) {
       notifications.show({
@@ -210,8 +286,8 @@ export default function EmpleadoPage() {
               size="lg"
               color="red"
               leftSection={<IconLogout2 size={20} />}
-              loading={marcando}
-              onClick={() => marcar('salida')}
+              loading={ubicando}
+              onClick={() => prepararMarca('salida')}
             >
               Marcar salida
             </Button>
@@ -263,9 +339,9 @@ export default function EmpleadoPage() {
             <Button
               size="lg"
               leftSection={<IconLogin2 size={20} />}
-              loading={marcando}
+              loading={ubicando}
               disabled={personas.length === 0}
-              onClick={() => marcar('entrada')}
+              onClick={() => prepararMarca('entrada')}
             >
               Marcar entrada
             </Button>
@@ -310,6 +386,84 @@ export default function EmpleadoPage() {
           </Stack>
         </>
       )}
+
+      {/* Confirmación: se ve dónde estás antes de que quede registrado. */}
+      <Modal
+        opened={!!marca}
+        onClose={() => setMarca(null)}
+        title={marca?.tipo === 'salida' ? 'Confirmar salida' : 'Confirmar entrada'}
+        centered
+        fullScreen={typeof window !== 'undefined' && window.innerWidth < 600}
+      >
+        {marca && (
+          <Stack gap="sm">
+            <Text fw={600}>{marca.personaNombre}</Text>
+
+            {marca.destino ? (
+              <>
+                <LeafletMap
+                  center={marca.posicion}
+                  zoom={17}
+                  pin={marca.destino}
+                  pinArrastrable={false}
+                  radioMetros={marca.radioMetros}
+                  posicionActual={marca.posicion}
+                  precisionMetros={marca.precision}
+                  style={{ height: 260 }}
+                />
+                <Group gap="xs" justify="center">
+                  <Badge color="pink" variant="light" size="sm">
+                    Domicilio
+                  </Badge>
+                  <Badge color="blue" variant="light" size="sm">
+                    Vos
+                  </Badge>
+                </Group>
+              </>
+            ) : (
+              <Alert color="yellow" icon={<IconAlertTriangle size={16} />} py="xs">
+                Ese domicilio no tiene ubicación cargada, así que no se puede mostrar el mapa.
+              </Alert>
+            )}
+
+            {marca.distancia != null && (
+              <Alert
+                color={marca.distancia <= marca.radioMetros ? 'green' : 'yellow'}
+                icon={<IconMapPin size={16} />}
+                py="xs"
+              >
+                {marca.distancia <= marca.radioMetros
+                  ? `Estás a ${marca.distancia} m del domicilio, dentro de los ${marca.radioMetros} m permitidos.`
+                  : `Estás a ${marca.distancia} m del domicilio, más de los ${marca.radioMetros} m permitidos. Podés fichar igual: queda registrado y la administración lo revisa.`}
+                {marca.precision != null && ` Precisión del GPS: ±${Math.round(marca.precision)} m.`}
+              </Alert>
+            )}
+
+            <Button
+              size="lg"
+              color={marca.tipo === 'salida' ? 'red' : undefined}
+              leftSection={marca.tipo === 'salida' ? <IconLogout2 size={20} /> : <IconLogin2 size={20} />}
+              loading={marcando}
+              onClick={confirmarMarca}
+            >
+              {marca.tipo === 'salida' ? 'Confirmar salida' : 'Confirmar entrada'}
+            </Button>
+            <Group grow>
+              <Button
+                variant="light"
+                leftSection={<IconRefresh size={16} />}
+                loading={ubicando}
+                onClick={() => prepararMarca(marca.tipo)}
+              >
+                Actualizar ubicación
+              </Button>
+              <Button variant="subtle" color="gray" onClick={() => setMarca(null)} disabled={marcando}>
+                Cancelar
+              </Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
     </Stack>
   );
 }
