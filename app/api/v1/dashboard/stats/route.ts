@@ -30,29 +30,26 @@ async function handleGET(request: NextRequest) {
     const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
 
-    // Obtener total de cuidadores
-    const totalCuidadores = await cuidadorRepository.count();
-    const totalCuidadoresLastMonth = await prisma.cuidador.count({
-      where: {
-        createdAt: {
-          lte: lastDayOfLastMonth,
+    // Todas estas consultas son independientes entre sí: en serie pagaban una
+    // ida y vuelta a la base cada una (~200 ms desde acá) y el dashboard
+    // tardaba más de dos segundos en abrir.
+    const [
+      totalCuidadores,
+      totalCuidadoresLastMonth,
+      liquidacionesRealizadas,
+      saldoMesActual,
+      saldoMesAnterior,
+      auditLogs,
+    ] = await Promise.all([
+      cuidadorRepository.count(),
+      prisma.cuidador.count({
+        where: {
+          createdAt: {
+            lte: lastDayOfLastMonth,
+          },
         },
-      },
-    });
-
-    // Calcular tendencia de cuidadores
-    const cuidadoresTrend = totalCuidadoresLastMonth > 0
-      ? ((totalCuidadores - totalCuidadoresLastMonth) / totalCuidadoresLastMonth) * 100
-      : 0;
-
-    // Obtener liquidaciones realizadas (todos los pagos, ya que todos son liquidaciones)
-    const liquidacionesRealizadas = await pagoRepository.count();
-
-    // Obtener total de pagos
-    const totalPagos = await pagoRepository.count();
-
-    // Obtener saldo total del mes actual
-    const [saldoMesActual, saldoMesAnterior] = await Promise.all([
+      }),
+      pagoRepository.count(),
       prisma.pago.aggregate({
         where: {
           fecha: {
@@ -75,7 +72,19 @@ async function handleGET(request: NextRequest) {
           monto: true,
         },
       }),
+      prisma.auditLog.findMany({
+        take: 20,
+        orderBy: { createdAt: 'desc' },
+      }),
     ]);
+
+    // Calcular tendencia de cuidadores
+    const cuidadoresTrend = totalCuidadoresLastMonth > 0
+      ? ((totalCuidadores - totalCuidadoresLastMonth) / totalCuidadoresLastMonth) * 100
+      : 0;
+
+    // Todos los pagos son liquidaciones, así que es el mismo número.
+    const totalPagos = liquidacionesRealizadas;
 
     const saldoTotal = saldoMesActual._sum.monto ? Number(saldoMesActual._sum.monto) : 0;
     const saldoAnterior = saldoMesAnterior._sum.monto ? Number(saldoMesAnterior._sum.monto) : 0;
@@ -85,78 +94,80 @@ async function handleGET(request: NextRequest) {
       ? ((saldoTotal - saldoAnterior) / saldoAnterior) * 100
       : 0;
 
-    // Obtener actividades recientes (últimas 20) desde AuditLog
-    const auditLogs = await prisma.auditLog.findMany({
-      take: 20,
-      orderBy: { createdAt: 'desc' },
+    // Los datos relacionados se traen por lote. Antes cada uno de los 20 logs
+    // disparaba entre una y tres consultas sueltas: cuarenta idas y vueltas a
+    // la base para armar una lista de actividad reciente.
+    const idsPorTabla = (tabla: string) =>
+      auditLogs.filter((log) => log.table === tabla).map((log) => log.recordId);
+
+    const [pagos, asignaciones] = await Promise.all([
+      prisma.pago.findMany({
+        where: { id: { in: idsPorTabla('Pago') } },
+        select: { id: true, monto: true, cuidadorId: true },
+      }),
+      prisma.asignacion.findMany({
+        where: { id: { in: idsPorTabla('Asignacion') } },
+        select: { id: true, personaId: true, cuidadores: { select: { cuidadorId: true } } },
+      }),
+    ]);
+
+    // Recién con pagos y asignaciones en mano se sabe qué cuidadores y personas
+    // hacen falta, así que este segundo lote va después.
+    const cuidadoresIds = new Set<string>([
+      ...idsPorTabla('Cuidador'),
+      ...pagos.map((p) => p.cuidadorId).filter(Boolean),
+      ...asignaciones.flatMap((a) => a.cuidadores.map((c) => c.cuidadorId)),
+    ]);
+    const personasIds = new Set<string>(asignaciones.map((a) => a.personaId).filter(Boolean));
+
+    const [cuidadores, personas] = await Promise.all([
+      prisma.cuidador.findMany({
+        where: { id: { in: Array.from(cuidadoresIds) } },
+        select: { id: true, nombreCompleto: true },
+      }),
+      prisma.personaAsistida.findMany({
+        where: { id: { in: Array.from(personasIds) } },
+        select: { id: true, nombreCompleto: true },
+      }),
+    ]);
+
+    const porId = <T extends { id: string }>(lista: T[]) => new Map(lista.map((x) => [x.id, x]));
+    const mapaCuidadores = porId(cuidadores);
+    const mapaPersonas = porId(personas);
+    const mapaPagos = porId(pagos);
+    const mapaAsignaciones = porId(asignaciones);
+
+    const actividadesConDatos = auditLogs.map((log) => {
+      let cuidador: { nombreCompleto: string } | null = null;
+      let pago: { monto: unknown; cuidadorId: string } | null = null;
+      let persona: { nombreCompleto: string } | null = null;
+      const asignacion = log.table === 'Asignacion' ? (mapaAsignaciones.get(log.recordId) ?? null) : null;
+
+      if (log.table === 'Cuidador') {
+        cuidador = mapaCuidadores.get(log.recordId) ?? null;
+      } else if (log.table === 'Pago') {
+        pago = mapaPagos.get(log.recordId) ?? null;
+        if (pago?.cuidadorId) cuidador = mapaCuidadores.get(pago.cuidadorId) ?? null;
+      } else if (asignacion) {
+        const primerCuidador = asignacion.cuidadores[0]?.cuidadorId;
+        if (primerCuidador) cuidador = mapaCuidadores.get(primerCuidador) ?? null;
+        if (asignacion.personaId) persona = mapaPersonas.get(asignacion.personaId) ?? null;
+      }
+
+      return {
+        ...log,
+        cuidador,
+        pago,
+        asignacion: asignacion
+          ? {
+              ...asignacion,
+              cuidadoresIds: asignacion.cuidadores.map((c) => c.cuidadorId),
+              cuidador,
+              persona,
+            }
+          : null,
+      };
     });
-
-    // Obtener datos relacionados manualmente para evitar problemas con relaciones
-    const actividadesConDatos = await Promise.all(
-      auditLogs.map(async (log) => {
-        let cuidador = null;
-        let pago = null;
-        let asignacion = null;
-        let persona = null;
-
-        if (log.table === 'Cuidador') {
-          cuidador = await prisma.cuidador.findUnique({
-            where: { id: log.recordId },
-            select: { nombreCompleto: true },
-          });
-        } else if (log.table === 'Pago') {
-          pago = await prisma.pago.findUnique({
-            where: { id: log.recordId },
-            select: {
-              monto: true,
-              cuidadorId: true,
-            },
-          });
-          if (pago?.cuidadorId) {
-            cuidador = await prisma.cuidador.findUnique({
-              where: { id: pago.cuidadorId },
-              select: { nombreCompleto: true },
-            });
-          }
-        } else if (log.table === 'Asignacion') {
-          asignacion = await prisma.asignacion.findUnique({
-            where: { id: log.recordId },
-            select: {
-              cuidadores: {
-                select: {
-                  cuidadorId: true,
-                },
-              },
-              personaId: true,
-            },
-          });
-          if (asignacion?.cuidadores && asignacion.cuidadores.length > 0) {
-            cuidador = await prisma.cuidador.findUnique({
-              where: { id: asignacion.cuidadores[0].cuidadorId },
-              select: { nombreCompleto: true },
-            });
-          }
-          if (asignacion?.personaId) {
-            persona = await prisma.personaAsistida.findUnique({
-              where: { id: asignacion.personaId },
-              select: { nombreCompleto: true },
-            });
-          }
-        }
-
-        return {
-          ...log,
-          cuidador,
-          pago,
-          asignacion: asignacion ? { 
-            ...asignacion, 
-            cuidadoresIds: asignacion.cuidadores?.map(c => c.cuidadorId) || [],
-            cuidador, 
-            persona 
-          } : null,
-        };
-      })
-    );
 
     const activities: ActivityItem[] = actividadesConDatos.map((log) => {
       const timeAgo = dayjs(log.createdAt);

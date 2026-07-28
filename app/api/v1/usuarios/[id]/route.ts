@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireAuth, HandlerContext } from '@/src/presentation/middleware/auth';
+import { requireAuth, invalidarCacheUsuario, HandlerContext } from '@/src/presentation/middleware/auth';
 import { createSuccessResponse, createErrorResponse, getRequestId } from '@/src/presentation/middleware/responseWrapper';
 import { prisma } from '@/src/infrastructure/database/PrismaService';
 import { createAdminClient } from '@/src/infrastructure/supabase/admin';
@@ -66,6 +66,9 @@ async function handlePATCH(request: NextRequest, context: HandlerContext) {
         return createErrorResponse('CONFLICT', 'Ese cuidador ya tiene un usuario asignado', undefined, requestId, 409);
       }
     }
+
+    // Un bloqueo o un cambio de rol tiene que valer ya, no cuando venza el TTL.
+    invalidarCacheUsuario(usuario.id);
 
     const actualizado = await prisma.usuario.update({
       where: { id: usuario.id },

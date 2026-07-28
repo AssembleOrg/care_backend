@@ -38,25 +38,36 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired - required for Server Components
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const { pathname } = request.nextUrl;
   const isAdminArea = pathname.startsWith('/admin');
   const isEmpleadoArea = pathname.startsWith('/empleado');
 
   if (!isAdminArea && !isEmpleadoArea) return supabaseResponse;
 
-  if (!user) {
+  // getClaims verifica la firma del JWT en el proceso (el proyecto usa ES256):
+  // ~1 ms contra los ~250 ms que costaba preguntarle a Supabase en CADA
+  // navegación. Sólo si el token venció se llama a getUser, que lo renueva y
+  // reescribe las cookies. La autorización real la hace igual la API.
+  const { data: claims } = await supabase.auth.getClaims();
+  let sesion: { id: string; rol: 'ADMIN' | 'EMPLEADO' } | null = claims?.claims?.sub
+    ? { id: claims.claims.sub, rol: getRol(claims.claims.app_metadata as Record<string, unknown> | undefined) }
+    : null;
+
+  if (!sesion) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    sesion = user ? { id: user.id, rol: getRol(user.app_metadata) } : null;
+  }
+
+  if (!sesion) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
 
-  const rol = getRol(user.app_metadata);
+  const rol = sesion.rol;
 
   // Cada rol se queda en su área.
   if (isAdminArea && rol !== 'ADMIN') {

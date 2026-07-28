@@ -23,6 +23,43 @@ type AuthResult = { ok: true; auth: AuthContext } | { ok: false; error: AuthFail
 const UNAUTHORIZED: AuthFailure = { code: 'UNAUTHORIZED', message: 'No autorizado', status: 401 };
 
 /**
+ * Cache muy corto de la fila `Usuario`.
+ *
+ * Sin esto cada request paga una consulta contra Supabase (~200 ms desde
+ * Argentina) sólo para releer el rol. El TTL es de segundos a propósito: un
+ * bloqueo tiene que hacerse efectivo enseguida, y además se invalida a mano
+ * cuando el panel modifica al usuario. Vive por instancia del proceso.
+ */
+const TTL_CACHE_USUARIO_MS = 10_000;
+
+interface UsuarioCacheado {
+  rol: RolUsuario;
+  activo: boolean;
+  cuidadorId: string | null;
+  email: string;
+}
+
+const cacheUsuarios = new Map<string, { usuario: UsuarioCacheado | null; at: number }>();
+
+/** La llama el ABM de usuarios: un bloqueo o un cambio de rol no puede esperar al TTL. */
+export function invalidarCacheUsuario(userId: string): void {
+  cacheUsuarios.delete(userId);
+}
+
+async function buscarUsuario(userId: string): Promise<UsuarioCacheado | null> {
+  const hit = cacheUsuarios.get(userId);
+  if (hit && Date.now() - hit.at < TTL_CACHE_USUARIO_MS) return hit.usuario;
+
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: userId },
+    select: { rol: true, activo: true, cuidadorId: true, email: true },
+  });
+
+  cacheUsuarios.set(userId, { usuario, at: Date.now() });
+  return usuario;
+}
+
+/**
  * Valida la sesión de Supabase y resuelve el rol contra la tabla `Usuario`,
  * que es la fuente de verdad: el claim `rol` del JWT sólo se usa para el
  * ruteo en el middleware de Next, nunca para autorizar en la API.
@@ -51,21 +88,25 @@ export async function resolveAuth(request: NextRequest): Promise<AuthResult> {
       }
     );
 
-    const { data: { user }, error } = await supabase.auth.getUser();
+    // El proyecto firma los JWT con ES256, así que getClaims verifica la firma
+    // en el proceso (~1 ms) en vez de preguntarle a Supabase (~250 ms). Si el
+    // token venció o la validación local no aplica, se cae a getUser, que
+    // además renueva la sesión.
+    const { data: claims } = await supabase.auth.getClaims();
+    let userId = claims?.claims?.sub;
+    let emailToken = typeof claims?.claims?.email === 'string' ? claims.claims.email : undefined;
 
-    if (error) {
-      console.error('Auth error:', error.message);
-      return { ok: false, error: UNAUTHORIZED };
+    if (!userId) {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        if (error) console.error('Auth error:', error.message);
+        return { ok: false, error: UNAUTHORIZED };
+      }
+      userId = user.id;
+      emailToken = user.email ?? undefined;
     }
 
-    if (!user) {
-      return { ok: false, error: UNAUTHORIZED };
-    }
-
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: user.id },
-      select: { rol: true, activo: true, cuidadorId: true, email: true },
-    });
+    const usuario = await buscarUsuario(userId);
 
     if (!usuario) {
       return {
@@ -84,8 +125,8 @@ export async function resolveAuth(request: NextRequest): Promise<AuthResult> {
     return {
       ok: true,
       auth: {
-        userId: user.id,
-        email: user.email || usuario.email,
+        userId,
+        email: emailToken || usuario.email,
         rol: usuario.rol,
         cuidadorId: usuario.cuidadorId,
       },
