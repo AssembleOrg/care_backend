@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import { requireEmpleado, HandlerContext } from '@/src/presentation/middleware/auth';
+import { requireCuidador, HandlerContext } from '@/src/presentation/middleware/auth';
 import { createSuccessResponse, createErrorResponse, getRequestId } from '@/src/presentation/middleware/responseWrapper';
 import { prisma } from '@/src/infrastructure/database/PrismaService';
 import { encryptionService } from '@/src/infrastructure/crypto/EncryptionService';
-import { diaSemanaLocal, horasEntre } from '@/src/domain/tiempo';
+import { diaSemanaLocal } from '@/src/domain/tiempo';
 import type { Horario } from '@/src/application/services/HorarioValidationService';
 
 function desencriptar(valor: string | null): string | null {
@@ -20,7 +20,7 @@ function horariosDeHoy(horarios: unknown, dia: number): Horario[] {
   return (horarios as Horario[]).filter((h) => h && typeof h === 'object' && h.diaSemana === dia);
 }
 
-/** Lo que el empleado necesita para fichar: a quién cuida hoy y si tiene un turno abierto. */
+/** Lo que el cuidador necesita para fichar: a quién cuida hoy y si tiene un turno abierto. */
 async function handleGET(request: NextRequest, context: HandlerContext) {
   const requestId = getRequestId(request);
   const { cuidadorId } = context.auth;
@@ -39,7 +39,7 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
     const ahora = new Date();
     const dia = diaSemanaLocal(ahora);
 
-    const [asignaciones, vinculos, turnoAbierto, ultimos] = await Promise.all([
+    const [asignaciones, vinculos, turnoAbierto] = await Promise.all([
       prisma.asignacion.findMany({
         where: {
           cuidadores: { some: { cuidadorId } },
@@ -60,12 +60,6 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
           persona: { select: { id: true, nombreCompleto: true, lat: true, lng: true, radioMetros: true } },
         },
         orderBy: { entradaAt: 'desc' },
-      }),
-      prisma.fichaje.findMany({
-        where: { cuidadorId, salidaAt: { not: null } },
-        include: { persona: { select: { nombreCompleto: true } } },
-        orderBy: { entradaAt: 'desc' },
-        take: 10,
       }),
     ]);
 
@@ -131,14 +125,6 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
               entradaEnRango: turnoAbierto.entradaEnRango,
             }
           : null,
-        ultimos: ultimos.map((f) => ({
-          id: f.id,
-          personaNombre: f.persona.nombreCompleto,
-          entradaAt: f.entradaAt.toISOString(),
-          salidaAt: f.salidaAt!.toISOString(),
-          horas: horasEntre(f.entradaAt, f.salidaAt!),
-          revision: f.revision,
-        })),
       },
       requestId
     );
@@ -148,4 +134,4 @@ async function handleGET(request: NextRequest, context: HandlerContext) {
   }
 }
 
-export const GET = requireEmpleado(handleGET);
+export const GET = requireCuidador(handleGET);
