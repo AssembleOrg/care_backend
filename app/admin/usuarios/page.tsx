@@ -31,6 +31,7 @@ import {
 } from '@tabler/icons-react';
 import { parseApiError } from '../utils/parseApiError';
 import { formatDate } from '../utils/formatDate';
+import { CuidadorSelect } from '../components/CuidadorPicker';
 
 interface Usuario {
   id: string;
@@ -43,11 +44,6 @@ interface Usuario {
   createdAt: string;
 }
 
-interface Cuidador {
-  id: string;
-  nombreCompleto: string;
-}
-
 const ROLES = [
   { value: 'EMPLEADO', label: 'Empleado (sólo fichaje)' },
   { value: 'ADMIN', label: 'Administrador' },
@@ -55,7 +51,6 @@ const ROLES = [
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [cuidadores, setCuidadores] = useState<Cuidador[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -71,15 +66,9 @@ export default function UsuariosPage() {
   const cargar = useCallback(async () => {
     setLoading(true);
     try {
-      const [resUsuarios, resCuidadores] = await Promise.all([
-        fetch('/api/v1/usuarios'),
-        fetch('/api/v1/cuidadores?all=true'),
-      ]);
-      const dataUsuarios = await resUsuarios.json();
-      const dataCuidadores = await resCuidadores.json();
-
-      if (dataUsuarios.ok) setUsuarios(dataUsuarios.data);
-      if (dataCuidadores.ok && Array.isArray(dataCuidadores.data)) setCuidadores(dataCuidadores.data);
+      const res = await fetch('/api/v1/usuarios');
+      const data = await res.json();
+      if (data.ok) setUsuarios(data.data);
     } catch (error) {
       notifications.show({ title: 'Error', message: parseApiError(error), color: 'red' });
     } finally {
@@ -91,14 +80,9 @@ export default function UsuariosPage() {
     cargar();
   }, [cargar]);
 
-  const cuidadoresLibres = (usuarioActual?: Usuario | null) =>
-    cuidadores
-      .filter(
-        (c) =>
-          usuarioActual?.cuidadorId === c.id ||
-          !usuarios.some((u) => u.cuidadorId === c.id)
-      )
-      .map((c) => ({ value: c.id, label: c.nombreCompleto }));
+  /** Un cuidador ya tomado por otro usuario no se ofrece: la relación es 1 a 1. */
+  const cuidadorOcupado = (cuidadorId: string, usuarioActualId?: string) =>
+    usuarios.some((u) => u.cuidadorId === cuidadorId && u.id !== usuarioActualId);
 
   const handleCrear = async () => {
     if (!form.email || !form.password) {
@@ -309,14 +293,12 @@ export default function UsuariosPage() {
             allowDeselect={false}
           />
           {form.rol === 'EMPLEADO' && (
-            <Select
+            <CuidadorSelect
               label="Cuidador vinculado"
               description="Necesario para fichar entrada y salida."
-              placeholder="Seleccionar cuidador"
-              data={cuidadoresLibres()}
-              value={form.cuidadorId}
+              value={form.cuidadorId || null}
               onChange={(v) => setForm({ ...form, cuidadorId: v || '' })}
-              searchable
+              excluir={cuidadorOcupado}
               clearable
             />
           )}
@@ -342,13 +324,16 @@ export default function UsuariosPage() {
             allowDeselect={false}
           />
           {formEdit.rol === 'EMPLEADO' && (
-            <Select
+            <CuidadorSelect
               label="Cuidador vinculado"
-              placeholder="Seleccionar cuidador"
-              data={cuidadoresLibres(editar)}
-              value={formEdit.cuidadorId}
+              value={formEdit.cuidadorId || null}
               onChange={(v) => setFormEdit({ ...formEdit, cuidadorId: v || '' })}
-              searchable
+              excluir={(id) => cuidadorOcupado(id, editar?.id)}
+              iniciales={
+                editar?.cuidadorId && editar.cuidadorNombre
+                  ? [{ id: editar.cuidadorId, nombreCompleto: editar.cuidadorNombre }]
+                  : []
+              }
               clearable
             />
           )}

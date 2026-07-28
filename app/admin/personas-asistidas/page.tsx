@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Button, Table, Modal, TextInput, Textarea, NumberInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect, Divider } from '@mantine/core';
+import { Container, Title, Button, Table, Modal, TextInput, Textarea, NumberInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, Divider } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
@@ -15,6 +15,7 @@ import { pdf } from '@react-pdf/renderer';
 import { ComprobantePdfDocument, FilaPdfData } from '../components/ComprobantePdfDocument';
 import { PresupuestoPdfDocument } from '../components/PresupuestoPdfDocument';
 import { UbicacionPicker } from '@/src/presentation/components/mapa/UbicacionPicker';
+import { CuidadorSelect } from '../components/CuidadorPicker';
 
 interface PersonaAsistida {
   id: string;
@@ -55,7 +56,6 @@ export default function PersonasAsistidasPage() {
   const [searching, setSearching] = useState(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [cuidadores, setCuidadores] = useState<Array<{ id: string; nombreCompleto: string }>>([]);
   const [cuidadoresPersona, setCuidadoresPersona] = useState<Array<{ id: string; cuidadorId: string; cuidadorNombre: string; activo: boolean }>>([]);
   const [cuidadoresModalOpened, { open: openCuidadoresModal, close: closeCuidadoresModal }] = useDisclosure(false);
   const [personaIdParaCuidadores, setPersonaIdParaCuidadores] = useState<string | null>(null);
@@ -255,15 +255,6 @@ export default function PersonasAsistidasPage() {
 
   useEffect(() => {
     fetchPersonas(1, search);
-    // Cargar cuidadores para el select
-    fetch('/api/v1/cuidadores?all=true')
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok && Array.isArray(data.data)) {
-          setCuidadores(data.data);
-        }
-      })
-      .catch(err => console.error('Error fetching cuidadores:', err));
   }, [search]);
 
   const handleSearch = async () => {
@@ -827,18 +818,16 @@ export default function PersonasAsistidasPage() {
       <Modal opened={cuidadoresModalOpened} onClose={closeCuidadoresModal} title="Gestionar Cuidadores" size="lg">
         {personaIdParaCuidadores && (
           <Stack>
-            <MultiSelect
+            {/* Se agrega de a uno: el select se limpia solo y el cuidador pasa
+                a la lista de abajo. Los ya asignados no se ofrecen. */}
+            <CuidadorSelect
               label="Agregar Cuidador"
-              placeholder="Seleccionar cuidador para agregar"
-              data={cuidadores
-                .filter(c => !cuidadoresPersona.find(pc => pc.cuidadorId === c.id && pc.activo))
-                .map(c => ({ value: c.id, label: c.nombreCompleto }))}
-              searchable
+              placeholder="Buscar cuidador para agregar..."
+              value={null}
               onChange={(value) => {
-                if (value && value.length > 0) {
-                  handleAgregarCuidador(value[value.length - 1]);
-                }
+                if (value) handleAgregarCuidador(value);
               }}
+              excluir={(id) => cuidadoresPersona.some(pc => pc.cuidadorId === id && pc.activo)}
             />
             
             <Paper p="md" withBorder>

@@ -17,8 +17,11 @@ async function handleGET(request: NextRequest) {
 
   try {
     if (all) {
-      // Cuando se usa all=true, devolver array simple con búsqueda opcional
-      const cuidadores = await cuidadorRepository.findAll(undefined, undefined, search);
+      // Cuando se usa all=true, devolver array simple con búsqueda opcional.
+      // `take` lo usan los selectores con búsqueda: piden de a 20, no la tabla entera.
+      const takeParam = parseInt(searchParams.get('take') || '', 10);
+      const take = Number.isFinite(takeParam) && takeParam > 0 ? Math.min(takeParam, PAGINATION_MAX_LIMIT) : undefined;
+      const cuidadores = await cuidadorRepository.findAll(undefined, take, search);
       const { plainToInstance } = await import('class-transformer');
       const { CuidadorDTO } = await import('@/src/application/dto/CuidadorDTO');
       const dtos = cuidadores.map(c => plainToInstance(CuidadorDTO, c, { excludeExtraneousValues: true }));

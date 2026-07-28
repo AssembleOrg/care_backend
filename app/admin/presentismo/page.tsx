@@ -24,6 +24,7 @@ import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX, IconMapPin, IconRefresh } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { parseApiError } from '../utils/parseApiError';
+import { CuidadorMultiSelect } from '../components/CuidadorPicker';
 
 interface Fichaje {
   id: string;
@@ -44,11 +45,6 @@ interface Fichaje {
   notaRevision: string | null;
 }
 
-interface Cuidador {
-  id: string;
-  nombreCompleto: string;
-}
-
 const REVISIONES = [
   { value: 'PENDIENTE', label: 'A revisar' },
   { value: 'NO_REQUIERE', label: 'En rango' },
@@ -65,11 +61,10 @@ const BADGE_REVISION: Record<Fichaje['revision'], { label: string; color: string
 
 export default function PresentismoPage() {
   const [fichajes, setFichajes] = useState<Fichaje[]>([]);
-  const [cuidadores, setCuidadores] = useState<Cuidador[]>([]);
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
-  const [cuidadorId, setCuidadorId] = useState<string | null>(null);
+  const [cuidadorIds, setCuidadorIds] = useState<string[]>([]);
   const [revision, setRevision] = useState<string | null>(null);
   const [desde, setDesde] = useState<Date | null>(dayjs().subtract(14, 'day').toDate());
   const [hasta, setHasta] = useState<Date | null>(new Date());
@@ -81,7 +76,7 @@ export default function PresentismoPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (cuidadorId) params.set('cuidadorId', cuidadorId);
+      if (cuidadorIds.length > 0) params.set('cuidadorIds', cuidadorIds.join(','));
       if (revision) params.set('revision', revision);
       if (desde) params.set('desde', dayjs(desde).startOf('day').toISOString());
       if (hasta) params.set('hasta', dayjs(hasta).endOf('day').toISOString());
@@ -95,20 +90,11 @@ export default function PresentismoPage() {
     } finally {
       setLoading(false);
     }
-  }, [cuidadorId, revision, desde, hasta]);
+  }, [cuidadorIds, revision, desde, hasta]);
 
   useEffect(() => {
     cargar();
   }, [cargar]);
-
-  useEffect(() => {
-    fetch('/api/v1/cuidadores?all=true')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.ok && Array.isArray(data.data)) setCuidadores(data.data);
-      })
-      .catch(() => undefined);
-  }, []);
 
   const revisar = async (fichaje: Fichaje, nuevaRevision: 'APROBADO' | 'RECHAZADO', notaRevision?: string) => {
     setGuardando(true);
@@ -181,15 +167,7 @@ export default function PresentismoPage() {
 
       <Paper withBorder p="md" mb="md">
         <Group grow align="flex-end">
-          <Select
-            label="Cuidador"
-            placeholder="Todos"
-            data={cuidadores.map((c) => ({ value: c.id, label: c.nombreCompleto }))}
-            value={cuidadorId}
-            onChange={setCuidadorId}
-            searchable
-            clearable
-          />
+          <CuidadorMultiSelect label="Cuidadores" value={cuidadorIds} onChange={setCuidadorIds} />
           <Select
             label="Estado"
             placeholder="Todos"

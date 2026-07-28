@@ -20,7 +20,11 @@ const marcaSchema = z.object({
 async function handleGET(request: NextRequest) {
   const requestId = getRequestId(request);
   const sp = request.nextUrl.searchParams;
-  const cuidadorId = sp.get('cuidadorId') || undefined;
+  // Admite uno (cuidadorId) o varios separados por coma (cuidadorIds).
+  const cuidadorIds = [
+    ...(sp.get('cuidadorId') ? [sp.get('cuidadorId')!] : []),
+    ...(sp.get('cuidadorIds')?.split(',').filter(Boolean) ?? []),
+  ];
   const personaId = sp.get('personaId') || undefined;
   const revision = sp.get('revision') || undefined;
   const desde = sp.get('desde');
@@ -29,7 +33,7 @@ async function handleGET(request: NextRequest) {
   try {
     const fichajes = await prisma.fichaje.findMany({
       where: {
-        ...(cuidadorId ? { cuidadorId } : {}),
+        ...(cuidadorIds.length > 0 ? { cuidadorId: { in: cuidadorIds } } : {}),
         ...(personaId ? { personaId } : {}),
         ...(revision ? { revision: revision as never } : {}),
         ...(desde || hasta

@@ -1,20 +1,16 @@
 'use client';
 
-import { Container, Title, Paper, Stack, Group, Text, Select, NumberInput, Button, Card, SimpleGrid, Divider, Modal, Table, Badge, Loader, Alert, Tooltip, ActionIcon } from '@mantine/core';
+import { Container, Title, Paper, Stack, Group, Text, NumberInput, Button, Card, SimpleGrid, Divider, Modal, Table, Badge, Loader, Alert, Tooltip, ActionIcon } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import { parseApiError } from '../utils/parseApiError';
+import { CuidadorSelect } from '../components/CuidadorPicker';
 import { IconCalculator, IconCheck, IconCalendar, IconCurrencyDollar, IconClockHour4, IconAlertTriangle } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 
 dayjs.locale('es');
-
-interface Cuidador {
-  id: string;
-  nombreCompleto: string;
-}
 
 interface FichajeResumen {
   id: string;
@@ -36,7 +32,6 @@ interface ResumenHoras {
 }
 
 export default function LiquidacionesPage() {
-  const [cuidadores, setCuidadores] = useState<Cuidador[]>([]);
   const [cuidadorId, setCuidadorId] = useState<string>('');
   const [precioPorHora, setPrecioPorHora] = useState<number>(0);
   const [fechaInicio, setFechaInicio] = useState<Date | null>(new Date());
@@ -46,17 +41,6 @@ export default function LiquidacionesPage() {
   const [resumenAbierto, setResumenAbierto] = useState(false);
   const [resumen, setResumen] = useState<ResumenHoras | null>(null);
   const [cargandoResumen, setCargandoResumen] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/v1/cuidadores?all=true')
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok && Array.isArray(data.data)) {
-          setCuidadores(data.data);
-        }
-      })
-      .catch(err => console.error('Error fetching cuidadores:', err));
-  }, []);
 
   // Precargar datos desde localStorage si vienen de liquidación rápida
   useEffect(() => {
@@ -243,14 +227,11 @@ export default function LiquidacionesPage() {
             </Group>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               <Group align="flex-end" gap="xs" wrap="nowrap">
-                <Select
+                <CuidadorSelect
                   label="Cuidador"
                   required
-                  placeholder="Seleccionar cuidador"
-                  data={cuidadores.map(c => ({ value: c.id, label: c.nombreCompleto }))}
-                  value={cuidadorId}
+                  value={cuidadorId || null}
                   onChange={(value) => setCuidadorId(value || '')}
-                  searchable
                   style={{ flex: 1 }}
                 />
                 <Tooltip label="Ver horas fichadas desde la última liquidación">
