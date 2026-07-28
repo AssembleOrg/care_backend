@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireAuth, requireEmpleado, HandlerContext } from '@/src/presentation/middleware/auth';
+import { requireAuth, requireCuidador, HandlerContext } from '@/src/presentation/middleware/auth';
 import { createSuccessResponse, createErrorResponse, getRequestId } from '@/src/presentation/middleware/responseWrapper';
 import { prisma } from '@/src/infrastructure/database/PrismaService';
 import { hashingService } from '@/src/infrastructure/crypto/HashingService';
 import { getClientIp } from '@/src/presentation/middleware/rateLimit';
 import { chequearRango } from '@/src/domain/geo';
+import { esUbicacionDudosa, esDispositivoMovil, motivosDeUbicacionDudosa } from '@/src/domain/gps';
 import { horasEntre } from '@/src/domain/tiempo';
 
 const marcaSchema = z.object({
@@ -54,24 +55,39 @@ async function handleGET(request: NextRequest) {
     });
 
     return createSuccessResponse(
-      fichajes.map((f) => ({
-        id: f.id,
-        cuidadorId: f.cuidadorId,
-        cuidadorNombre: f.cuidador.nombreCompleto,
-        personaId: f.personaId,
-        personaNombre: f.persona.nombreCompleto,
-        entradaAt: f.entradaAt.toISOString(),
-        entradaDistanciaM: Math.round(f.entradaDistanciaM),
-        entradaEnRango: f.entradaEnRango,
-        entradaLat: f.entradaLat,
-        entradaLng: f.entradaLng,
-        salidaAt: f.salidaAt?.toISOString() ?? null,
-        salidaDistanciaM: f.salidaDistanciaM != null ? Math.round(f.salidaDistanciaM) : null,
-        salidaEnRango: f.salidaEnRango,
-        horas: f.salidaAt ? horasEntre(f.entradaAt, f.salidaAt) : null,
-        revision: f.revision,
-        notaRevision: f.notaRevision,
-      })),
+      fichajes.map((f) => {
+        // Se evalúa al listar y no se guarda: todo lo que hace falta (las
+        // coordenadas, la precisión y el user agent) ya está en la fila.
+        const motivos = motivosDeUbicacionDudosa({
+          lat: f.entradaLat,
+          lng: f.entradaLng,
+          precisionM: f.entradaPrecisionM,
+          userAgent: f.userAgent,
+        });
+
+        return {
+          id: f.id,
+          cuidadorId: f.cuidadorId,
+          cuidadorNombre: f.cuidador.nombreCompleto,
+          personaId: f.personaId,
+          personaNombre: f.persona.nombreCompleto,
+          entradaAt: f.entradaAt.toISOString(),
+          entradaDistanciaM: Math.round(f.entradaDistanciaM),
+          entradaEnRango: f.entradaEnRango,
+          entradaLat: f.entradaLat,
+          entradaLng: f.entradaLng,
+          entradaPrecisionM: f.entradaPrecisionM != null ? Math.round(f.entradaPrecisionM) : null,
+          salidaAt: f.salidaAt?.toISOString() ?? null,
+          salidaDistanciaM: f.salidaDistanciaM != null ? Math.round(f.salidaDistanciaM) : null,
+          salidaEnRango: f.salidaEnRango,
+          salidaPrecisionM: f.salidaPrecisionM != null ? Math.round(f.salidaPrecisionM) : null,
+          horas: f.salidaAt ? horasEntre(f.entradaAt, f.salidaAt) : null,
+          revision: f.revision,
+          notaRevision: f.notaRevision,
+          desdeMovil: esDispositivoMovil(f.userAgent),
+          motivosDudosos: motivos,
+        };
+      }),
       requestId
     );
   } catch (error: unknown) {
@@ -80,7 +96,7 @@ async function handleGET(request: NextRequest) {
   }
 }
 
-/** Marca de entrada del empleado. */
+/** Marca de entrada del cuidador. */
 async function handlePOST(request: NextRequest, context: HandlerContext) {
   const requestId = getRequestId(request);
   const { cuidadorId, userId } = context.auth;
@@ -113,7 +129,7 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
       return createErrorResponse('NOT_FOUND', 'Persona no encontrada', undefined, requestId, 404);
     }
 
-    // El empleado sólo puede fichar en personas que tiene asignadas.
+    // El cuidador sólo puede fichar en personas que tiene asignadas.
     const ahora = new Date();
     const [asignacion, vinculo] = await Promise.all([
       prisma.asignacion.findFirst({
@@ -149,6 +165,12 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
       precision
     );
 
+    // Una lectura estimada por red puede caer dentro del radio por casualidad,
+    // así que "en rango" no alcanza: si la ubicación no parece de un GPS, el
+    // fichaje va a revisión igual.
+    const userAgent = request.headers.get('user-agent');
+    const dudosa = esUbicacionDudosa({ lat, lng, precisionM: precision, userAgent });
+
     const fichaje = await prisma.fichaje.create({
       data: {
         usuarioId: userId,
@@ -162,8 +184,8 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
         entradaDistanciaM: distanciaMetros,
         entradaEnRango: enRango,
         // Fuera de radio no bloquea: queda registrado y Dani decide.
-        revision: enRango ? 'NO_REQUIERE' : 'PENDIENTE',
-        userAgent: request.headers.get('user-agent') || undefined,
+        revision: enRango && !dudosa ? 'NO_REQUIERE' : 'PENDIENTE',
+        userAgent: userAgent || undefined,
         ipHash: hashingService.hash(getClientIp(request) || 'desconocida'),
       },
     });
@@ -174,6 +196,7 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
         entradaAt: fichaje.entradaAt.toISOString(),
         distanciaMetros: Math.round(distanciaMetros),
         enRango,
+        ubicacionDudosa: dudosa,
         radioMetros: persona.radioMetros,
       },
       requestId
@@ -185,4 +208,4 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
 }
 
 export const GET = requireAuth(handleGET);
-export const POST = requireEmpleado(handlePOST);
+export const POST = requireCuidador(handlePOST);

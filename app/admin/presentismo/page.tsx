@@ -18,12 +18,14 @@ import {
   Textarea,
   SimpleGrid,
   Card,
+  Tooltip,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX, IconMapPin, IconRefresh } from '@tabler/icons-react';
+import { IconCheck, IconX, IconMapPin, IconRefresh, IconDeviceMobile, IconDeviceDesktop } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { parseApiError } from '../utils/parseApiError';
+import { TEXTO_MOTIVO, type MotivoDudoso } from '@/src/domain/gps';
 import { CuidadorMultiSelect } from '../components/CuidadorPicker';
 
 interface Fichaje {
@@ -37,10 +39,14 @@ interface Fichaje {
   entradaEnRango: boolean;
   entradaLat: number;
   entradaLng: number;
+  entradaPrecisionM: number | null;
   salidaAt: string | null;
   salidaDistanciaM: number | null;
   salidaEnRango: boolean | null;
+  salidaPrecisionM: number | null;
   horas: number | null;
+  desdeMovil: boolean;
+  motivosDudosos: MotivoDudoso[];
   revision: 'NO_REQUIERE' | 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
   notaRevision: string | null;
 }
@@ -187,7 +193,7 @@ export default function PresentismoPage() {
             <Loader />
           </Group>
         ) : (
-          <Table.ScrollContainer minWidth={900}>
+          <Table.ScrollContainer minWidth={1100}>
             <Table highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
@@ -222,12 +228,46 @@ export default function PresentismoPage() {
                       <Table.Td>
                         <Text size="sm" c={f.entradaEnRango ? undefined : 'red'}>
                           E: {f.entradaDistanciaM} m
+                          {f.entradaPrecisionM != null && (
+                            <Text span size="xs" c="dimmed">
+                              {' '}
+                              ±{f.entradaPrecisionM}
+                            </Text>
+                          )}
                         </Text>
                         {f.salidaDistanciaM != null && (
                           <Text size="sm" c={f.salidaEnRango ? undefined : 'red'}>
                             S: {f.salidaDistanciaM} m
+                            {f.salidaPrecisionM != null && (
+                              <Text span size="xs" c="dimmed">
+                                {' '}
+                                ±{f.salidaPrecisionM}
+                              </Text>
+                            )}
                           </Text>
                         )}
+                        <Group gap={4} mt={2} wrap="nowrap">
+                          <Tooltip label={f.desdeMovil ? 'Fichado desde un celular' : 'Fichado desde una computadora'}>
+                            {f.desdeMovil ? (
+                              <IconDeviceMobile size={14} color="var(--admin-text-dimmed)" />
+                            ) : (
+                              <IconDeviceDesktop size={14} color="var(--admin-danger)" />
+                            )}
+                          </Tooltip>
+                          {f.motivosDudosos.length > 0 && (
+                            <Tooltip
+                              multiline
+                              w={260}
+                              label={`Ubicación poco confiable: ${f.motivosDudosos
+                                .map((m) => TEXTO_MOTIVO[m])
+                                .join('; ')}.`}
+                            >
+                              <Badge color="orange" variant="light" size="xs">
+                                GPS dudoso
+                              </Badge>
+                            </Tooltip>
+                          )}
+                        </Group>
                       </Table.Td>
                       <Table.Td>
                         <Badge color={badge.color} variant="light">

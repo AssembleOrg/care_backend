@@ -16,8 +16,8 @@ const ADMIN_PASS = process.env.E2E_ADMIN_PASSWORD || 'admin123';
 const stamp = Date.now();
 const CUIDADOR = `E2E Cuidador ${stamp}`;
 const PERSONA = `E2E Persona ${stamp}`;
-const EMPLEADO_EMAIL = `e2e.empleado.${stamp}@carebydani.test`;
-const EMPLEADO_PASS = `E2E-pass-${stamp}`;
+const CUIDADOR_EMAIL = `e2e.cuidador.${stamp}@carebydani.test`;
+const CUIDADOR_PASS = `E2E-pass-${stamp}`;
 
 // Datos que se van encadenando entre tests.
 const ctx: {
@@ -44,7 +44,7 @@ async function elegirEnSelect(page: Page, label: string | RegExp, opcion: string
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Presentismo end-to-end', () => {
-  test('admin carga cuidador, persona con ubicación y usuario empleado', async ({ page }) => {
+  test('admin carga cuidador, persona con ubicación y su usuario', async ({ page }) => {
     await loginComo(page, ADMIN_EMAIL, ADMIN_PASS, /\/admin$/);
 
     // --- Cuidador ---
@@ -111,28 +111,28 @@ test.describe('Presentismo end-to-end', () => {
     const vinculo = await prisma.personaCuidador.findFirst({ where: { personaId: ctx.personaId, activo: true } });
     expect(vinculo, 'la persona debería quedar vinculada al cuidador').toBeTruthy();
 
-    // --- Usuario empleado vinculado al cuidador ---
+    // --- Usuario del cuidador ---
     await page.goto('/admin/usuarios');
     await page.getByRole('button', { name: 'Nuevo usuario' }).click();
     const modalUsuario = page.getByRole('dialog');
-    await modalUsuario.getByLabel('Email').fill(EMPLEADO_EMAIL);
-    await modalUsuario.getByLabel('Nombre').fill(`E2E Empleado ${stamp}`);
-    await modalUsuario.getByLabel('Contraseña').fill(EMPLEADO_PASS);
+    await modalUsuario.getByLabel('Email').fill(CUIDADOR_EMAIL);
+    await modalUsuario.getByLabel('Nombre').fill(`E2E Usuario ${stamp}`);
+    await modalUsuario.getByLabel('Contraseña').fill(CUIDADOR_PASS);
     await modalUsuario.getByRole('textbox', { name: 'Cuidador vinculado' }).click();
     await page.getByRole('option', { name: CUIDADOR }).click();
     await modalUsuario.getByRole('button', { name: 'Crear usuario' }).click();
 
-    await expect(page.getByRole('cell', { name: EMPLEADO_EMAIL })).toBeVisible();
-    const filaUsuario = page.getByRole('row', { name: new RegExp(EMPLEADO_EMAIL) });
-    await expect(filaUsuario.getByText('Empleado', { exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: CUIDADOR_EMAIL })).toBeVisible();
+    const filaUsuario = page.getByRole('row', { name: new RegExp(CUIDADOR_EMAIL) });
+    await expect(filaUsuario.getByText('Cuidador', { exact: true })).toBeVisible();
     await expect(filaUsuario.getByRole('cell', { name: CUIDADOR })).toBeVisible();
 
-    const usuario = await prisma.usuario.findUnique({ where: { email: EMPLEADO_EMAIL } });
+    const usuario = await prisma.usuario.findUnique({ where: { email: CUIDADOR_EMAIL } });
     expect(usuario?.cuidadorId, 'el usuario debería quedar vinculado al cuidador').toBeTruthy();
     ctx.cuidadorId = usuario!.cuidadorId!;
   });
 
-  test('empleado ficha entrada en rango y salida fuera de rango', async ({ browser }) => {
+  test('cuidador ficha entrada en rango y salida fuera de rango', async ({ browser }) => {
     // Parado exactamente en el domicilio.
     const contexto = await browser.newContext({
       permissions: ['geolocation'],
@@ -140,7 +140,7 @@ test.describe('Presentismo end-to-end', () => {
     });
     const page = await contexto.newPage();
 
-    await loginComo(page, EMPLEADO_EMAIL, EMPLEADO_PASS, /\/empleado$/);
+    await loginComo(page, CUIDADOR_EMAIL, CUIDADOR_PASS, /\/cuidador$/);
     await expect(page.getByText(PERSONA)).toBeVisible();
 
     // Antes de que quede registrado hay que ver dónde estamos en el mapa.
@@ -173,23 +173,23 @@ test.describe('Presentismo end-to-end', () => {
     await expect(page.getByText(/Salida registrada/i)).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText(/se registró igual y la administración lo va a revisar/i)).toBeVisible();
 
-    // El turno cerrado aparece en el historial del empleado.
-    await expect(page.getByText('Últimos turnos')).toBeVisible();
+    // El turno cerrado aparece en el historial del cuidador.
+    await expect(page.getByText(/Mi presentismo \(\d+ turnos?\)/)).toBeVisible();
     await expect(page.getByText('A revisar').first()).toBeVisible();
 
     await contexto.close();
   });
 
-  test('empleado no puede entrar al panel de administración', async ({ browser }) => {
+  test('cuidador no puede entrar al panel de administración', async ({ browser }) => {
     const contexto = await browser.newContext();
     const page = await contexto.newPage();
-    await loginComo(page, EMPLEADO_EMAIL, EMPLEADO_PASS, /\/empleado$/);
+    await loginComo(page, CUIDADOR_EMAIL, CUIDADOR_PASS, /\/cuidador$/);
 
     await page.goto('/admin/usuarios');
-    await expect(page).toHaveURL(/\/empleado$/);
+    await expect(page).toHaveURL(/\/cuidador$/);
 
     const res = await page.request.get('/api/v1/usuarios');
-    expect(res.status(), 'la API de usuarios debe rechazar a un empleado').toBe(403);
+    expect(res.status(), 'la API de usuarios debe rechazar a un cuidador').toBe(403);
 
     await contexto.close();
   });
@@ -202,7 +202,9 @@ test.describe('Presentismo end-to-end', () => {
     const fila = page.getByRole('row', { name: new RegExp(CUIDADOR) });
     await expect(fila).toBeVisible({ timeout: 30_000 });
     await expect(fila.getByText('A revisar')).toBeVisible();
-    await expect(fila.getByText(/^S: \d+ m$/)).toBeVisible();
+    await expect(fila.getByText(/S: \d+ m/)).toBeVisible();
+    // El fichaje se hizo desde un navegador de escritorio: no hay GPS real.
+    await expect(fila.getByText('GPS dudoso')).toBeVisible();
 
     await fila.getByRole('button', { name: 'Aprobar' }).click();
     await expect(page.getByText(/Fichaje aprobado/i)).toBeVisible();
@@ -233,7 +235,7 @@ test.describe('Presentismo end-to-end', () => {
         await prisma.fichaje.deleteMany({ where: { cuidadorId: ctx.cuidadorId } });
         await prisma.pago.deleteMany({ where: { cuidadorId: ctx.cuidadorId } });
       }
-      const usuario = await prisma.usuario.findUnique({ where: { email: EMPLEADO_EMAIL } });
+      const usuario = await prisma.usuario.findUnique({ where: { email: CUIDADOR_EMAIL } });
       if (usuario) {
         await prisma.usuario.delete({ where: { id: usuario.id } });
         const admin = createClient(

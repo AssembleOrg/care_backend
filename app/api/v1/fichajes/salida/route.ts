@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireEmpleado, HandlerContext } from '@/src/presentation/middleware/auth';
+import { requireCuidador, HandlerContext } from '@/src/presentation/middleware/auth';
 import { createSuccessResponse, createErrorResponse, getRequestId } from '@/src/presentation/middleware/responseWrapper';
 import { prisma } from '@/src/infrastructure/database/PrismaService';
 import { chequearRango } from '@/src/domain/geo';
+import { esUbicacionDudosa } from '@/src/domain/gps';
 import { horasEntre } from '@/src/domain/tiempo';
 
 const schema = z.object({
@@ -12,7 +13,7 @@ const schema = z.object({
   precision: z.number().nonnegative().optional().nullable(),
 });
 
-/** Cierra el turno abierto del empleado. */
+/** Cierra el turno abierto del cuidador. */
 async function handlePOST(request: NextRequest, context: HandlerContext) {
   const requestId = getRequestId(request);
   const { cuidadorId } = context.auth;
@@ -48,6 +49,13 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
       ? chequearRango(destino, { lat, lng }, abierto.persona.radioMetros, precision)
       : { distanciaMetros: 0, enRango: true };
 
+    const dudosa = esUbicacionDudosa({
+      lat,
+      lng,
+      precisionM: precision,
+      userAgent: request.headers.get('user-agent'),
+    });
+
     const salidaAt = new Date();
     const actualizado = await prisma.fichaje.update({
       where: { id: abierto.id },
@@ -59,7 +67,8 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
         salidaDistanciaM: chequeo.distanciaMetros,
         salidaEnRango: chequeo.enRango,
         // Con el turno cerrado se recalcula si hace falta que Dani lo revise.
-        revision: abierto.entradaEnRango && chequeo.enRango ? 'NO_REQUIERE' : 'PENDIENTE',
+        // Una ubicación que no parece de GPS manda a revisión aunque dé en rango.
+        revision: abierto.entradaEnRango && chequeo.enRango && !dudosa ? 'NO_REQUIERE' : 'PENDIENTE',
       },
     });
 
@@ -71,6 +80,7 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
         horas: horasEntre(actualizado.entradaAt, salidaAt),
         distanciaMetros: Math.round(chequeo.distanciaMetros),
         enRango: chequeo.enRango,
+        ubicacionDudosa: dudosa,
       },
       requestId
     );
@@ -80,4 +90,4 @@ async function handlePOST(request: NextRequest, context: HandlerContext) {
   }
 }
 
-export const POST = requireEmpleado(handlePOST);
+export const POST = requireCuidador(handlePOST);
