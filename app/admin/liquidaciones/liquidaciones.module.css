@@ -170,48 +170,25 @@
 .submitButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Dark Mode */
-:global(.adminContainer.dark) .configCard,
-:global(body.admin-dark-mode) .configCard,
-:global(.adminContainer.dark) .scheduleCard,
-:global(body.admin-dark-mode) .scheduleCard {
+}:global(body.admin-active) .configCard,
+:global(body.admin-active) .scheduleCard {
   background: #1e293b !important;
   border-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .summaryCard,
-:global(body.admin-dark-mode) .summaryCard {
+}:global(body.admin-active) .summaryCard {
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(255, 107, 157, 0.1) 100%);
   border-color: rgba(14, 165, 233, 0.2);
-}
-
-:global(.adminContainer.dark) .summaryItem,
-:global(body.admin-dark-mode) .summaryItem {
+}:global(body.admin-active) .summaryItem {
   background: #0f172a !important;
   border-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .timeInput,
-:global(body.admin-dark-mode) .timeInput {
+}:global(body.admin-active) .timeInput {
   background: #0f172a;
   border-color: #334155;
   color: white;
-}
-
-:global(.adminContainer.dark) .timeInput:focus,
-:global(body.admin-dark-mode) .timeInput:focus {
+}:global(body.admin-active) .timeInput:focus {
   border-color: #0ea5e9;
-}
-
-:global(.adminContainer.dark) .timeInputDisabled,
-:global(body.admin-dark-mode) .timeInputDisabled {
+}:global(body.admin-active) .timeInputDisabled {
   background: #1e293b;
-}
-
-:global(.adminContainer.dark) .weekRange,
-:global(body.admin-dark-mode) .weekRange {
+}:global(body.admin-active) .weekRange {
   color: #94a3b8;
 }
 
@@ -416,46 +393,24 @@
   .tableWrapper {
     display: block;
   }
-}
-
-/* Dark Mode para Mobile Cards */
-:global(.adminContainer.dark) .mobileCard,
-:global(body.admin-dark-mode) .mobileCard {
+}:global(body.admin-active) .mobileCard {
   background: #1e293b !important;
   border-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .mobileCardActive,
-:global(body.admin-dark-mode) .mobileCardActive {
+}:global(body.admin-active) .mobileCardActive {
   background: rgba(14, 165, 233, 0.15) !important;
   border-color: #0ea5e9 !important;
-}
-
-:global(.adminContainer.dark) .mobileCardInactive,
-:global(body.admin-dark-mode) .mobileCardInactive {
+}:global(body.admin-active) .mobileCardInactive {
   background: #0f172a !important;
   opacity: 0.6;
-}
-
-:global(.adminContainer.dark) .mobileCardBody,
-:global(body.admin-dark-mode) .mobileCardBody {
+}:global(body.admin-active) .mobileCardBody {
   border-top-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .mobileTimeInput,
-:global(body.admin-dark-mode) .mobileTimeInput {
+}:global(body.admin-active) .mobileTimeInput {
   background: #0f172a !important;
   border-color: #334155 !important;
   color: white !important;
-}
-
-:global(.adminContainer.dark) .mobileTimeInput:focus,
-:global(body.admin-dark-mode) .mobileTimeInput:focus {
+}:global(body.admin-active) .mobileTimeInput:focus {
   border-color: #0ea5e9 !important;
-}
-
-:global(.adminContainer.dark) .mobileSubtotal,
-:global(body.admin-dark-mode) .mobileSubtotal {
+}:global(body.admin-active) .mobileSubtotal {
   background: rgba(255, 107, 157, 0.15) !important;
   border-color: rgba(255, 107, 157, 0.3) !important;
 }

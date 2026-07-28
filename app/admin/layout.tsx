@@ -27,7 +27,6 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [darkMode, setDarkMode] = useState(true); // Default to dark mode
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unread, setUnread] = useState<{
     contacto: number;
@@ -52,12 +51,6 @@ export default function AdminLayout({
   }).current;
 
   useEffect(() => {
-    // Initialize dark mode - only apply to admin container, not html
-    const savedDarkMode = localStorage.getItem("darkMode");
-    const shouldBeDark =
-      savedDarkMode === null ? true : savedDarkMode === "true";
-
-    setDarkMode(shouldBeDark);
     setMounted(true);
 
     let isMounted = true;
@@ -133,28 +126,22 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem("darkMode", darkMode ? "true" : "false");
-      // Marca de scope: el CSS global de admin (admin-globals.css) solo aplica
-      // bajo body.admin-active, para que no se filtre a la landing.
+      // Marca de scope: el CSS del admin (admin-globals.css y los .module.css)
+      // solo aplica bajo body.admin-active, para que no se filtre a la landing.
+      // También alcanza a modales y dropdowns, que se renderizan en un portal
+      // fuera de .adminContainer pero dentro de <body>. Ver design.md §2.
       document.body.classList.add("admin-active");
-      // Add/remove class on body for modals/dropdowns that render outside adminContainer
-      if (darkMode) {
-        document.body.classList.add("admin-dark-mode");
-      } else {
-        document.body.classList.remove("admin-dark-mode");
-      }
     }
-    // Cleanup: remove classes when leaving the admin area (pathname change / unmount)
+    // Cleanup: sacar la clase al salir del área de admin (nav / unmount)
     return () => {
       const currentPath = window.location.pathname;
       const isGoingToAdminPage =
         currentPath.startsWith("/admin") && currentPath !== "/admin/login";
       if (!isGoingToAdminPage) {
-        document.body.classList.remove("admin-dark-mode");
         document.body.classList.remove("admin-active");
       }
     };
-  }, [darkMode, mounted, pathname]);
+  }, [mounted, pathname]);
 
   if (!mounted) {
     return (
@@ -172,10 +159,6 @@ export default function AdminLayout({
     await supabase.auth.signOut();
     router.push("/admin/login");
     router.refresh();
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
   };
 
   const navItems = [
@@ -207,7 +190,7 @@ export default function AdminLayout({
     navItems.find((item) => item.href === pathname)?.label || "Dashboard";
 
   return (
-    <div className={`${styles.adminContainer} ${darkMode ? "dark" : ""}`}>
+    <div className={styles.adminContainer}>
       {/* Mobile Menu Overlay */}
       {sidebarOpen && (
         <div
@@ -348,19 +331,6 @@ export default function AdminLayout({
         {/* Content */}
         <div className={styles.content}>{children}</div>
       </main>
-
-      {/* Dark Mode Toggle */}
-      <button
-        onClick={toggleDarkMode}
-        className={styles.darkModeToggle}
-        type="button"
-      >
-        {darkMode ? (
-          <span className="material-icons">light_mode</span>
-        ) : (
-          <span className="material-icons">dark_mode</span>
-        )}
-      </button>
     </div>
   );
 }

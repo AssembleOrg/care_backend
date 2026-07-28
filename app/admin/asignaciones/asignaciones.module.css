@@ -24,23 +24,13 @@
   font-size: 16px;
   padding: 8px 12px;
   box-sizing: border-box;
-}
-
-/* Dark mode para inputs de tiempo */
-:global(.adminContainer.dark) .timeInput,
-:global(body.admin-dark-mode) .timeInput {
+}:global(body.admin-active) .timeInput {
   background: #0f172a !important;
   border-color: #334155 !important;
   color: white !important;
-}
-
-:global(.adminContainer.dark) .timeInput:focus,
-:global(body.admin-dark-mode) .timeInput:focus {
+}:global(body.admin-active) .timeInput:focus {
   border-color: #0ea5e9 !important;
-}
-
-:global(.adminContainer.dark) .timeInput:disabled,
-:global(body.admin-dark-mode) .timeInput:disabled {
+}:global(body.admin-active) .timeInput:disabled {
   background: #1e293b !important;
   opacity: 0.5;
 }

@@ -19,9 +19,9 @@
   color: #6b7280;
 }
 
-.adminContainer:global(.dark) .loadingContainer {
-  background: #0f172a;
-  color: #94a3b8;
+:global(body.admin-active) .adminContainer .loadingContainer {
+  background: var(--admin-bg);
+  color: var(--admin-text-dimmed);
 }
 
 /* Sidebar */
@@ -332,140 +332,98 @@
   z-index: 0;
 }
 
-/* Dark Mode Toggle */
-.darkModeToggle {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 50;
-  background: white;
-  padding: 12px;
-  border-radius: 50%;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border: none;
+/* Tema oscuro del shell */
+:global(body.admin-active) .adminContainer {
+  background: var(--admin-bg);
+  color: var(--admin-text);
 }
 
-.darkModeToggle:hover {
-  color: #0ea5e9;
-  transform: scale(1.1);
+:global(body.admin-active) .adminContainer .sidebar {
+  background: var(--admin-bg);
+  border-right-color: var(--admin-surface);
 }
 
-.darkModeToggle .material-icons {
-  font-size: 20px;
-  display: block;
+:global(body.admin-active) .adminContainer .sidebarHeader {
+  border-bottom-color: var(--admin-surface);
 }
 
-/* Dark Mode Styles */
-.adminContainer:global(.dark) {
-  background: #0f172a;
-  color: #f1f5f9;
-}
-
-.adminContainer:global(.dark) .sidebar {
-  background: #0f172a;
-  border-right-color: #1e293b;
-}
-
-.adminContainer:global(.dark) .sidebarHeader {
-  border-bottom-color: #1e293b;
-}
-
-.adminContainer:global(.dark) .logoTitle {
+:global(body.admin-active) .adminContainer .logoTitle {
   color: white;
 }
 
-.adminContainer:global(.dark) .navLink {
-  color: #94a3b8;
+:global(body.admin-active) .adminContainer .navLink {
+  color: var(--admin-text-dimmed);
 }
 
-.adminContainer:global(.dark) .navLink:hover {
-  background: #1e293b;
-  color: #f1f5f9;
+:global(body.admin-active) .adminContainer .navLink:hover {
+  background: var(--admin-surface);
+  color: var(--admin-text);
 }
 
-.adminContainer:global(.dark) .navLinkActive {
-  background: rgba(14, 165, 233, 0.2);
-  color: #0ea5e9;
+:global(body.admin-active) .adminContainer .navLinkActive {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-text);
 }
 
-.adminContainer:global(.dark) .sidebarFooter {
-  border-top-color: #1e293b;
+:global(body.admin-active) .adminContainer .sidebarFooter {
+  border-top-color: var(--admin-surface);
 }
 
-.adminContainer:global(.dark) .logoutButton {
-  color: #94a3b8;
+:global(body.admin-active) .adminContainer .logoutButton {
+  color: var(--admin-text-dimmed);
 }
 
-.adminContainer:global(.dark) .logoutButton:hover {
-  color: #ef4444;
+:global(body.admin-active) .adminContainer .logoutButton:hover {
+  color: var(--admin-danger);
 }
 
-.adminContainer:global(.dark) .homeLink {
-  color: #94a3b8;
+:global(body.admin-active) .adminContainer .homeLink {
+  color: var(--admin-text-dimmed);
 }
 
-.adminContainer:global(.dark) .homeLink:hover {
-  color: #0ea5e9;
+:global(body.admin-active) .adminContainer .homeLink:hover {
+  color: var(--admin-accent-text);
 }
 
-.adminContainer:global(.dark) .main {
-  background: #0f172a;
+:global(body.admin-active) .adminContainer .main {
+  background: var(--admin-bg);
 }
 
-.adminContainer:global(.dark) .header {
-  background: rgba(30, 41, 59, 0.8);
-  border-bottom-color: #334155;
+:global(body.admin-active) .adminContainer .header {
+  background: var(--admin-surface);
+  border-bottom-color: var(--admin-surface-2);
 }
 
-.adminContainer:global(.dark) .headerTitle {
+:global(body.admin-active) .adminContainer .headerTitle {
   color: white;
 }
 
-.adminContainer:global(.dark) .notificationButton:hover {
-  background: #1e293b;
+:global(body.admin-active) .adminContainer .notificationButton:hover {
+  background: var(--admin-surface);
 }
 
-.adminContainer:global(.dark) .notificationBadge {
-  border-color: #0f172a;
+:global(body.admin-active) .adminContainer .notificationBadge {
+  border-color: var(--admin-bg);
 }
 
-.adminContainer:global(.dark) .userMenu:hover {
-  background: #1e293b;
+:global(body.admin-active) .adminContainer .userMenu:hover {
+  background: var(--admin-surface);
 }
 
-.adminContainer:global(.dark) .userName {
-  color: #cbd5e1;
+:global(body.admin-active) .adminContainer .userName {
+  color: var(--admin-text-dimmed);
 }
 
-.adminContainer:global(.dark) .userEmail {
-  color: #64748b;
+:global(body.admin-active) .adminContainer .userEmail {
+  color: var(--admin-text-muted);
 }
 
-.adminContainer:global(.dark) .userMenu .material-icons-outlined {
-  color: #64748b;
+:global(body.admin-active) .adminContainer .userMenu .material-icons-outlined {
+  color: var(--admin-text-muted);
 }
 
-.adminContainer:global(.dark) .userMenu:hover .material-icons-outlined {
-  color: #94a3b8;
-}
-
-.adminContainer:global(.dark) .darkModeToggle {
-  background: #1e293b;
-  border-color: #334155;
-  color: #cbd5e1;
-}
-
-.adminContainer:global(.dark) .darkModeToggle:hover {
-  color: #0ea5e9;
+:global(body.admin-active) .adminContainer .userMenu:hover .material-icons-outlined {
+  color: var(--admin-text-dimmed);
 }
 
 /* Mobile Menu Button */
@@ -556,16 +514,16 @@
   }
 }
 
-.adminContainer:global(.dark) .mobileMenuButton {
-  color: #94a3b8;
+:global(body.admin-active) .adminContainer .mobileMenuButton {
+  color: var(--admin-text-dimmed);
 }
 
-.adminContainer:global(.dark) .mobileMenuButton:hover {
-  background: #1e293b;
-  color: #0ea5e9;
+:global(body.admin-active) .adminContainer .mobileMenuButton:hover {
+  background: var(--admin-surface);
+  color: var(--admin-accent-text);
 }
 
-.adminContainer:global(.dark) .mobileOverlay {
+:global(body.admin-active) .adminContainer .mobileOverlay {
   background: rgba(0, 0, 0, 0.7);
 }
 
@@ -586,7 +544,7 @@
   border-radius: 3px;
 }
 
-.adminContainer:global(.dark) .nav::-webkit-scrollbar-thumb,
-.adminContainer:global(.dark) .content::-webkit-scrollbar-thumb {
-  background: #475569;
+:global(body.admin-active) .adminContainer .nav::-webkit-scrollbar-thumb,
+:global(body.admin-active) .adminContainer .content::-webkit-scrollbar-thumb {
+  background: var(--admin-border-strong);
 }

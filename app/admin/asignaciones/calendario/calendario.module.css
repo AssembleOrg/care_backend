@@ -58,32 +58,16 @@
   vertical-align: top;
   box-sizing: border-box;
   overflow: hidden;
-}
-
-/* Dark Mode para calendario desktop */
-:global(.adminContainer.dark) .hourColumn,
-:global(body.admin-dark-mode) .hourColumn {
+}:global(body.admin-active) .hourColumn {
   background-color: #1e293b !important;
-}
-
-:global(.adminContainer.dark) .hourCell,
-:global(body.admin-dark-mode) .hourCell {
+}:global(body.admin-active) .hourCell {
   background-color: #1e293b !important;
   color: #cbd5e1 !important;
-}
-
-:global(.adminContainer.dark) .dayColumn,
-:global(body.admin-dark-mode) .dayColumn {
+}:global(body.admin-active) .dayColumn {
   color: #f1f5f9 !important;
-}
-
-:global(.adminContainer.dark) .calendarTable,
-:global(body.admin-dark-mode) .calendarTable {
+}:global(body.admin-active) .calendarTable {
   border-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .dayCell,
-:global(body.admin-dark-mode) .dayCell {
+}:global(body.admin-active) .dayCell {
   border-color: #334155 !important;
 }
 
@@ -160,34 +144,18 @@
   flex-shrink: 0;
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Dark Mode */
-:global(.adminContainer.dark) .dayCard,
-:global(body.admin-dark-mode) .dayCard {
+}:global(body.admin-active) .dayCard {
   background: #1e293b !important;
   border-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .dayCardToday,
-:global(body.admin-dark-mode) .dayCardToday {
+}:global(body.admin-active) .dayCardToday {
   border-color: #ffc107 !important;
   background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%);
-}
-
-:global(.adminContainer.dark) .dayHeader,
-:global(body.admin-dark-mode) .dayHeader {
+}:global(body.admin-active) .dayHeader {
   border-bottom-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .asignacionCard,
-:global(body.admin-dark-mode) .asignacionCard {
+}:global(body.admin-active) .asignacionCard {
   background: #0f172a !important;
   border-color: #334155 !important;
-}
-
-:global(.adminContainer.dark) .asignacionCard:hover,
-:global(body.admin-dark-mode) .asignacionCard:hover {
+}:global(body.admin-active) .asignacionCard:hover {
   background: #1e293b !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }

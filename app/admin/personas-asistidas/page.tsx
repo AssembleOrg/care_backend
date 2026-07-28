@@ -6,13 +6,14 @@ import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 import { useState, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye, IconX, IconFileDownload } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSearch, IconEdit, IconEye, IconX, IconFileDownload, IconFileText } from '@tabler/icons-react';
 import { ViewToggle, useViewMode } from '../components/ViewToggle';
 import { ConfirmDeleteModal } from '../components/ConfirmDeleteModal';
 import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
 import cardStyles from '../components/card-view.module.css';
 import { pdf } from '@react-pdf/renderer';
 import { ComprobantePdfDocument, FilaPdfData } from '../components/ComprobantePdfDocument';
+import { PresupuestoPdfDocument } from '../components/PresupuestoPdfDocument';
 
 interface PersonaAsistida {
   id: string;
@@ -63,6 +64,78 @@ export default function PersonasAsistidasPage() {
   const [comprobanteHoras, setComprobanteHoras] = useState<number | ''>('');
   const [comprobanteTotal, setComprobanteTotal] = useState<number | ''>('');
   const [generandoPdf, setGenerandoPdf] = useState(false);
+
+  const [presupuestoModalOpened, { open: openPresupuestoModal, close: closePresupuestoModal }] = useDisclosure(false);
+  const [presupuestoFecha, setPresupuestoFecha] = useState<Date | null>(null);
+  const [presupuestoCargaHoraria, setPresupuestoCargaHoraria] = useState('');
+  const [presupuestoTotalSemanal, setPresupuestoTotalSemanal] = useState('');
+  const [presupuestoValorHora, setPresupuestoValorHora] = useState<number | ''>('');
+  const [presupuestoTotal, setPresupuestoTotal] = useState<number | ''>('');
+  const [generandoPresupuesto, setGenerandoPresupuesto] = useState(false);
+
+  const handleOpenPresupuesto = () => {
+    setPresupuestoFecha(new Date());
+    setPresupuestoCargaHoraria('');
+    setPresupuestoTotalSemanal('');
+    setPresupuestoValorHora('');
+    setPresupuestoTotal('');
+    openPresupuestoModal();
+  };
+
+  const presupuestoValido =
+    !!presupuestoFecha &&
+    presupuestoCargaHoraria.trim() !== '' &&
+    presupuestoTotalSemanal.trim() !== '' &&
+    presupuestoValorHora !== '' &&
+    presupuestoTotal !== '';
+
+  const handleGenerarPresupuesto = async () => {
+    if (!presupuestoValido || !presupuestoFecha) return;
+
+    setGenerandoPresupuesto(true);
+    try {
+      const formatoMoneda = (valor: number) => `$${valor.toLocaleString('es-AR')}`;
+
+      const blob = await pdf(
+        <PresupuestoPdfDocument
+          fecha={presupuestoFecha.toLocaleDateString('es-AR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })}
+          cargaHoraria={presupuestoCargaHoraria.trim()}
+          totalSemanal={presupuestoTotalSemanal.trim()}
+          valorPorHora={formatoMoneda(Number(presupuestoValorHora))}
+          total={formatoMoneda(Number(presupuestoTotal))}
+        />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Presupuesto_${presupuestoFecha.toLocaleDateString('es-AR').replace(/\//g, '-')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      closePresupuestoModal();
+      notifications.show({
+        title: 'Éxito',
+        message: 'Presupuesto generado correctamente',
+        color: 'green',
+      });
+    } catch (error) {
+      console.error(error);
+      notifications.show({
+        title: 'Error',
+        message: 'No se pudo generar el presupuesto',
+        color: 'red',
+      });
+    } finally {
+      setGenerandoPresupuesto(false);
+    }
+  };
 
   const handleOpenComprobante = (persona: PersonaAsistida) => {
     setComprobantePersona(persona);
@@ -462,9 +535,14 @@ export default function PersonasAsistidasPage() {
     <Container size="xl" py="xl">
       <Group justify="space-between" mb="xl">
         <Title order={1}>Personas Asistidas</Title>
-        <Button leftSection={<IconPlus size={16} />} onClick={open} color="fucsia">
-          Nueva Persona
-        </Button>
+        <Group gap="sm">
+          <Button leftSection={<IconFileText size={16} />} onClick={handleOpenPresupuesto} variant="light" color="teal">
+            Generar Presupuesto
+          </Button>
+          <Button leftSection={<IconPlus size={16} />} onClick={open} color="fucsia">
+            Nueva Persona
+          </Button>
+        </Group>
       </Group>
 
       <Paper p="md" withBorder mb="md">
@@ -858,6 +936,77 @@ export default function PersonasAsistidasPage() {
             </Group>
           </Stack>
         )}
+      </Modal>
+
+      <Modal opened={presupuestoModalOpened} onClose={closePresupuestoModal} title="Generar Presupuesto">
+        <Stack>
+          <DateInput
+            label="Fecha"
+            required
+            placeholder="Seleccionar fecha"
+            value={presupuestoFecha}
+            onChange={(val: string | Date | null) => {
+              if (!val) return setPresupuestoFecha(null);
+              if (typeof val === 'string') {
+                const [y, m, d] = val.split('T')[0].split('-').map(Number);
+                setPresupuestoFecha(new Date(y, m - 1, d));
+              } else {
+                setPresupuestoFecha(new Date(val));
+              }
+            }}
+          />
+          <TextInput
+            label="Carga horaria"
+            required
+            placeholder="4 horas por día"
+            value={presupuestoCargaHoraria}
+            onChange={(e) => setPresupuestoCargaHoraria(e.currentTarget.value)}
+          />
+          <TextInput
+            label="Total semanal"
+            required
+            placeholder="28 horas semanales"
+            value={presupuestoTotalSemanal}
+            onChange={(e) => setPresupuestoTotalSemanal(e.currentTarget.value)}
+          />
+          <NumberInput
+            label="Valor por hora"
+            required
+            placeholder="0"
+            min={0}
+            decimalScale={2}
+            prefix="$ "
+            thousandSeparator="."
+            decimalSeparator=","
+            value={presupuestoValorHora}
+            onChange={(val) => setPresupuestoValorHora(val === '' ? '' : Number(val))}
+          />
+          <NumberInput
+            label="Total semanal ($)"
+            required
+            placeholder="0"
+            min={0}
+            decimalScale={2}
+            prefix="$ "
+            thousandSeparator="."
+            decimalSeparator=","
+            value={presupuestoTotal}
+            onChange={(val) => setPresupuestoTotal(val === '' ? '' : Number(val))}
+          />
+          <Group justify="flex-end" mt="md">
+            <Button variant="subtle" onClick={closePresupuestoModal}>
+              Cancelar
+            </Button>
+            <Button
+              color="fucsia"
+              onClick={handleGenerarPresupuesto}
+              loading={generandoPresupuesto}
+              disabled={!presupuestoValido || generandoPresupuesto}
+            >
+              Generar Presupuesto
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </Container>
   );

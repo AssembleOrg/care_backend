@@ -326,136 +326,60 @@
   color: #9ca3af;
   margin-left: 16px;
   flex-shrink: 0;
-}
-
-/* Dark Mode Styles */
-:global(.adminContainer.dark) .welcomeTitle,
-:global(body.admin-dark-mode) .welcomeTitle {
+}:global(body.admin-active) .welcomeTitle {
   color: white;
-}
-
-:global(.adminContainer.dark) .welcomeSubtitle,
-:global(body.admin-dark-mode) .welcomeSubtitle {
+}:global(body.admin-active) .welcomeSubtitle {
   color: #94a3b8;
-}
-
-:global(.adminContainer.dark) .statCard,
-:global(body.admin-dark-mode) .statCard {
+}:global(body.admin-active) .statCard {
   background: #1e293b !important;
   border: 1px solid #334155 !important;
   box-shadow: none !important;
-}
-
-:global(.adminContainer.dark) .statCard:hover,
-:global(body.admin-dark-mode) .statCard:hover {
+}:global(body.admin-active) .statCard:hover {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-}
-
-:global(.adminContainer.dark) .statIconPink,
-:global(body.admin-dark-mode) .statIconPink {
+}:global(body.admin-active) .statIconPink {
   background: rgba(236, 72, 153, 0.2);
-}
-
-:global(.adminContainer.dark) .statIconPrimary,
-:global(body.admin-dark-mode) .statIconPrimary {
+}:global(body.admin-active) .statIconPrimary {
   background: rgba(14, 165, 233, 0.2);
-}
-
-:global(.adminContainer.dark) .statIconGold,
-:global(body.admin-dark-mode) .statIconGold {
+}:global(body.admin-active) .statIconGold {
   background: rgba(251, 191, 36, 0.2);
-}
-
-:global(.adminContainer.dark) .statTrend,
-:global(body.admin-dark-mode) .statTrend {
+}:global(body.admin-active) .statTrend {
   background: rgba(16, 185, 129, 0.2);
   color: #10b981;
-}
-
-:global(.adminContainer.dark) .statTrendNeutral,
-:global(body.admin-dark-mode) .statTrendNeutral {
+}:global(body.admin-active) .statTrendNeutral {
   background: #1e293b;
   color: #94a3b8;
-}
-
-:global(.adminContainer.dark) .statLabel,
-:global(body.admin-dark-mode) .statLabel {
+}:global(body.admin-active) .statLabel {
   color: #94a3b8;
-}
-
-:global(.adminContainer.dark) .statNumber,
-:global(body.admin-dark-mode) .statNumber {
+}:global(body.admin-active) .statNumber {
   color: white;
-}
-
-:global(.adminContainer.dark) .statSubtext,
-:global(body.admin-dark-mode) .statSubtext {
+}:global(body.admin-active) .statSubtext {
   color: #64748b;
-}
-
-:global(.adminContainer.dark) .statProgress,
-:global(body.admin-dark-mode) .statProgress {
+}:global(body.admin-active) .statProgress {
   background: #334155;
-}
-
-:global(.adminContainer.dark) .activityCard,
-:global(body.admin-dark-mode) .activityCard {
+}:global(body.admin-active) .activityCard {
   background: #1e293b !important;
   border: 1px solid #334155 !important;
   box-shadow: none !important;
-}
-
-:global(.adminContainer.dark) .activityHeader,
-:global(body.admin-dark-mode) .activityHeader {
+}:global(body.admin-active) .activityHeader {
   border-bottom-color: #334155;
-}
-
-:global(.adminContainer.dark) .activityTitle,
-:global(body.admin-dark-mode) .activityTitle {
+}:global(body.admin-active) .activityTitle {
   color: white;
-}
-
-:global(.adminContainer.dark) .activityItem,
-:global(body.admin-dark-mode) .activityItem {
+}:global(body.admin-active) .activityItem {
   border-bottom-color: #334155;
-}
-
-:global(.adminContainer.dark) .activityItem:hover,
-:global(body.admin-dark-mode) .activityItem:hover {
+}:global(body.admin-active) .activityItem:hover {
   background: rgba(30, 41, 59, 0.5);
-}
-
-:global(.adminContainer.dark) .activityIconperson_add,
-:global(body.admin-dark-mode) .activityIconperson_add {
+}:global(body.admin-active) .activityIconperson_add {
   background: rgba(37, 99, 235, 0.3);
-}
-
-:global(.adminContainer.dark) .activityIconpayment,
-:global(body.admin-dark-mode) .activityIconpayment {
+}:global(body.admin-active) .activityIconpayment {
   background: rgba(16, 185, 129, 0.3);
-}
-
-:global(.adminContainer.dark) .activityIconwarning,
-:global(body.admin-dark-mode) .activityIconwarning {
+}:global(body.admin-active) .activityIconwarning {
   background: rgba(249, 115, 22, 0.3);
-}
-
-:global(.adminContainer.dark) .activityIconassignment,
-:global(body.admin-dark-mode) .activityIconassignment {
+}:global(body.admin-active) .activityIconassignment {
   background: rgba(99, 102, 241, 0.3);
-}
-
-:global(.adminContainer.dark) .activityItemTitle,
-:global(body.admin-dark-mode) .activityItemTitle {
+}:global(body.admin-active) .activityItemTitle {
   color: white;
-}
-
-:global(.adminContainer.dark) .activityItemDescription,
-:global(body.admin-dark-mode) .activityItemDescription {
+}:global(body.admin-active) .activityItemDescription {
   color: #94a3b8;
-}
-
-:global(.adminContainer.dark) .activityTime,
-:global(body.admin-dark-mode) .activityTime {
+}:global(body.admin-active) .activityTime {
   color: #64748b;
 }

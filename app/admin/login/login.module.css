@@ -143,7 +143,7 @@
   width: 56px;
   height: 56px;
   border-radius: 0.75rem;
-  background: linear-gradient(to bottom right, #13a4ec, #2dd4bf);
+  background: linear-gradient(to bottom right, var(--admin-accent), var(--admin-accent-hover));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -259,7 +259,7 @@
 }
 
 .inputWrapper:focus-within .inputIcon {
-  color: #13a4ec;
+  color: var(--admin-accent-text);
 }
 
 .inputIcon .material-symbols-outlined {
@@ -288,8 +288,8 @@
 
 .input:focus {
   outline: none;
-  border-color: #13a4ec;
-  box-shadow: 0 0 0 1px #13a4ec;
+  border-color: var(--admin-accent-text);
+  box-shadow: 0 0 0 1px var(--admin-accent-text);
 }
 
 .input:disabled {
@@ -333,7 +333,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: #13a4ec;
+  background: var(--admin-accent);
   padding: 0.875rem 0.75rem;
   font-size: 0.875rem;
   font-weight: 700;
@@ -345,7 +345,7 @@
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #0e8bc7;
+  background: var(--admin-accent-hover);
   box-shadow: 0 10px 15px -3px rgba(19, 164, 236, 0.4);
 }
 
@@ -354,7 +354,7 @@
 }
 
 .submitButton:focus-visible {
-  outline: 2px solid #13a4ec;
+  outline: 2px solid var(--admin-accent-text);
   outline-offset: 2px;
 }
 
@@ -390,7 +390,7 @@
 }
 
 .backLink:hover {
-  color: #13a4ec;
+  color: var(--admin-accent-text);
 }
 
 /* Footer */
@@ -402,61 +402,95 @@
   z-index: 10;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .page {
-    background: #101c22;
-  }
+/* ── Tema oscuro (fijo) ───────────────────────
+   Antes esto era un @media (prefers-color-scheme: dark) y el login arrancaba
+   CLARO salvo que el SO estuviera en oscuro: se entraba por una pantalla clara
+   y se caía a un panel oscuro. Ahora es fijo, igual que el resto del admin.
 
-  .glassPanel {
-    background: rgba(16, 28, 34, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  }
+   Los tokens se redeclaran acá porque el login NO recibe `body.admin-active`
+   (admin/layout.tsx retorna antes para esta ruta). Mismos valores que
+   admin-globals.css §1 — si cambian allá, cambiarlos acá. Ver design.md §2. */
+.page {
+  --admin-bg: #0b2b31;
+  --admin-surface: #103f4a;
+  --admin-text: #f1f5f9;
+  --admin-text-dimmed: #a8c4c9;
+  --admin-text-muted: #95b3b9;
+  --admin-border: rgba(44, 136, 148, 0.25);
+  --admin-accent-text: #5cc0ca;
 
-  .logoTitle {
-    color: #f1f5f9;
-  }
+  background: var(--admin-bg);
+}
 
-  .title {
-    color: white;
-  }
+.glassPanel {
+  background: rgba(16, 63, 74, 0.7);
+  border: 1px solid var(--admin-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
 
-  .subtitle {
-    color: #94a3b8;
-  }
+.logoTitle,
+.title {
+  color: var(--admin-text);
+}
 
-  .label {
-    color: #cbd5e1;
-  }
+.subtitle {
+  color: var(--admin-text-dimmed);
+}
 
-  .input {
-    background: rgba(30, 41, 59, 0.5);
-    border-color: #334155;
-    color: white;
-  }
+.label {
+  color: var(--admin-text-dimmed);
+}
 
-  .input::placeholder {
-    color: #64748b;
-  }
+.input {
+  background: rgba(11, 43, 49, 0.6);
+  border-color: var(--admin-border);
+  color: var(--admin-text);
+}
 
-  .blob {
-    mix-blend-mode: normal;
-  }
+.input::placeholder {
+  color: var(--admin-text-muted);
+}
 
-  .blob1 {
-    background: rgba(19, 164, 236, 0.1);
-  }
+.input:focus {
+  border-color: var(--admin-accent-text);
+}
 
-  .blob2 {
-    background: rgba(94, 234, 212, 0.1);
-  }
+.inputIcon,
+.passwordToggle,
+.footer,
+.backLink {
+  color: var(--admin-text-muted);
+}
 
-  .blob3 {
-    background: rgba(59, 130, 246, 0.1);
-  }
+.passwordToggle:hover,
+.backLink:hover,
+.inputWrapper:focus-within .inputIcon {
+  color: var(--admin-accent-text);
+}
 
-  .blob4 {
-    background: rgba(103, 232, 249, 0.1);
-  }
+.errorAlert {
+  color: #ff9ea1; /* danger sobre oscuro; ver admin-globals.css §1 */
+  background: rgba(229, 72, 77, 0.14);
+  border-color: rgba(229, 72, 77, 0.3);
+}
+
+/* Blobs ambientales teñidos de marca */
+.blob {
+  mix-blend-mode: normal;
+}
+
+.blob1 {
+  background: rgba(44, 136, 148, 0.14);
+}
+
+.blob2 {
+  background: rgba(92, 192, 202, 0.12);
+}
+
+.blob3 {
+  background: rgba(16, 63, 74, 0.18);
+}
+
+.blob4 {
+  background: rgba(212, 175, 55, 0.08);
 }

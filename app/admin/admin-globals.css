@@ -1,656 +1,211 @@
-/* Global styles for admin pages - Dark mode and improved contrast */
-/* NOTA: todo este archivo está scopeado bajo body.admin-active / body.admin-dark-mode
-   para que NO se filtre a la landing pública (causaba que el hero se pintara de azul). */
+/* ──────────────────────────────────────────────
+   Panel admin — tokens y overrides de Mantine
+   Ver design.md §1-§3.
 
-/* Improve text contrast in light mode (solo admin) */
+   CONTRATO DE SCOPING (no romper):
+   Todo en este archivo cuelga de `body.admin-active`, la marca que
+   admin/layout.tsx pone/saca al entrar y salir de /admin. Sin ese scope el
+   CSS se filtra a la landing pública (ya pasó: pintó el hero de azul).
+
+   El panel es SOLO OSCURO. No hay bloque de modo claro: el toggle del layout
+   quedó inerte a propósito. Si volviera a haber dos modos, volvería el bug de
+   cascada que hacía ilegible el panel (dos bloques de igual especificidad,
+   ganaba el último del archivo).
+
+   El login NO recibe `admin-active` (layout.tsx retorna antes para esa ruta):
+   se estiliza por su cuenta en login/login.module.css.
+   ────────────────────────────────────────────── */
+
+/* ── §1 Tokens ──────────────────────────────────
+   Derivados de la marca (--color-teal-* de app/globals.css, que este archivo
+   solo LEE, nunca modifica). Para recolorear el panel, tocar solo este bloque.
+   Todos los pares texto/fondo verificados a ≥4.5:1 (WCAG AA). */
 body.admin-active {
-  --mantine-color-text: #1a1a1a;
-  --mantine-color-dimmed: #5c5c5c;
-}
-
-/* Dark mode variables - only for admin */
-body.admin-dark-mode {
-  --mantine-color-text: #f1f5f9;
-  --mantine-color-dimmed: #94a3b8;
-}
-
-/* Notifications - Top Right Position and Better Contrast */
-.mantine-Notification-root {
-  position: fixed !important;
-  top: 20px !important;
-  right: 20px !important;
-  bottom: auto !important;
-  left: auto !important;
-  z-index: 1000 !important;
-}
-
-/* Light mode notifications - dark text on light background */
-.mantine-Notification-root {
-  background: #ffffff !important;
-  color: #1a1a1a !important;
-  border: 1px solid #e2e8f0;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.mantine-Notification-title {
-  color: #1a1a1a !important;
-  font-weight: 600 !important;
-}
-
-.mantine-Notification-description {
-  color: #374151 !important;
-  font-weight: 400 !important;
-}
-
-/* Dark mode notifications - light text on dark background */
-.adminContainer.dark .mantine-Notification-root,
-body.admin-dark-mode .mantine-Notification-root {
-  background: #1e293b !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #334155;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.3),
-    0 2px 4px -1px rgba(0, 0, 0, 0.2);
-}
-
-.adminContainer.dark .mantine-Notification-title,
-body.admin-dark-mode .mantine-Notification-title {
-  color: #f1f5f9 !important;
-  font-weight: 600 !important;
-  font-size: 18px !important;
-  margin-bottom: 8px !important;
-}
-
-@media (min-width: 768px) {
-  .adminContainer.dark .mantine-Notification-title,
-  body.admin-dark-mode .mantine-Notification-title {
-    font-size: 20px !important;
-    margin-bottom: 10px !important;
-  }
-}
-
-.adminContainer.dark .mantine-Notification-description,
-body.admin-dark-mode .mantine-Notification-description {
-  color: #cbd5e1 !important;
-  font-weight: 400 !important;
-  font-size: 15px !important;
-  line-height: 1.5 !important;
-}
-
-@media (min-width: 768px) {
-  .adminContainer.dark .mantine-Notification-description,
-  body.admin-dark-mode .mantine-Notification-description {
-    font-size: 16px !important;
-    line-height: 1.6 !important;
-  }
-}
-
-/* Error notifications - red variant with better contrast */
-.mantine-Notification-root[data-variant="filled"][data-color="red"],
-.mantine-Notification-root[data-color="red"] {
-  background: #dc2626 !important;
-  color: #ffffff !important;
-  border: 1px solid #b91c1c;
-}
-
-.mantine-Notification-root[data-variant="filled"][data-color="red"]
-  .mantine-Notification-title,
-.mantine-Notification-root[data-color="red"] .mantine-Notification-title {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-}
-
-.mantine-Notification-root[data-variant="filled"][data-color="red"]
-  .mantine-Notification-description,
-.mantine-Notification-root[data-color="red"] .mantine-Notification-description {
-  color: #fef2f2 !important;
-  font-weight: 400 !important;
-}
-
-/* Success notifications - green variant */
-.mantine-Notification-root[data-variant="filled"][data-color="green"],
-.mantine-Notification-root[data-color="green"] {
-  background: #16a34a !important;
-  color: #ffffff !important;
-  border: 1px solid #15803d;
-}
-
-.mantine-Notification-root[data-variant="filled"][data-color="green"]
-  .mantine-Notification-title,
-.mantine-Notification-root[data-color="green"] .mantine-Notification-title {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-}
-
-.mantine-Notification-root[data-variant="filled"][data-color="green"]
-  .mantine-Notification-description,
-.mantine-Notification-root[data-color="green"]
-  .mantine-Notification-description {
-  color: #f0fdf4 !important;
-  font-weight: 400 !important;
-}
-
-/* Mantine Modal Dark Mode - for modals inside adminContainer */
-.adminContainer.dark .mantine-Modal-root,
-body.admin-dark-mode .mantine-Modal-root {
-  color: white;
-}
-
-.adminContainer.dark .mantine-Modal-content,
-body.admin-dark-mode .mantine-Modal-content {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: white;
-}
-
-.adminContainer.dark .mantine-Modal-header,
-body.admin-dark-mode .mantine-Modal-header {
-  background: #1e293b;
-  border-bottom: 1px solid #334155;
-}
-
-.adminContainer.dark .mantine-Modal-title,
-body.admin-dark-mode .mantine-Modal-title {
-  color: white !important;
-  font-weight: 600;
-}
-
-.adminContainer.dark .mantine-Modal-close,
-body.admin-dark-mode .mantine-Modal-close {
-  color: #cbd5e1;
-}
-
-.adminContainer.dark .mantine-Modal-close:hover,
-body.admin-dark-mode .mantine-Modal-close:hover {
-  background: #334155;
-  color: white;
-}
-
-.adminContainer.dark .mantine-Modal-body,
-body.admin-dark-mode .mantine-Modal-body {
-  color: white;
-}
-
-/* All text in modals should be white */
-.adminContainer.dark .mantine-Modal-body *,
-body.admin-dark-mode .mantine-Modal-body * {
-  color: white;
-}
-
-.adminContainer.dark .mantine-Modal-body .mantine-Text-root,
-body.admin-dark-mode .mantine-Modal-body .mantine-Text-root {
-  color: white !important;
-}
-
-.adminContainer.dark .mantine-Modal-body .mantine-Text-root[data-c="dimmed"],
-body.admin-dark-mode .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
-  color: #cbd5e1 !important;
-}
-
-.adminContainer.dark .mantine-Modal-body .mantine-Title-root,
-body.admin-dark-mode .mantine-Modal-body .mantine-Title-root {
-  color: white !important;
-}
-
-/* Mantine Paper Dark Mode */
-.adminContainer.dark .mantine-Paper-root,
-body.admin-dark-mode .mantine-Paper-root {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f1f5f9 !important;
-}
-
-/* Mantine Table Dark Mode */
-.adminContainer.dark .mantine-Table-root,
-body.admin-dark-mode .mantine-Table-root {
-  color: white;
-}
-
-.adminContainer.dark .mantine-Table-thead,
-body.admin-dark-mode .mantine-Table-thead {
-  background: #0f172a;
-}
-
-.adminContainer.dark .mantine-Table-th,
-body.admin-dark-mode .mantine-Table-th {
-  color: white !important;
-  border-bottom-color: #334155;
-  font-weight: 600;
-}
-
-.adminContainer.dark .mantine-Table-td,
-body.admin-dark-mode .mantine-Table-td {
-  color: white !important;
-  border-bottom-color: #334155;
-}
-
-.adminContainer.dark .mantine-Table-td .mantine-Text-root,
-body.admin-dark-mode .mantine-Table-td .mantine-Text-root {
-  color: white !important;
-}
-
-.adminContainer.dark .mantine-Table-td .mantine-Text-root[data-c="dimmed"],
-body.admin-dark-mode .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
-  color: #cbd5e1 !important;
-}
-
-.adminContainer.dark .mantine-Table-tr:hover,
-body.admin-dark-mode .mantine-Table-tr:hover {
-  background: rgba(30, 41, 59, 0.5);
-}
-
-/* Mantine Input Dark Mode */
-.adminContainer.dark .mantine-TextInput-input,
-.adminContainer.dark .mantine-NumberInput-input,
-.adminContainer.dark .mantine-Select-input,
-.adminContainer.dark .mantine-Textarea-input,
-.adminContainer.dark .mantine-DateInput-input,
-.adminContainer.dark .mantine-MultiSelect-input,
-body.admin-dark-mode .mantine-TextInput-input,
-body.admin-dark-mode .mantine-NumberInput-input,
-body.admin-dark-mode .mantine-Select-input,
-body.admin-dark-mode .mantine-Textarea-input,
-body.admin-dark-mode .mantine-DateInput-input,
-body.admin-dark-mode .mantine-MultiSelect-input {
-  background: #0f172a !important;
-  border-color: #334155 !important;
-  color: #f1f5f9 !important;
-}
-
-.adminContainer.dark .mantine-TextInput-input:focus,
-.adminContainer.dark .mantine-NumberInput-input:focus,
-.adminContainer.dark .mantine-Select-input:focus,
-.adminContainer.dark .mantine-Textarea-input:focus,
-.adminContainer.dark .mantine-DateInput-input:focus,
-.adminContainer.dark .mantine-MultiSelect-input:focus,
-body.admin-dark-mode .mantine-TextInput-input:focus,
-body.admin-dark-mode .mantine-NumberInput-input:focus,
-body.admin-dark-mode .mantine-Select-input:focus,
-body.admin-dark-mode .mantine-Textarea-input:focus,
-body.admin-dark-mode .mantine-DateInput-input:focus,
-body.admin-dark-mode .mantine-MultiSelect-input:focus {
-  border-color: #0ea5e9;
-}
-
-.adminContainer.dark .mantine-TextInput-label,
-.adminContainer.dark .mantine-NumberInput-label,
-.adminContainer.dark .mantine-Select-label,
-.adminContainer.dark .mantine-Textarea-label,
-.adminContainer.dark .mantine-DateInput-label,
-.adminContainer.dark .mantine-MultiSelect-label,
-body.admin-dark-mode .mantine-TextInput-label,
-body.admin-dark-mode .mantine-NumberInput-label,
-body.admin-dark-mode .mantine-Select-label,
-body.admin-dark-mode .mantine-Textarea-label,
-body.admin-dark-mode .mantine-DateInput-label,
-body.admin-dark-mode .mantine-MultiSelect-label {
-  color: white !important;
-  font-weight: 500;
-}
-
-.adminContainer.dark .mantine-TextInput-input::placeholder,
-.adminContainer.dark .mantine-NumberInput-input::placeholder,
-.adminContainer.dark .mantine-Select-input::placeholder,
-.adminContainer.dark .mantine-Textarea-input::placeholder,
-.adminContainer.dark .mantine-DateInput-input::placeholder,
-.adminContainer.dark .mantine-MultiSelect-input::placeholder,
-body.admin-dark-mode .mantine-TextInput-input::placeholder,
-body.admin-dark-mode .mantine-NumberInput-input::placeholder,
-body.admin-dark-mode .mantine-Select-input::placeholder,
-body.admin-dark-mode .mantine-Textarea-input::placeholder,
-body.admin-dark-mode .mantine-DateInput-input::placeholder,
-body.admin-dark-mode .mantine-MultiSelect-input::placeholder {
-  color: #64748b;
-}
-
-/* Mantine Select Dropdown Dark Mode */
-.adminContainer.dark .mantine-Select-dropdown,
-body.admin-dark-mode .mantine-DateInput-input::placeholder {
-  color: #64748b;
-}
-
-/* Mantine Select Dropdown Dark Mode */
-.adminContainer.dark .mantine-Select-dropdown,
-.adminContainer.dark .mantine-MultiSelect-dropdown,
-body.admin-dark-mode .mantine-Select-dropdown,
-body.admin-dark-mode .mantine-MultiSelect-dropdown {
-  background: #1e293b;
-  border: 1px solid #334155;
-}
-
-.adminContainer.dark .mantine-Select-option,
-.adminContainer.dark .mantine-MultiSelect-option,
-body.admin-dark-mode .mantine-Select-option,
-body.admin-dark-mode .mantine-MultiSelect-option {
-  color: #f1f5f9;
-}
-
-.adminContainer.dark .mantine-Select-option:hover,
-.adminContainer.dark .mantine-MultiSelect-option:hover,
-.adminContainer.dark .mantine-MultiSelect-option[data-hovered],
-body.admin-dark-mode .mantine-Select-option:hover,
-body.admin-dark-mode .mantine-MultiSelect-option:hover,
-body.admin-dark-mode .mantine-MultiSelect-option[data-hovered] {
-  background: #334155;
-}
-
-.adminContainer.dark .mantine-Select-option[data-selected],
-.adminContainer.dark .mantine-MultiSelect-option[data-selected],
-body.admin-dark-mode .mantine-Select-option[data-selected],
-body.admin-dark-mode .mantine-MultiSelect-option[data-selected] {
-  background: #0ea5e9;
-  color: white;
-}
-
-/* Mantine MultiSelect Value Badge Dark Mode - Selectores más específicos */
-.adminContainer.dark .mantine-MultiSelect-value,
-body.admin-dark-mode .mantine-MultiSelect-value,
-.adminContainer.dark [class*="MultiSelect-value"],
-body.admin-dark-mode [class*="MultiSelect-value"] {
-  background: #ff3d75 !important;
-  color: #ffffff !important;
-  border: none !important;
-}
-
-.adminContainer.dark .mantine-MultiSelect-valueLabel,
-body.admin-dark-mode .mantine-MultiSelect-valueLabel,
-.adminContainer.dark [class*="MultiSelect-valueLabel"],
-body.admin-dark-mode [class*="MultiSelect-valueLabel"],
-.adminContainer.dark .mantine-MultiSelect-value span,
-body.admin-dark-mode .mantine-MultiSelect-value span,
-.adminContainer.dark .mantine-MultiSelect-value div,
-body.admin-dark-mode .mantine-MultiSelect-value div {
-  color: #ffffff !important;
-  font-weight: 500 !important;
-}
-
-.adminContainer.dark .mantine-MultiSelect-valueRemove,
-body.admin-dark-mode .mantine-MultiSelect-valueRemove,
-.adminContainer.dark [class*="MultiSelect-valueRemove"],
-body.admin-dark-mode [class*="MultiSelect-valueRemove"] {
-  color: #ffffff !important;
-}
-
-.adminContainer.dark .mantine-MultiSelect-valueRemove:hover,
-body.admin-dark-mode .mantine-MultiSelect-valueRemove:hover,
-.adminContainer.dark [class*="MultiSelect-valueRemove"]:hover,
-body.admin-dark-mode [class*="MultiSelect-valueRemove"]:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
-}
-
-/* Asegurar que TODO el texto dentro del value sea legible */
-.adminContainer.dark .mantine-MultiSelect-value *,
-body.admin-dark-mode .mantine-MultiSelect-value *,
-.adminContainer.dark [class*="MultiSelect-value"] *,
-body.admin-dark-mode [class*="MultiSelect-value"] * {
-  color: #ffffff !important;
-}
-
-/* Estilo global más agresivo para valores de MultiSelect */
-.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-value,
-body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-value,
-.adminContainer.dark .mantine-MultiSelect-input [class*="value"],
-body.admin-dark-mode .mantine-MultiSelect-input [class*="value"] {
-  background-color: #ff3d75 !important;
-  color: #ffffff !important;
-}
-
-.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-value *,
-body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-value *,
-.adminContainer.dark .mantine-MultiSelect-input [class*="value"] *,
-body.admin-dark-mode .mantine-MultiSelect-input [class*="value"] * {
-  color: #ffffff !important;
-}
-
-/* Mantine Button Dark Mode */
-.adminContainer.dark .mantine-Button-root,
-body.admin-dark-mode .mantine-Button-root {
-  color: #f1f5f9;
-}
-
-.adminContainer.dark .mantine-Button-root[data-variant="light"],
-body.admin-dark-mode .mantine-Button-root[data-variant="light"] {
-  background: rgba(14, 165, 233, 0.1);
-  color: #0ea5e9;
-}
-
-.adminContainer.dark .mantine-Button-root[data-variant="light"]:hover,
-body.admin-dark-mode .mantine-Button-root[data-variant="light"]:hover {
-  background: rgba(14, 165, 233, 0.2);
-}
-
-.adminContainer.dark .mantine-Button-root[data-variant="subtle"],
-body.admin-dark-mode .mantine-Button-root[data-variant="subtle"] {
-  color: #94a3b8;
-}
-
-.adminContainer.dark .mantine-Button-root[data-variant="subtle"]:hover,
-body.admin-dark-mode .mantine-Button-root[data-variant="subtle"]:hover {
-  background: #334155;
-  color: #f1f5f9;
-}
-
-/* Mantine Badge Dark Mode */
-.adminContainer.dark .mantine-Badge-root,
-body.admin-dark-mode .mantine-Badge-root {
-  color: #f1f5f9;
-}
-
-.adminContainer.dark .mantine-Badge-root[data-variant="light"],
-body.admin-dark-mode .mantine-Badge-root[data-variant="light"] {
-  background: rgba(14, 165, 233, 0.2);
-  color: #0ea5e9;
-}
-
-/* Mantine Checkbox Dark Mode */
-.adminContainer.dark .mantine-Checkbox-input,
-body.admin-dark-mode .mantine-Checkbox-input {
-  border-color: #475569;
-  background: #0f172a;
-}
-
-.adminContainer.dark .mantine-Checkbox-input:checked,
-body.admin-dark-mode .mantine-Checkbox-input:checked {
-  background: #0ea5e9;
-  border-color: #0ea5e9;
-}
-
-.adminContainer.dark .mantine-Checkbox-label,
-body.admin-dark-mode .mantine-Checkbox-label {
-  color: #f1f5f9;
-}
-
-/* Mantine ActionIcon Dark Mode */
-.adminContainer.dark .mantine-ActionIcon-root,
-body.admin-dark-mode .mantine-ActionIcon-root {
-  color: #94a3b8;
-}
-
-.adminContainer.dark .mantine-ActionIcon-root:hover,
-body.admin-dark-mode .mantine-ActionIcon-root:hover {
-  background: #334155;
-  color: #f1f5f9;
-}
-
-/* Mantine Text Dark Mode */
-.adminContainer.dark .mantine-Text-root,
-body.admin-dark-mode .mantine-Text-root {
-  color: white !important;
-}
-
-.adminContainer.dark .mantine-Text-root[data-c="dimmed"],
-body.admin-dark-mode .mantine-Text-root[data-c="dimmed"] {
-  color: #cbd5e1 !important;
-}
-
-/* Mantine Title Dark Mode */
-.adminContainer.dark .mantine-Title-root,
-body.admin-dark-mode .mantine-Title-root {
-  color: white !important;
-}
-
-/* All titles in dark mode should be white */
-.adminContainer.dark h1,
-body.admin-dark-mode h1,
-.adminContainer.dark h2,
-body.admin-dark-mode h2,
-.adminContainer.dark h3,
-body.admin-dark-mode h3,
-.adminContainer.dark h4,
-body.admin-dark-mode h4,
-.adminContainer.dark h5,
-body.admin-dark-mode h5,
-.adminContainer.dark h6 {
-  color: white !important;
-}
-
-/* Mantine Container Dark Mode */
-.adminContainer.dark .mantine-Container-root,
-body.admin-dark-mode h6 {
-  color: white !important;
-}
-
-/* Mantine Container Dark Mode */
-.adminContainer.dark .mantine-Container-root,
-body.admin-dark-mode .mantine-Container-root {
-  color: #f1f5f9;
-}
-
-/* Mantine Stack Dark Mode */
-.adminContainer.dark .mantine-Stack-root,
-body.admin-dark-mode .mantine-Stack-root {
-  color: #f1f5f9;
-}
-
-/* Mantine Group Dark Mode */
-.adminContainer.dark .mantine-Group-root,
-body.admin-dark-mode .mantine-Group-root {
-  color: #f1f5f9;
-}
-
-/* Mantine Card Dark Mode */
-.adminContainer.dark .mantine-Card-root,
-body.admin-dark-mode .mantine-Card-root {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f1f5f9 !important;
-}
-
-/* Mantine Divider Dark Mode */
-.adminContainer.dark .mantine-Divider-root,
-body.admin-dark-mode .mantine-Divider-root {
-  border-color: #334155;
-}
-
-/* Native input elements in dark mode */
-.adminContainer.dark input[type="time"],
-body.admin-dark-mode input[type="time"],
-.adminContainer.dark input[type="text"],
-body.admin-dark-mode input[type="text"],
-.adminContainer.dark input[type="email"],
-body.admin-dark-mode input[type="email"],
-.adminContainer.dark input[type="number"],
-body.admin-dark-mode input[type="number"],
-.adminContainer.dark textarea {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.adminContainer.dark textarea,
-body.admin-dark-mode textarea {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.adminContainer.dark input[type="time"]:focus,
-body.admin-dark-mode input[type="time"]:focus,
-.adminContainer.dark input[type="text"]:focus,
-body.admin-dark-mode input[type="text"]:focus,
-.adminContainer.dark input[type="email"]:focus,
-body.admin-dark-mode input[type="email"]:focus,
-.adminContainer.dark input[type="number"]:focus,
-body.admin-dark-mode input[type="number"]:focus,
-.adminContainer.dark textarea:focus {
-  border-color: #0ea5e9;
-  outline: none;
-}
-
-.adminContainer.dark textarea:focus,
-body.admin-dark-mode textarea:focus {
-  border-color: #0ea5e9;
-  outline: none;
-}
-
-.adminContainer.dark input[type="time"]:disabled,
-body.admin-dark-mode input[type="time"]:disabled,
-.adminContainer.dark input[type="text"]:disabled,
-body.admin-dark-mode input[type="text"]:disabled,
-.adminContainer.dark input[type="email"]:disabled,
-body.admin-dark-mode input[type="email"]:disabled,
-.adminContainer.dark input[type="number"]:disabled,
-body.admin-dark-mode input[type="number"]:disabled,
-.adminContainer.dark textarea:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Pagination styles */
-.adminContainer.dark .mantine-Pagination-root,
-body.admin-dark-mode textarea:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Pagination styles */
-.adminContainer.dark .mantine-Pagination-root,
-body.admin-dark-mode .mantine-Pagination-root {
-  color: #f1f5f9;
-}
-
-.adminContainer.dark .mantine-Pagination-control,
-body.admin-dark-mode .mantine-Pagination-control {
-  background: #1e293b;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-.adminContainer.dark .mantine-Pagination-control:hover,
-body.admin-dark-mode .mantine-Pagination-control:hover {
-  background: #334155;
-}
-
-.adminContainer.dark .mantine-Pagination-control[data-active],
-body.admin-dark-mode .mantine-Pagination-control[data-active] {
-  background: #0ea5e9;
-  border-color: #0ea5e9;
-  color: white;
-}
-
-/* Improve text contrast in light mode - make text darker (solo admin) */
-body.admin-active .mantine-Text-root {
-  color: #0f172a !important;
-}
-
-body.admin-active .mantine-Text-root[data-c="dimmed"] {
-  color: #374151 !important;
-}
-
-body.admin-active .mantine-Title-root {
-  color: #0f172a !important;
+  /* Superficies */
+  --admin-bg: #0b2b31; /* fondo base */
+  --admin-surface: #103f4a; /* cards, modales, paper, dropdowns */
+  --admin-surface-2: #155059; /* hover, thead */
+  --admin-border: rgba(44, 136, 148, 0.25);
+  --admin-border-strong: rgba(44, 136, 148, 0.45);
+
+  /* Texto — ratios medidos sobre --admin-surface, el fondo más claro y por
+     tanto el caso peor. Todos ≥4.5:1 (WCAG AA). */
+  --admin-text: #f1f5f9; /* 10.5:1 */
+  --admin-text-dimmed: #a8c4c9; /* 6.2:1 */
+  --admin-text-muted: #95b3b9; /* 5.2:1 — placeholders */
+
+  /* Acentos de marca.
+     Dos variantes a propósito: `accent` es para RELLENOS (lleva texto blanco
+     encima) y `accent-text` para TEXTO sobre superficie oscura. El teal puro
+     de marca (#2c8894) da 4.15:1 con blanco: no llega a AA, así que como
+     relleno se usa un tono más profundo de la misma escala. */
+  --admin-accent: #236f78; /* relleno; blanco encima = 5.8:1 */
+  --admin-accent-hover: #2a808b; /* hover de relleno; blanco encima = 4.6:1.
+     Es el teal de marca (#2c8894) apenas oscurecido: el puro da 4.15:1 con
+     blanco y no llega a AA. */
+  --admin-accent-text: #5cc0ca; /* texto/bordes sobre oscuro = 5.4:1 */
+  --admin-accent-soft: rgba(44, 136, 148, 0.18);
+  --admin-cta: #d4af37; /* gold de marca; 7.1:1 sobre bg */
+
+  /* Semánticos — los `-fill` llevan texto blanco encima, los otros son texto */
+  --admin-danger: #ff9ea1; /* texto sobre oscuro = 5.8:1 */
+  --admin-danger-fill: #b91c1c; /* relleno; blanco encima = 6.5:1 */
+  --admin-danger-soft: rgba(229, 72, 77, 0.18);
+  --admin-success-fill: #15703f; /* relleno; blanco encima = 6.1:1 */
+  --admin-on-accent: #ffffff;
+
+  /* ── §2 Mapeo de Mantine ─────────────────────
+     `!important` deliberado: app/globals.css declara --mantine-color-text en
+     :root con !important para la landing. Ese archivo es intocable, así que
+     acá se gana por especificidad — body.admin-active (0,2,0) > :root (0,1,0).
+     Sin esto, todo componente Mantine sin override explícito hereda texto
+     #1a1a2e sobre fondo oscuro: contraste 1.1:1, ilegible. */
+  --mantine-color-text: var(--admin-text) !important;
+  --mantine-color-dimmed: var(--admin-text-dimmed) !important;
+  --mantine-color-body: var(--admin-bg) !important;
+}
+
+/* ── §3 Tipografía base ─────────────────────── */
+body.admin-active .mantine-Text-root,
+body.admin-active .mantine-Title-root,
+body.admin-active h1,
+body.admin-active h2,
+body.admin-active h3,
+body.admin-active h4,
+body.admin-active h5,
+body.admin-active h6 {
+  color: var(--admin-text);
+}
+
+/* `!important` necesario: app/globals.css:131-141 declara
+   `.mantine-Text-root[data-c="dimmed"] { color:#4a5568 !important }` SIN scope,
+   así que alcanza al admin y le gana a una regla normal. Ese archivo es de la
+   landing y no se toca. Sin esto el texto secundario queda gris oscuro sobre
+   fondo oscuro (~1.9:1). Mismo motivo para el Anchor. */
+body.admin-active .mantine-Text-root[data-c="dimmed"],
+body.admin-active .mantine-Anchor-root[data-c="dimmed"] {
+  color: var(--admin-text-dimmed) !important;
+}
+
+body.admin-active .mantine-Container-root,
+body.admin-active .mantine-Stack-root,
+body.admin-active .mantine-Group-root {
+  color: var(--admin-text);
+}
+
+/* ── §4 Superficies ─────────────────────────── */
+body.admin-active .mantine-Paper-root,
+body.admin-active .mantine-Card-root {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Divider-root {
+  border-color: var(--admin-border);
+}
+
+/* ── §5 Tablas ──────────────────────────────── */
+body.admin-active .mantine-Table-root {
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Table-thead {
+  background: var(--admin-bg);
 }
 
 body.admin-active .mantine-Table-th {
-  color: #0f172a !important;
+  color: var(--admin-text);
+  border-bottom-color: var(--admin-border);
   font-weight: 600;
 }
 
 body.admin-active .mantine-Table-td {
-  color: #1f2937 !important;
+  color: var(--admin-text);
+  border-bottom-color: var(--admin-border);
+}
+
+body.admin-active .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active .mantine-Table-tr:hover {
+  background: var(--admin-surface-2);
+}
+
+/* ── §6 Modales ─────────────────────────────── */
+body.admin-active .mantine-Modal-content,
+body.admin-active .mantine-Modal-header {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Modal-content {
+  border: 1px solid var(--admin-border);
+}
+
+body.admin-active .mantine-Modal-header {
+  border-bottom: 1px solid var(--admin-border);
+}
+
+body.admin-active .mantine-Modal-title {
+  color: var(--admin-text);
+  font-weight: 600;
+}
+
+body.admin-active .mantine-Modal-body {
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active .mantine-Modal-close {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active .mantine-Modal-close:hover {
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+}
+
+/* ── §7 Inputs ──────────────────────────────── */
+body.admin-active .mantine-TextInput-input,
+body.admin-active .mantine-NumberInput-input,
+body.admin-active .mantine-Select-input,
+body.admin-active .mantine-Textarea-input,
+body.admin-active .mantine-DateInput-input,
+body.admin-active .mantine-MultiSelect-input,
+body.admin-active input[type="text"],
+body.admin-active input[type="email"],
+body.admin-active input[type="number"],
+body.admin-active input[type="time"],
+body.admin-active textarea {
+  background: var(--admin-bg);
+  border-color: var(--admin-border-strong);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-TextInput-input:focus,
+body.admin-active .mantine-NumberInput-input:focus,
+body.admin-active .mantine-Select-input:focus,
+body.admin-active .mantine-Textarea-input:focus,
+body.admin-active .mantine-DateInput-input:focus,
+body.admin-active .mantine-MultiSelect-input:focus,
+body.admin-active input[type="text"]:focus,
+body.admin-active input[type="email"]:focus,
+body.admin-active input[type="number"]:focus,
+body.admin-active input[type="time"]:focus,
+body.admin-active textarea:focus {
+  border-color: var(--admin-accent-text);
+  outline: none;
+}
+
+body.admin-active input:disabled,
+body.admin-active textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 body.admin-active .mantine-TextInput-label,
@@ -658,445 +213,248 @@ body.admin-active .mantine-NumberInput-label,
 body.admin-active .mantine-Select-label,
 body.admin-active .mantine-Textarea-label,
 body.admin-active .mantine-DateInput-label,
-body.admin-active .mantine-MultiSelect-label {
-  color: #0f172a !important;
-  font-weight: 600;
+body.admin-active .mantine-MultiSelect-label,
+body.admin-active .mantine-Checkbox-label {
+  color: var(--admin-text);
+  font-weight: 500;
 }
 
-/* Mantine MultiSelect Value Badge Light Mode - asegurar contraste */
-.mantine-MultiSelect-value,
-[class*="MultiSelect-value"] {
-  background: #ff3d75 !important;
-  color: #ffffff !important;
-  border: none !important;
+body.admin-active input::placeholder,
+body.admin-active textarea::placeholder {
+  color: var(--admin-text-muted);
 }
 
-.mantine-MultiSelect-valueLabel,
-[class*="MultiSelect-valueLabel"],
-.mantine-MultiSelect-value span,
-.mantine-MultiSelect-value div {
-  color: #ffffff !important;
-  font-weight: 500 !important;
+/* ── §8 Dropdowns (Select / MultiSelect / Menu) ── */
+body.admin-active .mantine-Select-dropdown,
+body.admin-active .mantine-MultiSelect-dropdown,
+body.admin-active .mantine-Menu-dropdown {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
 }
 
-.mantine-MultiSelect-valueRemove,
-[class*="MultiSelect-valueRemove"] {
-  color: #ffffff !important;
+body.admin-active .mantine-Select-option,
+body.admin-active .mantine-MultiSelect-option,
+body.admin-active .mantine-Menu-item {
+  color: var(--admin-text);
 }
 
-.mantine-MultiSelect-valueRemove:hover,
-[class*="MultiSelect-valueRemove"]:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
+body.admin-active .mantine-Select-option:hover,
+body.admin-active .mantine-MultiSelect-option:hover,
+body.admin-active .mantine-MultiSelect-option[data-hovered],
+body.admin-active .mantine-Menu-item:hover,
+body.admin-active .mantine-Menu-item[data-hovered] {
+  background: var(--admin-surface-2);
 }
 
-/* Asegurar que TODO el texto dentro del value sea legible en modo claro también */
-.mantine-MultiSelect-value *,
-[class*="MultiSelect-value"] * {
-  color: #ffffff !important;
+body.admin-active .mantine-Select-option[data-selected],
+body.admin-active .mantine-MultiSelect-option[data-selected] {
+  background: var(--admin-accent);
+  color: var(--admin-on-accent);
 }
 
-/* Estilo global más agresivo para valores de MultiSelect en modo claro */
-.mantine-MultiSelect-input .mantine-MultiSelect-value,
-.mantine-MultiSelect-input [class*="value"] {
-  background-color: #ff3d75 !important;
-  color: #ffffff !important;
+body.admin-active .mantine-Menu-item[data-hovered][data-color="red"] {
+  background: var(--admin-danger-soft);
+  color: var(--admin-danger);
 }
 
-.mantine-MultiSelect-input .mantine-MultiSelect-value *,
-.mantine-MultiSelect-input [class*="value"] * {
-  color: #ffffff !important;
+body.admin-active .mantine-Menu-item[data-color="red"] {
+  color: var(--admin-danger);
 }
 
-/* Improve contrast for Paper content (solo admin) */
-body.admin-active .mantine-Paper-root .mantine-Text-root {
-  color: #0f172a !important;
+body.admin-active .mantine-Menu-label {
+  color: var(--admin-text-dimmed);
 }
 
-body.admin-active .mantine-Paper-root .mantine-Text-root[data-c="dimmed"] {
-  color: #374151 !important;
+body.admin-active .mantine-Menu-divider {
+  border-color: var(--admin-border);
 }
 
-/* Improve contrast for Modal content - Light mode */
-body.admin-active .mantine-Modal-body .mantine-Text-root {
-  color: #0f172a !important;
+/* ── §9 Pills del MultiSelect ────────────────
+   Antes había 8 bloques casi idénticos con selectores [class*="value"] y
+   `> div > div`, la mitad SIN scope — se filtraban a la landing. Mantine 8
+   usa .mantine-Pill-* dentro del MultiSelect, así que alcanza con esto. */
+body.admin-active .mantine-MultiSelect-pill,
+body.admin-active .mantine-MultiSelect-input .mantine-Pill-root {
+  background: var(--admin-accent);
+  color: var(--admin-on-accent);
+  border: none;
+  border-radius: 6px;
 }
 
-body.admin-active .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
-  color: #374151 !important;
+body.admin-active .mantine-MultiSelect-pill .mantine-Pill-label,
+body.admin-active .mantine-MultiSelect-pill .mantine-Pill-remove,
+body.admin-active .mantine-MultiSelect-input .mantine-Pill-root .mantine-Pill-label,
+body.admin-active .mantine-MultiSelect-input .mantine-Pill-root .mantine-Pill-remove {
+  color: var(--admin-on-accent);
 }
 
-/* Dark mode modal text - ensure all is white */
-.adminContainer.dark .mantine-Modal-body .mantine-Text-root,
-body.admin-dark-mode .mantine-Modal-body .mantine-Text-root {
-  color: white !important;
+body.admin-active .mantine-MultiSelect-pill .mantine-Pill-remove:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
-.adminContainer.dark .mantine-Modal-body .mantine-Text-root[data-c="dimmed"],
-body.admin-dark-mode .mantine-Modal-body .mantine-Text-root[data-c="dimmed"] {
-  color: #cbd5e1 !important;
+/* Separación entre pills (Mantine no la trae por defecto) */
+body.admin-active .mantine-MultiSelect-pillsList,
+body.admin-active .mantine-MultiSelect-input .mantine-PillGroup-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  --pg-gap: 6px;
 }
 
-/* Improve contrast for Table content - Light mode (solo admin) */
-body.admin-active .mantine-Table-td .mantine-Text-root {
-  color: #1f2937 !important;
-}
-
-body.admin-active .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
-  color: #4b5563 !important;
-}
-
-/* Dark mode table text - ensure all is white */
-.adminContainer.dark .mantine-Table-td .mantine-Text-root,
-body.admin-dark-mode .mantine-Table-td .mantine-Text-root {
-  color: white !important;
-}
-
-.adminContainer.dark .mantine-Table-td .mantine-Text-root[data-c="dimmed"],
-body.admin-dark-mode .mantine-Table-td .mantine-Text-root[data-c="dimmed"] {
-  color: #cbd5e1 !important;
-}
-
-/* Improve contrast for Card content (solo admin) */
-body.admin-active .mantine-Card-root .mantine-Text-root {
-  color: #0f172a !important;
-}
-
-body.admin-active .mantine-Card-root .mantine-Text-root[data-c="dimmed"] {
-  color: #374151 !important;
-}
-
-/* Improve contrast for Stack/Group content (solo admin) */
-body.admin-active .mantine-Stack-root .mantine-Text-root,
-body.admin-active .mantine-Group-root .mantine-Text-root {
-  color: #0f172a !important;
-}
-
-body.admin-active .mantine-Stack-root .mantine-Text-root[data-c="dimmed"],
-body.admin-active .mantine-Group-root .mantine-Text-root[data-c="dimmed"] {
-  color: #374151 !important;
-}
-
-/* Mantine Menu Dark Mode */
-.adminContainer.dark .mantine-Menu-dropdown,
-body.admin-dark-mode .mantine-Menu-dropdown {
-  background: #1e293b;
-  border: 1px solid #334155;
-}
-
-.adminContainer.dark .mantine-Menu-item,
-body.admin-dark-mode .mantine-Menu-item {
-  color: white;
-}
-
-.adminContainer.dark .mantine-Menu-item:hover,
-body.admin-dark-mode .mantine-Menu-item:hover {
-  background: #334155;
-}
-
-.adminContainer.dark .mantine-Menu-item[data-hovered],
-body.admin-dark-mode .mantine-Menu-item[data-hovered] {
-  background: #334155;
-}
-
-.adminContainer.dark .mantine-Menu-item[data-hovered][data-color="red"],
-body.admin-dark-mode .mantine-Menu-item[data-hovered][data-color="red"] {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-}
-
-.adminContainer.dark .mantine-Menu-label,
-body.admin-dark-mode .mantine-Menu-label {
-  color: #cbd5e1;
-}
-
-.adminContainer.dark .mantine-Menu-divider,
-body.admin-dark-mode .mantine-Menu-divider {
-  border-color: #334155;
-}
-
-/* ============================================
-   ESTILOS ULTRA ESPECÍFICOS PARA MULTISELECT VALUE
-   ============================================ */
-
-/* Forzar estilos en valores de MultiSelect - Máxima especificidad */
-.mantine-MultiSelect-input [data-value],
-.mantine-MultiSelect-input [class*="value"],
-.mantine-MultiSelect-input [class*="Value"],
-.mantine-MultiSelect-input > div > div[class*="value"],
-.mantine-MultiSelect-input > div > div[class*="Value"] {
-  background-color: #ff3d75 !important;
-  color: #ffffff !important;
-  border: none !important;
-}
-
-.mantine-MultiSelect-input [data-value] *,
-.mantine-MultiSelect-input [class*="value"] *,
-.mantine-MultiSelect-input [class*="Value"] *,
-.mantine-MultiSelect-input > div > div[class*="value"] *,
-.mantine-MultiSelect-input > div > div[class*="Value"] * {
-  color: #ffffff !important;
-}
-
-/* Modo oscuro - aún más específico */
-.adminContainer.dark .mantine-MultiSelect-input [data-value],
-body.admin-dark-mode .mantine-MultiSelect-input [data-value],
-.adminContainer.dark .mantine-MultiSelect-input [class*="value"],
-body.admin-dark-mode .mantine-MultiSelect-input [class*="value"],
-.adminContainer.dark .mantine-MultiSelect-input [class*="Value"],
-body.admin-dark-mode .mantine-MultiSelect-input [class*="Value"],
-.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="value"],
-body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="value"],
-.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="Value"],
-body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="Value"] {
-  background-color: #ff3d75 !important;
-  color: #ffffff !important;
-  border: none !important;
-}
-
-.adminContainer.dark .mantine-MultiSelect-input [data-value] *,
-body.admin-dark-mode .mantine-MultiSelect-input [data-value] *,
-.adminContainer.dark .mantine-MultiSelect-input [class*="value"] *,
-body.admin-dark-mode .mantine-MultiSelect-input [class*="value"] *,
-.adminContainer.dark .mantine-MultiSelect-input [class*="Value"] *,
-body.admin-dark-mode .mantine-MultiSelect-input [class*="Value"] *,
-.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="value"] *,
-body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="value"] *,
-.adminContainer.dark .mantine-MultiSelect-input > div > div[class*="Value"] *,
-body.admin-dark-mode .mantine-MultiSelect-input > div > div[class*="Value"] * {
-  color: #ffffff !important;
-}
-
-/* Clases personalizadas para MultiSelect Pills - MÁXIMA ESPECIFICIDAD */
-/* MODO CLARO - Fondo blanco (por defecto) */
-.multiselect-pill-custom,
-.mantine-MultiSelect-pill.multiselect-pill-custom,
-.mantine-Pill-root.multiselect-pill-custom,
-.mantine-MultiSelect-input .multiselect-pill-custom {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
-  color: #1a1a1a !important;
-  border: 1px solid #e2e8f0 !important;
-  border-color: #e2e8f0 !important;
-}
-
-/* MODO OSCURO - Fondo rosa (sobrescribe modo claro) */
-.adminContainer.dark .multiselect-pill-custom,
-body.admin-dark-mode .multiselect-pill-custom,
-.adminContainer.dark .mantine-MultiSelect-pill.multiselect-pill-custom,
-body.admin-dark-mode .mantine-MultiSelect-pill.multiselect-pill-custom,
-.adminContainer.dark .mantine-Pill-root.multiselect-pill-custom,
-body.admin-dark-mode .mantine-Pill-root.multiselect-pill-custom,
-.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-custom,
-body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-custom {
-  background-color: #ff3d75 !important;
-  background: #ff3d75 !important;
-  color: #ffffff !important;
-  border: none !important;
-  border-color: transparent !important;
-}
-
-/* MODO CLARO - Label oscuro (por defecto) */
-.multiselect-pill-label-custom,
-.mantine-Pill-label.multiselect-pill-label-custom,
-.multiselect-pill-custom .mantine-Pill-label,
-.mantine-MultiSelect-input .multiselect-pill-label-custom {
-  color: #1a1a1a !important;
-  font-weight: 500 !important;
-}
-
-/* MODO OSCURO - Label blanco (sobrescribe modo claro) */
-.adminContainer.dark .multiselect-pill-label-custom,
-body.admin-dark-mode .multiselect-pill-label-custom,
-.adminContainer.dark .mantine-Pill-label.multiselect-pill-label-custom,
-body.admin-dark-mode .mantine-Pill-label.multiselect-pill-label-custom,
-.adminContainer.dark .multiselect-pill-custom .mantine-Pill-label,
-body.admin-dark-mode .multiselect-pill-custom .mantine-Pill-label,
-.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-label-custom,
-body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-label-custom {
-  color: #ffffff !important;
-  font-weight: 500 !important;
-}
-
-/* MODO CLARO - Remove oscuro (por defecto) */
-.multiselect-pill-remove-custom,
-.mantine-Pill-remove.multiselect-pill-remove-custom,
-.multiselect-pill-custom .mantine-Pill-remove,
-.mantine-MultiSelect-input .multiselect-pill-remove-custom {
-  color: #1a1a1a !important;
-}
-
-/* MODO OSCURO - Remove blanco (sobrescribe modo claro) */
-.adminContainer.dark .multiselect-pill-remove-custom,
-body.admin-dark-mode .multiselect-pill-remove-custom,
-.adminContainer.dark .mantine-Pill-remove.multiselect-pill-remove-custom,
-body.admin-dark-mode .mantine-Pill-remove.multiselect-pill-remove-custom,
-.adminContainer.dark .multiselect-pill-custom .mantine-Pill-remove,
-body.admin-dark-mode .multiselect-pill-custom .mantine-Pill-remove,
-.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-remove-custom,
-body.admin-dark-mode
-  .mantine-MultiSelect-input
-  .multiselect-pill-remove-custom {
-  color: #ffffff !important;
-}
-
-.multiselect-pill-remove-custom:hover,
-.mantine-Pill-remove.multiselect-pill-remove-custom:hover,
-.multiselect-pill-custom .mantine-Pill-remove:hover,
-.mantine-MultiSelect-input .multiselect-pill-remove-custom:hover,
-.adminContainer.dark
-  .mantine-MultiSelect-input
-  .multiselect-pill-remove-custom:hover,
-body.admin-dark-mode
-  .mantine-MultiSelect-input
-  .multiselect-pill-remove-custom:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
-}
-
-/* MODO CLARO - Todo oscuro (por defecto) */
-.multiselect-pill-custom *,
-.mantine-MultiSelect-input .multiselect-pill-custom * {
-  color: #1a1a1a !important;
-}
-
-/* MODO OSCURO - Todo blanco (sobrescribe modo claro) */
-.adminContainer.dark .multiselect-pill-custom *,
-body.admin-dark-mode .multiselect-pill-custom *,
-.adminContainer.dark .mantine-MultiSelect-input .multiselect-pill-custom *,
-body.admin-dark-mode .mantine-MultiSelect-input .multiselect-pill-custom * {
-  color: #ffffff !important;
-}
-
-/* ESTILO ULTRA AGRESIVO - Apuntar a los Pills de Mantine v8 dentro del MultiSelect */
-/* MODO CLARO - Fondo blanco/gris claro con texto oscuro (por defecto) */
-.mantine-MultiSelect-pill,
-.mantine-Pill-root.mantine-MultiSelect-pill,
-.mantine-MultiSelect-input .mantine-MultiSelect-pill,
-.mantine-MultiSelect-input .mantine-Pill-root,
-.mantine-MultiSelect-input [class*="MultiSelect-pill"],
-.mantine-MultiSelect-input [class*="Pill-root"] {
-  background-color: #ffffff !important;
-  background: #ffffff !important;
-  color: #1a1a1a !important;
-  border: 1px solid #e2e8f0 !important;
-  border-color: #e2e8f0 !important;
-  border-radius: 6px !important;
-}
-
-/* MODO OSCURO - Fondo rosa con texto blanco (sobrescribe modo claro) */
-.adminContainer.dark .mantine-MultiSelect-pill,
-body.admin-dark-mode .mantine-MultiSelect-pill,
-.adminContainer.dark .mantine-Pill-root.mantine-MultiSelect-pill,
-body.admin-dark-mode .mantine-Pill-root.mantine-MultiSelect-pill,
-.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-pill,
-body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-pill,
-.adminContainer.dark .mantine-MultiSelect-input .mantine-Pill-root,
-body.admin-dark-mode .mantine-MultiSelect-input .mantine-Pill-root,
-.adminContainer.dark .mantine-MultiSelect-input [class*="MultiSelect-pill"],
-body.admin-dark-mode .mantine-MultiSelect-input [class*="MultiSelect-pill"],
-.adminContainer.dark .mantine-MultiSelect-input [class*="Pill-root"],
-body.admin-dark-mode .mantine-MultiSelect-input [class*="Pill-root"] {
-  background-color: #ff3d75 !important;
-  background: #ff3d75 !important;
-  color: #ffffff !important;
-  border: none !important;
-  border-color: transparent !important;
-  border-radius: 6px !important;
-}
-
-/* Estilos para el label dentro del Pill */
-/* MODO CLARO - Texto oscuro (por defecto) */
-.mantine-Pill-label,
-.mantine-MultiSelect-pill .mantine-Pill-label,
-.mantine-Pill-root .mantine-Pill-label,
-.mantine-MultiSelect-input .mantine-Pill-label {
-  color: #1a1a1a !important;
-}
-
-/* MODO OSCURO - Texto blanco (sobrescribe modo claro) */
-.adminContainer.dark .mantine-Pill-label,
-body.admin-dark-mode .mantine-Pill-label,
-.adminContainer.dark .mantine-MultiSelect-pill .mantine-Pill-label,
-body.admin-dark-mode .mantine-MultiSelect-pill .mantine-Pill-label,
-.adminContainer.dark .mantine-Pill-root .mantine-Pill-label,
-body.admin-dark-mode .mantine-Pill-root .mantine-Pill-label {
-  color: #ffffff !important;
-}
-
-/* Estilos para el botón de eliminar dentro del Pill */
-/* MODO CLARO - Icono oscuro (por defecto) */
-.mantine-Pill-remove,
-.mantine-MultiSelect-pill .mantine-Pill-remove,
-.mantine-Pill-root .mantine-Pill-remove,
-.mantine-MultiSelect-input .mantine-Pill-remove {
-  color: #1a1a1a !important;
-}
-
-/* MODO OSCURO - Icono blanco (sobrescribe modo claro) */
-.adminContainer.dark .mantine-Pill-remove,
-body.admin-dark-mode .mantine-Pill-remove,
-.adminContainer.dark .mantine-MultiSelect-pill .mantine-Pill-remove,
-body.admin-dark-mode .mantine-MultiSelect-pill .mantine-Pill-remove {
-  color: #ffffff !important;
-}
-
-.mantine-Pill-remove:hover,
-.mantine-MultiSelect-pill .mantine-Pill-remove:hover,
-.mantine-Pill-root .mantine-Pill-remove:hover,
-.adminContainer.dark .mantine-Pill-remove:hover,
-body.admin-dark-mode .mantine-Pill-remove:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
-}
-
-/* Asegurar que TODO dentro del Pill tenga el color correcto según el modo */
-/* MODO CLARO - Texto oscuro (por defecto) */
-.mantine-MultiSelect-pill *,
-.mantine-Pill-root.mantine-MultiSelect-pill *,
-.mantine-MultiSelect-input .mantine-MultiSelect-pill *,
-.mantine-MultiSelect-input .mantine-Pill-root * {
-  color: #1a1a1a !important;
-}
-
-/* MODO OSCURO - Texto blanco (sobrescribe modo claro) */
-.adminContainer.dark .mantine-MultiSelect-pill *,
-body.admin-dark-mode .mantine-MultiSelect-pill *,
-.adminContainer.dark .mantine-Pill-root.mantine-MultiSelect-pill *,
-body.admin-dark-mode .mantine-Pill-root.mantine-MultiSelect-pill * {
-  color: #ffffff !important;
-}
-
-/* Agregar separación y flex wrap a los valores del MultiSelect - Contenedor correcto */
-.mantine-MultiSelect-pillsList,
-.mantine-PillGroup-group.mantine-MultiSelect-pillsList,
-.mantine-MultiSelect-input .mantine-MultiSelect-pillsList,
-.mantine-MultiSelect-input .mantine-PillGroup-group,
-.mantine-MultiSelect-input [class*="pillsList"],
-.mantine-MultiSelect-input [class*="PillGroup-group"],
-.adminContainer.dark .mantine-MultiSelect-pillsList,
-body.admin-dark-mode .mantine-MultiSelect-pillsList,
-.adminContainer.dark .mantine-PillGroup-group.mantine-MultiSelect-pillsList,
-body.admin-dark-mode .mantine-PillGroup-group.mantine-MultiSelect-pillsList,
-.adminContainer.dark .mantine-MultiSelect-input .mantine-MultiSelect-pillsList,
-body.admin-dark-mode .mantine-MultiSelect-input .mantine-MultiSelect-pillsList,
-.adminContainer.dark .mantine-MultiSelect-input .mantine-PillGroup-group,
-body.admin-dark-mode .mantine-MultiSelect-input .mantine-PillGroup-group {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-  row-gap: 6px !important;
-  column-gap: 6px !important;
-  --pg-gap: 6px !important;
-}
-
-/* Ocultar placeholder cuando hay pills seleccionados */
-.mantine-MultiSelect-input:has(.mantine-MultiSelect-pill)
-  .mantine-MultiSelect-inputField::placeholder,
-.mantine-MultiSelect-input:has(.mantine-Pill-root)
-  .mantine-MultiSelect-inputField::placeholder,
-.mantine-MultiSelect-input:has(.multiselect-pill-custom)
+/* Con pills cargados el placeholder estorba */
+body.admin-active
+  .mantine-MultiSelect-input:has(.mantine-Pill-root)
   .mantine-MultiSelect-inputField::placeholder {
-  opacity: 0 !important;
-  color: transparent !important;
+  opacity: 0;
+}
+
+/* ── §10 Botones, badges, iconos ────────────── */
+body.admin-active .mantine-Button-root {
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Button-root[data-variant="light"] {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-text);
+}
+
+body.admin-active .mantine-Button-root[data-variant="light"]:hover {
+  background: var(--admin-accent);
+  color: var(--admin-on-accent);
+}
+
+body.admin-active .mantine-Button-root[data-variant="subtle"] {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active .mantine-Button-root[data-variant="subtle"]:hover {
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Badge-root {
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Badge-root[data-variant="light"] {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent-text);
+}
+
+body.admin-active .mantine-ActionIcon-root {
+  color: var(--admin-text-dimmed);
+}
+
+body.admin-active .mantine-ActionIcon-root:hover {
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Checkbox-input {
+  background: var(--admin-bg);
+  border-color: var(--admin-border-strong);
+}
+
+body.admin-active .mantine-Checkbox-input:checked {
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+}
+
+/* ── §11 Paginación ─────────────────────────── */
+body.admin-active .mantine-Pagination-root {
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Pagination-control {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  color: var(--admin-text);
+}
+
+body.admin-active .mantine-Pagination-control:hover {
+  background: var(--admin-surface-2);
+}
+
+body.admin-active .mantine-Pagination-control[data-active] {
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: var(--admin-on-accent);
+}
+
+/* ── §12 Notificaciones ──────────────────────
+   Se renderizan en un portal fuera de .adminContainer, pero siguen dentro de
+   <body>, así que el scope alcanza. `!important` acá es necesario: Mantine
+   aplica los colores de variant/color inline sobre el root. */
+body.admin-active .mantine-Notification-root {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 1000 !important;
+  background: var(--admin-surface) !important;
+  color: var(--admin-text) !important;
+  border: 1px solid var(--admin-border) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.admin-active .mantine-Notification-title {
+  color: var(--admin-text) !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  margin-bottom: 8px !important;
+}
+
+body.admin-active .mantine-Notification-description {
+  color: var(--admin-text-dimmed) !important;
+  font-weight: 400 !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+@media (min-width: 768px) {
+  body.admin-active .mantine-Notification-title {
+    font-size: 20px !important;
+    margin-bottom: 10px !important;
+  }
+
+  body.admin-active .mantine-Notification-description {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+  }
+}
+
+body.admin-active .mantine-Notification-root[data-color="red"] {
+  background: var(--admin-danger-fill) !important;
+  border-color: var(--admin-danger-fill) !important;
+}
+
+body.admin-active .mantine-Notification-root[data-color="green"] {
+  background: var(--admin-success-fill) !important;
+  border-color: var(--admin-success-fill) !important;
+}
+
+body.admin-active .mantine-Notification-root[data-color="red"]
+  .mantine-Notification-title,
+body.admin-active .mantine-Notification-root[data-color="red"]
+  .mantine-Notification-description,
+body.admin-active .mantine-Notification-root[data-color="green"]
+  .mantine-Notification-title,
+body.admin-active .mantine-Notification-root[data-color="green"]
+  .mantine-Notification-description {
+  color: var(--admin-on-accent) !important;
+}
+
+/* ── §13 Cursor de carga ─────────────────────
+   Estaba en globals.css sin scope; vive acá porque solo aplica al panel. */
+body.admin-active button:disabled,
+body.admin-active button[data-loading],
+body.admin-active .mantine-Button-root[data-loading],
+body.admin-active .mantine-ActionIcon-root[data-loading] {
+  cursor: wait !important;
+}
+
+body.admin-active .mantine-Button-root[data-loading="true"],
+body.admin-active .mantine-ActionIcon-root[data-loading="true"] {
+  pointer-events: none;
 }

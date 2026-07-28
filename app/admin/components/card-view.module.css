@@ -68,32 +68,16 @@
 .cardFieldValueEmpty {
   color: #9ca3af;
   font-style: italic;
-}
-
-/* Dark Mode */
-:global(.adminContainer.dark) .cardItem,
-:global(body.admin-dark-mode) .cardItem {
+}:global(body.admin-active) .cardItem {
   background: #1e293b;
   border-color: #334155;
-}
-
-:global(.adminContainer.dark) .cardTitle,
-:global(body.admin-dark-mode) .cardTitle {
+}:global(body.admin-active) .cardTitle {
   color: white;
-}
-
-:global(.adminContainer.dark) .cardFieldLabel,
-:global(body.admin-dark-mode) .cardFieldLabel {
+}:global(body.admin-active) .cardFieldLabel {
   color: #94a3b8;
-}
-
-:global(.adminContainer.dark) .cardFieldValue,
-:global(body.admin-dark-mode) .cardFieldValue {
+}:global(body.admin-active) .cardFieldValue {
   color: #f1f5f9;
-}
-
-:global(.adminContainer.dark) .cardFieldValueEmpty,
-:global(body.admin-dark-mode) .cardFieldValueEmpty {
+}:global(body.admin-active) .cardFieldValueEmpty {
   color: #64748b;
 }
 
