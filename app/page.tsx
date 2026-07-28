@@ -117,14 +117,14 @@ export default function HomePage() {
               <Anchor href="#nosotros" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Nosotros</Anchor>
               <Anchor href="#contacto" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Contacto</Anchor>
               <Anchor href="#trabaja-con-nosotros" c="dark" underline="never" style={{ whiteSpace: 'nowrap', color: '#1a1a2e' }}>Trabaja con nosotros</Anchor>
-              <Link href="/admin/login">
+              <Link href="/login">
                 <Button variant="outline" color="primary" size="sm" radius="xl">
                   Iniciar sesión
                 </Button>
               </Link>
             </Group>
             <Group hiddenFrom="sm" style={{ flexShrink: 0, display: 'flex' }} className={styles.mobileLoginGroup}>
-              <Link href="/admin/login" style={{ display: 'flex', textDecoration: 'none' }}>
+              <Link href="/login" style={{ display: 'flex', textDecoration: 'none' }}>
                 <Button variant="outline" color="primary" size="sm" radius="xl" className={styles.mobileLoginButton}>
                   Login
                 </Button>

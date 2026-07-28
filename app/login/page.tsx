@@ -1,20 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { notifications } from '@mantine/notifications';
 import { createClient } from '@/src/infrastructure/supabase/client';
 import Link from 'next/link';
 import styles from './login.module.css';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const supabase = createClient();
+
+  // Si ya hay sesión, no tiene sentido mostrar el form: va a su área.
+  useEffect(() => {
+    let vivo = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!vivo || !data.user) return;
+      router.replace(data.user.app_metadata?.rol === 'ADMIN' ? '/admin' : '/empleado');
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [supabase, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +64,14 @@ export default function LoginPage() {
         color: 'green',
       });
 
-      router.push('/admin');
+      // El rol viaja en app_metadata; el área a la que puede entrar depende de él.
+      const esAdmin = data.user?.app_metadata?.rol === 'ADMIN';
+      const home = esAdmin ? '/admin' : '/empleado';
+      const redirect = searchParams.get('redirect');
+      // `/admin/login` es un alias viejo que vuelve acá: seguirlo sería un loop.
+      const destino = redirect?.startsWith(home) && !redirect.includes('/login') ? redirect : home;
+
+      router.push(destino);
       router.refresh();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error de conexión';
@@ -86,7 +106,7 @@ export default function LoginPage() {
           {/* Headlines */}
           <div className={styles.headlines}>
             <h2 className={styles.title}>Bienvenido de nuevo</h2>
-            <p className={styles.subtitle}>Portal de Administración</p>
+            <p className={styles.subtitle}>Ingreso al sistema</p>
           </div>
 
           {/* Error Alert */}
@@ -178,5 +198,14 @@ export default function LoginPage() {
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  // useSearchParams necesita un límite de Suspense para prerenderizar.
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

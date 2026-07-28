@@ -46,6 +46,9 @@ export class PersonaAsistidaRepository implements IPersonaAsistidaRepository {
         direccionHash: data.direccionHash,
         telefonoContactoEmergenciaEnc: data.telefonoContactoEmergenciaEnc,
         telefonoContactoEmergenciaHash: data.telefonoContactoEmergenciaHash,
+        lat: data.lat ?? null,
+        lng: data.lng ?? null,
+        ...(data.radioMetros !== undefined && { radioMetros: data.radioMetros }),
       },
     });
     return this.toEntity(created);
@@ -64,6 +67,9 @@ export class PersonaAsistidaRepository implements IPersonaAsistidaRepository {
         ...(data.direccionHash !== undefined && { direccionHash: data.direccionHash }),
         ...(data.telefonoContactoEmergenciaEnc !== undefined && { telefonoContactoEmergenciaEnc: data.telefonoContactoEmergenciaEnc }),
         ...(data.telefonoContactoEmergenciaHash !== undefined && { telefonoContactoEmergenciaHash: data.telefonoContactoEmergenciaHash }),
+        ...(data.lat !== undefined && { lat: data.lat }),
+        ...(data.lng !== undefined && { lng: data.lng }),
+        ...(data.radioMetros !== undefined && { radioMetros: data.radioMetros }),
       },
     });
     return this.toEntity(updated);
@@ -100,6 +106,9 @@ export class PersonaAsistidaRepository implements IPersonaAsistidaRepository {
       data.telefonoContactoEmergenciaHash,
       data.createdAt,
       data.updatedAt,
+      data.lat,
+      data.lng,
+      data.radioMetros,
     );
   }
 }

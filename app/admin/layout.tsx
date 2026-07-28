@@ -130,7 +130,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     // Cleanup: remove class when component unmounts or pathname changes
     return () => {
       const currentPath = window.location.pathname;
-      const isGoingToAdminPage = currentPath.startsWith('/admin') && currentPath !== '/admin/login';
+      const isGoingToAdminPage = currentPath.startsWith('/admin') && currentPath !== '/login';
       if (!isGoingToAdminPage) {
         document.body.classList.remove('admin-dark-mode');
       }
@@ -145,13 +145,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (pathname === '/admin/login') {
+  if (pathname === '/login') {
     return <>{children}</>;
   }
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    router.push('/login');
     router.refresh();
   };
 
@@ -169,6 +169,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Contratos', icon: 'description', href: '/admin/contratos' },
     { label: 'Solicitudes de Empleo', icon: 'work', href: '/admin/solicitudes-empleo' },
     { label: 'Mensajes de Contacto', icon: 'mail', href: '/admin/contacto' },
+    { label: 'Presentismo', icon: 'schedule', href: '/admin/presentismo' },
+    { label: 'Usuarios', icon: 'manage_accounts', href: '/admin/usuarios' },
     { label: 'Bot de WhatsApp', icon: 'smartphone', href: '/admin/whatsapp' },
   ];
 

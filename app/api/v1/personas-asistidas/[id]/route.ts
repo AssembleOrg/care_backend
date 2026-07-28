@@ -18,6 +18,10 @@ const updateSchema = z.object({
   telefono: z.string().optional().nullable(),
   direccion: z.string().optional().nullable(),
   telefonoContactoEmergencia: z.string().optional().nullable(),
+  // Punto del domicilio para validar el fichaje del cuidador.
+  lat: z.number().min(-90).max(90).optional().nullable(),
+  lng: z.number().min(-180).max(180).optional().nullable(),
+  radioMetros: z.number().int().min(20).max(1000).optional(),
 });
 
 async function handleGET(request: NextRequest, context: HandlerContext) {
@@ -75,6 +79,15 @@ async function handlePUT(request: NextRequest, context: HandlerContext) {
     if (validated.telefonoContactoEmergencia !== undefined) {
       updateData.telefonoContactoEmergenciaEnc = validated.telefonoContactoEmergencia ? encryptionService.encrypt(validated.telefonoContactoEmergencia) : null;
       updateData.telefonoContactoEmergenciaHash = validated.telefonoContactoEmergencia ? hashingService.hash(validated.telefonoContactoEmergencia) : null;
+    }
+    if (validated.lat !== undefined) {
+      updateData.lat = validated.lat;
+    }
+    if (validated.lng !== undefined) {
+      updateData.lng = validated.lng;
+    }
+    if (validated.radioMetros !== undefined) {
+      updateData.radioMetros = validated.radioMetros;
     }
 
     const updated = await personaRepository.update(params.id, updateData);

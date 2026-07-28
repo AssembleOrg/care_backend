@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect } from '@mantine/core';
+import { Container, Title, Button, Table, Modal, TextInput, Stack, Group, ActionIcon, Pagination, Paper, Badge, Text, MultiSelect, Divider } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
@@ -13,6 +13,7 @@ import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
 import cardStyles from '../components/card-view.module.css';
 import { pdf } from '@react-pdf/renderer';
 import { ComprobantePdfDocument, FilaPdfData } from '../components/ComprobantePdfDocument';
+import { UbicacionPicker } from '@/src/presentation/components/mapa/UbicacionPicker';
 
 interface PersonaAsistida {
   id: string;
@@ -21,6 +22,9 @@ interface PersonaAsistida {
   telefono?: string | null;
   direccion?: string | null;
   telefonoContactoEmergencia?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  radioMetros?: number;
   createdAt: string;
 }
 
@@ -157,6 +161,9 @@ export default function PersonasAsistidasPage() {
       telefono: '',
       direccion: '',
       telefonoContactoEmergencia: '',
+      lat: null as number | null,
+      lng: null as number | null,
+      radioMetros: 50,
     },
   });
 
@@ -230,6 +237,9 @@ export default function PersonasAsistidasPage() {
           telefono: values.telefono || undefined,
           direccion: values.direccion || undefined,
           telefonoContactoEmergencia: values.telefonoContactoEmergencia || undefined,
+          lat: values.lat,
+          lng: values.lng,
+          radioMetros: values.radioMetros,
         }),
       });
 
@@ -268,6 +278,9 @@ export default function PersonasAsistidasPage() {
       telefono: persona.telefono || '',
       direccion: persona.direccion || '',
       telefonoContactoEmergencia: persona.telefonoContactoEmergencia || '',
+      lat: persona.lat ?? null,
+      lng: persona.lng ?? null,
+      radioMetros: persona.radioMetros ?? 50,
     });
     openEdit();
   };
@@ -663,6 +676,14 @@ export default function PersonasAsistidasPage() {
             <TextInput label="Teléfono" {...form.getInputProps('telefono')} />
             <TextInput label="Dirección" {...form.getInputProps('direccion')} />
             <TextInput label="Teléfono Contacto Emergencia" {...form.getInputProps('telefonoContactoEmergencia')} />
+            <Divider label="Ubicación para el fichaje" labelPosition="center" mt="sm" />
+            <UbicacionPicker
+              lat={form.values.lat}
+              lng={form.values.lng}
+              radioMetros={form.values.radioMetros}
+              direccion={form.values.direccion}
+              onChange={({ lat, lng, radioMetros }) => form.setValues({ lat, lng, radioMetros })}
+            />
             <Group justify="flex-end" mt="md">
               <Button variant="subtle" onClick={close}>
                 Cancelar
@@ -675,7 +696,7 @@ export default function PersonasAsistidasPage() {
         </form>
       </Modal>
 
-      <Modal opened={editOpened} onClose={closeEdit} title="Editar Persona Asistida">
+      <Modal opened={editOpened} onClose={closeEdit} title="Editar Persona Asistida" size="lg">
         <form onSubmit={form.onSubmit(handleUpdate)}>
           <Stack>
             <TextInput label="Nombre Completo" required {...form.getInputProps('nombreCompleto')} />
@@ -683,6 +704,14 @@ export default function PersonasAsistidasPage() {
             <TextInput label="Teléfono" {...form.getInputProps('telefono')} />
             <TextInput label="Dirección" {...form.getInputProps('direccion')} />
             <TextInput label="Teléfono Contacto Emergencia" {...form.getInputProps('telefonoContactoEmergencia')} />
+            <Divider label="Ubicación para el fichaje" labelPosition="center" mt="sm" />
+            <UbicacionPicker
+              lat={form.values.lat}
+              lng={form.values.lng}
+              radioMetros={form.values.radioMetros}
+              direccion={form.values.direccion}
+              onChange={({ lat, lng, radioMetros }) => form.setValues({ lat, lng, radioMetros })}
+            />
             <Group justify="flex-end" mt="md">
               <Button variant="subtle" onClick={closeEdit}>
                 Cancelar
