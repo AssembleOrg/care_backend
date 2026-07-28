@@ -37,7 +37,7 @@ interface Usuario {
   id: string;
   email: string;
   nombre: string | null;
-  rol: 'ADMIN' | 'EMPLEADO';
+  rol: 'ADMIN' | 'CUIDADOR';
   activo: boolean;
   cuidadorId: string | null;
   cuidadorNombre: string | null;
@@ -45,7 +45,7 @@ interface Usuario {
 }
 
 const ROLES = [
-  { value: 'EMPLEADO', label: 'Empleado (sólo fichaje)' },
+  { value: 'CUIDADOR', label: 'Cuidador (sólo fichaje)' },
   { value: 'ADMIN', label: 'Administrador' },
 ];
 
@@ -59,9 +59,9 @@ export default function UsuariosPage() {
   const [password, setPassword] = useState<Usuario | null>(null);
 
   // Form de creación
-  const [form, setForm] = useState({ email: '', nombre: '', password: '', rol: 'EMPLEADO', cuidadorId: '' });
+  const [form, setForm] = useState({ email: '', nombre: '', password: '', rol: 'CUIDADOR', cuidadorId: '' });
   const [nuevaPassword, setNuevaPassword] = useState('');
-  const [formEdit, setFormEdit] = useState({ nombre: '', rol: 'EMPLEADO', cuidadorId: '' });
+  const [formEdit, setFormEdit] = useState({ nombre: '', rol: 'CUIDADOR', cuidadorId: '' });
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -99,7 +99,7 @@ export default function UsuariosPage() {
           password: form.password,
           nombre: form.nombre.trim() || undefined,
           rol: form.rol,
-          cuidadorId: form.rol === 'EMPLEADO' && form.cuidadorId ? form.cuidadorId : null,
+          cuidadorId: form.rol === 'CUIDADOR' && form.cuidadorId ? form.cuidadorId : null,
         }),
       });
       const data = await res.json();
@@ -107,7 +107,7 @@ export default function UsuariosPage() {
 
       notifications.show({ title: 'Listo', message: 'Usuario creado', color: 'green' });
       setCrearAbierto(false);
-      setForm({ email: '', nombre: '', password: '', rol: 'EMPLEADO', cuidadorId: '' });
+      setForm({ email: '', nombre: '', password: '', rol: 'CUIDADOR', cuidadorId: '' });
       cargar();
     } catch (error) {
       notifications.show({ title: 'Error', message: parseApiError(error), color: 'red' });
@@ -159,7 +159,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const empleadosSinCuidador = usuarios.filter((u) => u.rol === 'EMPLEADO' && !u.cuidadorId);
+  const cuidadoresSinVincular = usuarios.filter((u) => u.rol === 'CUIDADOR' && !u.cuidadorId);
 
   return (
     <Container size="xl" py="xl">
@@ -170,11 +170,11 @@ export default function UsuariosPage() {
         </Button>
       </Group>
 
-      {empleadosSinCuidador.length > 0 && (
+      {cuidadoresSinVincular.length > 0 && (
         <Alert color="yellow" icon={<IconAlertTriangle size={18} />} mb="md">
-          {empleadosSinCuidador.length === 1
-            ? 'Hay un empleado sin cuidador vinculado: no va a poder fichar hasta que lo asignes.'
-            : `Hay ${empleadosSinCuidador.length} empleados sin cuidador vinculado: no van a poder fichar hasta que los asignes.`}
+          {cuidadoresSinVincular.length === 1
+            ? 'Hay un usuario de cuidador sin vincular: no va a poder fichar hasta que le asignes uno.'
+            : `Hay ${cuidadoresSinVincular.length} usuarios de cuidador sin vincular: no van a poder fichar hasta que les asignes uno.`}
         </Alert>
       )}
 
@@ -204,7 +204,7 @@ export default function UsuariosPage() {
                     <Table.Td>{u.nombre || '-'}</Table.Td>
                     <Table.Td>
                       <Badge color={u.rol === 'ADMIN' ? 'grape' : 'cyan'} variant="light">
-                        {u.rol === 'ADMIN' ? 'Administrador' : 'Empleado'}
+                        {u.rol === 'ADMIN' ? 'Administrador' : 'Cuidador'}
                       </Badge>
                     </Table.Td>
                     <Table.Td>{u.cuidadorNombre || '-'}</Table.Td>
@@ -268,7 +268,7 @@ export default function UsuariosPage() {
           <TextInput
             label="Email"
             required
-            placeholder="empleado@carebydani.com"
+            placeholder="cuidador@carebydani.com"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.currentTarget.value })}
           />
@@ -281,7 +281,7 @@ export default function UsuariosPage() {
           <PasswordInput
             label="Contraseña"
             required
-            description="Mínimo 8 caracteres. Se la pasás vos al empleado."
+            description="Mínimo 8 caracteres. Se la pasás vos al cuidador."
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.currentTarget.value })}
           />
@@ -289,10 +289,10 @@ export default function UsuariosPage() {
             label="Rol"
             data={ROLES}
             value={form.rol}
-            onChange={(v) => setForm({ ...form, rol: v || 'EMPLEADO' })}
+            onChange={(v) => setForm({ ...form, rol: v || 'CUIDADOR' })}
             allowDeselect={false}
           />
-          {form.rol === 'EMPLEADO' && (
+          {form.rol === 'CUIDADOR' && (
             <CuidadorSelect
               label="Cuidador vinculado"
               description="Necesario para fichar entrada y salida."
@@ -320,10 +320,10 @@ export default function UsuariosPage() {
             label="Rol"
             data={ROLES}
             value={formEdit.rol}
-            onChange={(v) => setFormEdit({ ...formEdit, rol: v || 'EMPLEADO' })}
+            onChange={(v) => setFormEdit({ ...formEdit, rol: v || 'CUIDADOR' })}
             allowDeselect={false}
           />
-          {formEdit.rol === 'EMPLEADO' && (
+          {formEdit.rol === 'CUIDADOR' && (
             <CuidadorSelect
               label="Cuidador vinculado"
               value={formEdit.cuidadorId || null}
@@ -346,7 +346,7 @@ export default function UsuariosPage() {
                 {
                   nombre: formEdit.nombre.trim() || null,
                   rol: formEdit.rol,
-                  cuidadorId: formEdit.rol === 'EMPLEADO' && formEdit.cuidadorId ? formEdit.cuidadorId : null,
+                  cuidadorId: formEdit.rol === 'CUIDADOR' && formEdit.cuidadorId ? formEdit.cuidadorId : null,
                 },
                 'Usuario actualizado'
               )

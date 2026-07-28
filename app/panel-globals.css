@@ -1,15 +1,15 @@
 /* ──────────────────────────────────────────────
-   Zonas privadas (panel de administración y portal del empleado):
+   Zonas privadas (panel de administración y portal del cuidador):
    tokens y overrides de Mantine. Ver design.md §1-§3.
 
    CONTRATO DE SCOPING (no romper):
    Todo en este archivo cuelga de `body.panel-oscuro`, la marca que ponen y
-   sacan admin/layout.tsx y empleado/layout.tsx al entrar y salir de su área.
+   sacan admin/layout.tsx y cuidador/layout.tsx al entrar y salir de su área.
    Sin ese scope el CSS se filtra a la landing pública (ya pasó: pintó el hero
    de azul).
 
    `admin-active` es otra clase, más chica: sólo la usan los .module.css del
-   chrome del panel (sidebar, topbar). El portal del empleado comparte estos
+   chrome del panel (sidebar, topbar). El portal del cuidador comparte estos
    tokens pero no ese chrome.
 
    Es SOLO OSCURO. No hay bloque de modo claro: el toggle del layout quedó

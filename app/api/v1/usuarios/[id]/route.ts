@@ -12,7 +12,7 @@ const BAN_DURATION = '876000h';
 
 const updateSchema = z.object({
   nombre: z.string().min(1).optional().nullable(),
-  rol: z.enum(['ADMIN', 'EMPLEADO']).optional(),
+  rol: z.enum(['ADMIN', 'CUIDADOR']).optional(),
   activo: z.boolean().optional(),
   cuidadorId: z.string().uuid().optional().nullable(),
 });

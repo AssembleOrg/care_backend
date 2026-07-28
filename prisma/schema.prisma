@@ -218,17 +218,17 @@ model FormSubmissionLog {
 
 enum RolUsuario {
   ADMIN
-  EMPLEADO
+  CUIDADOR
 }
 
 // Espejo local de auth.users de Supabase: acá vive el rol y el bloqueo.
-// `id` es el uid de Supabase Auth (no se genera acá). Un usuario EMPLEADO
+// `id` es el uid de Supabase Auth (no se genera acá). Un usuario CUIDADOR
 // debería tener `cuidadorId` para poder fichar.
 model Usuario {
   id                String     @id
   email             String     @unique
   nombre            String?
-  rol               RolUsuario @default(EMPLEADO)
+  rol               RolUsuario @default(CUIDADOR)
   activo            Boolean    @default(true)
   cuidadorId        String?    @unique
   createdAt         DateTime   @default(now())

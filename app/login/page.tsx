@@ -22,7 +22,7 @@ function LoginForm() {
     let vivo = true;
     supabase.auth.getUser().then(({ data }) => {
       if (!vivo || !data.user) return;
-      router.replace(data.user.app_metadata?.rol === 'ADMIN' ? '/admin' : '/empleado');
+      router.replace(data.user.app_metadata?.rol === 'ADMIN' ? '/admin' : '/cuidador');
     });
     return () => {
       vivo = false;
@@ -66,7 +66,7 @@ function LoginForm() {
 
       // El rol viaja en app_metadata; el área a la que puede entrar depende de él.
       const esAdmin = data.user?.app_metadata?.rol === 'ADMIN';
-      const home = esAdmin ? '/admin' : '/empleado';
+      const home = esAdmin ? '/admin' : '/cuidador';
       const redirect = searchParams.get('redirect');
       // `/admin/login` es un alias viejo que vuelve acá: seguirlo sería un loop.
       const destino = redirect?.startsWith(home) && !redirect.includes('/login') ? redirect : home;

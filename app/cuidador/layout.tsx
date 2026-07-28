@@ -6,9 +6,9 @@ import { Container, Group, Text, Button } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
 import { createClient } from '@/src/infrastructure/supabase/client';
 import '../panel-globals.css';
-import styles from './empleado.module.css';
+import styles from './cuidador.module.css';
 
-export default function EmpleadoLayout({ children }: { children: React.ReactNode }) {
+export default function CuidadorLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export default function EmpleadoLayout({ children }: { children: React.ReactNode
     // aparte. Va en el body porque los modales se renderizan en un portal.
     document.body.classList.add('panel-oscuro');
     return () => {
-      if (!window.location.pathname.startsWith('/empleado')) {
+      if (!window.location.pathname.startsWith('/cuidador')) {
         document.body.classList.remove('panel-oscuro');
       }
     };

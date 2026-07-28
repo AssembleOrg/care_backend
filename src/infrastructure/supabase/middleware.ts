@@ -6,8 +6,8 @@ import { NextResponse, type NextRequest } from 'next/server';
  * el claim `rol` que se guarda en `app_metadata` al crear/editar el usuario.
  * La autorización real la hace la API contra la tabla `Usuario`.
  */
-function getRol(appMetadata: Record<string, unknown> | undefined): 'ADMIN' | 'EMPLEADO' {
-  return appMetadata?.rol === 'ADMIN' ? 'ADMIN' : 'EMPLEADO';
+function getRol(appMetadata: Record<string, unknown> | undefined): 'ADMIN' | 'CUIDADOR' {
+  return appMetadata?.rol === 'ADMIN' ? 'ADMIN' : 'CUIDADOR';
 }
 
 export async function updateSession(request: NextRequest) {
@@ -40,16 +40,16 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAdminArea = pathname.startsWith('/admin');
-  const isEmpleadoArea = pathname.startsWith('/empleado');
+  const isCuidadorArea = pathname.startsWith('/cuidador');
 
-  if (!isAdminArea && !isEmpleadoArea) return supabaseResponse;
+  if (!isAdminArea && !isCuidadorArea) return supabaseResponse;
 
   // getClaims verifica la firma del JWT en el proceso (el proyecto usa ES256):
   // ~1 ms contra los ~250 ms que costaba preguntarle a Supabase en CADA
   // navegación. Sólo si el token venció se llama a getUser, que lo renueva y
   // reescribe las cookies. La autorización real la hace igual la API.
   const { data: claims } = await supabase.auth.getClaims();
-  let sesion: { id: string; rol: 'ADMIN' | 'EMPLEADO' } | null = claims?.claims?.sub
+  let sesion: { id: string; rol: 'ADMIN' | 'CUIDADOR' } | null = claims?.claims?.sub
     ? { id: claims.claims.sub, rol: getRol(claims.claims.app_metadata as Record<string, unknown> | undefined) }
     : null;
 
@@ -72,12 +72,12 @@ export async function updateSession(request: NextRequest) {
   // Cada rol se queda en su área.
   if (isAdminArea && rol !== 'ADMIN') {
     const url = request.nextUrl.clone();
-    url.pathname = '/empleado';
+    url.pathname = '/cuidador';
     url.search = '';
     return NextResponse.redirect(url);
   }
 
-  if (isEmpleadoArea && rol === 'ADMIN') {
+  if (isCuidadorArea && rol === 'ADMIN') {
     const url = request.nextUrl.clone();
     url.pathname = '/admin';
     url.search = '';

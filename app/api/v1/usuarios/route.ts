@@ -11,8 +11,8 @@ const createSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   nombre: z.string().min(1).optional(),
-  rol: z.enum(['ADMIN', 'EMPLEADO']).default('EMPLEADO'),
-  /** Cuidador con el que se vincula el empleado (requerido para fichar). */
+  rol: z.enum(['ADMIN', 'CUIDADOR']).default('CUIDADOR'),
+  /** Ficha de cuidador con la que se vincula el usuario (requerida para fichar). */
   cuidadorId: z.string().uuid().optional().nullable(),
 });
 

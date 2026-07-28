@@ -13,6 +13,6 @@ export const config = {
      * getUser() network call, which was previously executed on every request.
      */
     '/admin/:path*',
-    '/empleado/:path*',
+    '/cuidador/:path*',
   ],
 };

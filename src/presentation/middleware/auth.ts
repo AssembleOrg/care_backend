@@ -8,7 +8,7 @@ export interface AuthContext {
   userId: string;
   email: string;
   rol: RolUsuario;
-  /** Cuidador vinculado al usuario. Sólo los EMPLEADO deberían tenerlo. */
+  /** Cuidador vinculado al usuario. Sólo los CUIDADOR deberían tenerlo. */
   cuidadorId: string | null;
 }
 
@@ -174,7 +174,7 @@ export function requireAuth(handler: Handler) {
   return requireRole(['ADMIN'], handler);
 }
 
-/** Rutas del portal del empleado (fichaje). */
-export function requireEmpleado(handler: Handler) {
-  return requireRole(['EMPLEADO'], handler);
+/** Rutas del portal del cuidador (fichaje). */
+export function requireCuidador(handler: Handler) {
+  return requireRole(['CUIDADOR'], handler);
 }

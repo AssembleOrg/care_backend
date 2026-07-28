@@ -127,7 +127,7 @@ export default function AdminLayout({
   useEffect(() => {
     if (mounted) {
       // Marcas de scope: `panel-oscuro` trae los tokens y overrides de Mantine
-      // (compartidos con el portal del empleado) y `admin-active` el chrome
+      // (compartidos con el portal del cuidador) y `admin-active` el chrome
       // propio del panel. Se ponen en el body porque modales y dropdowns se
       // renderizan en un portal fuera de .adminContainer. Ver design.md §2.
       document.body.classList.add("panel-oscuro", "admin-active");
