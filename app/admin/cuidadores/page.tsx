@@ -106,13 +106,24 @@ export default function CuidadoresPage() {
 
   const totalPages = useMemo(() => Math.ceil(total / 20), [total]);
 
+  /**
+   * Los campos opcionales vacíos se mandan como `undefined`: la API valida
+   * formato (por ejemplo email) y una cadena vacía le da error de validación.
+   */
+  const limpiarOpcionales = (values: typeof form.values) => ({
+    nombreCompleto: values.nombreCompleto,
+    dni: values.dni?.trim() || undefined,
+    telefono: values.telefono?.trim() || undefined,
+    email: values.email?.trim() || undefined,
+  });
+
   const handleSubmit = async (values: typeof form.values) => {
     setSubmitting(true);
     try {
       const response = await fetch('/api/v1/cuidadores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify(limpiarOpcionales(values)),
       });
 
       const data = await response.json();
@@ -182,7 +193,13 @@ export default function CuidadoresPage() {
       const response = await fetch(`/api/v1/cuidadores/${selectedCuidador.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        // Acá vacío significa "borrar el dato", así que va null y no undefined.
+        body: JSON.stringify({
+          nombreCompleto: values.nombreCompleto,
+          dni: values.dni?.trim() || null,
+          telefono: values.telefono?.trim() || null,
+          email: values.email?.trim() || null,
+        }),
       });
 
       const data = await response.json();
