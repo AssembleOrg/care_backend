@@ -60,6 +60,8 @@ const PATHS = {
     'M4 4m0 4a4 4 0 0 1 4 -4h8a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-8a4 4 0 0 1 -4 -4z M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0 M16.5 7.5l0 .01',
   mapPin:
     'M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0 M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z',
+  user:
+    'M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0 M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2',
 };
 
 /** Icono de línea dentro de un círculo claro, como en el diseño. */
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
   detalleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#eceff1',
@@ -232,12 +234,12 @@ const styles = StyleSheet.create({
   },
 
   totalBox: {
-    marginTop: 18,
+    marginTop: 14,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f2f7f7',
     borderRadius: 10,
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 24,
   },
   totalLabel: {
@@ -375,6 +377,8 @@ const styles = StyleSheet.create({
 });
 
 export interface PresupuestoPdfProps {
+  /** Persona que recibe el presupuesto. */
+  cliente: string;
   fecha: string;
   cargaHoraria: string;
   totalSemanal: string;
@@ -387,6 +391,7 @@ export interface PresupuestoPdfProps {
 }
 
 export const PresupuestoPdfDocument: React.FC<PresupuestoPdfProps> = ({
+  cliente,
   fecha,
   cargaHoraria,
   totalSemanal,
@@ -437,6 +442,11 @@ export const PresupuestoPdfDocument: React.FC<PresupuestoPdfProps> = ({
 
         {/* Detalle */}
         <View style={styles.detalleRow}>
+          <IconCircle d={PATHS.user} />
+          <Text style={styles.detalleLabel}>Cliente:</Text>
+          <Text style={styles.detalleValue}>{cliente}</Text>
+        </View>
+        <View style={styles.detalleRow}>
           <IconCircle d={PATHS.clock} />
           <Text style={styles.detalleLabel}>Carga horaria:</Text>
           <Text style={styles.detalleValue}>{cargaHoraria}</Text>
@@ -486,7 +496,7 @@ export const PresupuestoPdfDocument: React.FC<PresupuestoPdfProps> = ({
           </View>
           <View style={styles.contactoItem}>
             <IconCircle d={PATHS.whatsapp} size={19} bg="#dff3ea" />
-            <Text style={styles.contactoItemText}>+54 9 11 5725-7307</Text>
+            <Text style={styles.contactoItemText}>+54 9 11 7136-2057</Text>
           </View>
           <View style={styles.contactoItem}>
             <IconCircle d={PATHS.instagram} size={19} bg="#fde8f0" color={FUCSIA} />
