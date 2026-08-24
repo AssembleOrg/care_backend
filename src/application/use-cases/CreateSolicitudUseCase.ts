@@ -13,7 +13,7 @@ const createSolicitudSchema = z.object({
     zonaTrabajo: z.string().min(1, 'La zona de trabajo es requerida'),
     telefono: z.string().min(1, 'El telefono es requerido'),
     email: z.email('El email debe ser un correo electrónico válido'),
-    experiencia: z.string().max(200, 'La experiencia debe tener como máximo 200 caracteres').optional(),
+    experiencia: z.string().max(300, 'La experiencia debe tener como máximo 300 caracteres').optional(),
     cvUrl: z.string().optional(),
 });
 

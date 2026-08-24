@@ -184,7 +184,7 @@ model SolicitudEmpleo{
   email                 String
   emailHash             String
   estado                EstadoSolicitud @default(ABIERTA)
-  experiencia           String?         @db.VarChar(200)
+  experiencia           String?         @db.Text  //Encriptado (el cifrado agranda el texto, por eso Text y no VarChar)
   experienciaHash       String?
   cvUrl                 String?           //Path del CV en Supabase Storage
   createdAt             DateTime        @default(now())

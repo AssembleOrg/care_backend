@@ -127,6 +127,17 @@ export default function HomePage() {
 
   const handleWorkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validar en cliente antes de enviar: no dejamos que salga si no pasa.
+    if (workForm.experiencia.length > 300) {
+      notifications.show({
+        title: "Revisá el formulario",
+        message: "La experiencia debe tener como máximo 300 caracteres.",
+        color: "red",
+      });
+      return;
+    }
+
     setSubmittingWork(true);
     try {
       const formData = new FormData();
@@ -991,18 +1002,30 @@ export default function HomePage() {
                       />
                     </Group>
                     <textarea
-                      placeholder="¡Contanos tu experiencia! (Máximo 200 caracteres)"
-                      maxLength={200}
+                      placeholder="¡Contanos tu experiencia! (Máximo 300 caracteres)"
+                      maxLength={300}
                       rows={3}
                       className={styles.contactInput}
                       value={workForm.experiencia}
                       onChange={(e) =>
                         setWorkForm({
                           ...workForm,
-                          experiencia: e.target.value,
+                          experiencia: e.target.value.slice(0, 300),
                         })
                       }
                     />
+                    <Text
+                      size="xs"
+                      ta="right"
+                      c={
+                        workForm.experiencia.length >= 300
+                          ? "red"
+                          : "dimmed"
+                      }
+                      mt={-8}
+                    >
+                      {workForm.experiencia.length}/300
+                    </Text>
                     <FileInput
                       placeholder="Adjuntar CV (PDF, DOC o DOCX — máx. 10MB)"
                       accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"

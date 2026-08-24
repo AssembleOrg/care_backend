@@ -141,9 +141,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(solicitudEmpleo, { status: 201 });
     } catch (error: any) {
         console.error('Error creating solicitud:', error);
+
+        // Validación (Zod): devolver el primer mensaje legible, no el JSON crudo.
+        if (error?.name === 'ZodError' && Array.isArray(error.issues)) {
+            return NextResponse.json(
+                { error: error.issues[0]?.message || 'Datos inválidos. Revisá el formulario.' },
+                { status: 400 },
+            );
+        }
+
+        // Errores de negocio controlados (los que lanzamos con new Error(...) legible).
+        if (error instanceof Error && !error.message.startsWith('\n') && error.message.length < 200) {
+            return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+
+        // Cualquier otra cosa (Prisma, etc.): nunca exponer el error crudo al usuario.
         return NextResponse.json(
-            { error: error.message || 'Internal Server Error' },
-            { status: 400 }
+            { error: 'No pudimos procesar tu solicitud. Revisá los datos e intentá de nuevo.' },
+            { status: 400 },
         );
     }
 
