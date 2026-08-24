@@ -70,6 +70,7 @@ export default function PersonasAsistidasPage() {
   const [generandoPdf, setGenerandoPdf] = useState(false);
 
   const [presupuestoModalOpened, { open: openPresupuestoModal, close: closePresupuestoModal }] = useDisclosure(false);
+  const [presupuestoCliente, setPresupuestoCliente] = useState('');
   const [presupuestoFecha, setPresupuestoFecha] = useState<Date | null>(null);
   const [presupuestoCargaHoraria, setPresupuestoCargaHoraria] = useState('');
   const [presupuestoTotalSemanal, setPresupuestoTotalSemanal] = useState('');
@@ -78,6 +79,7 @@ export default function PersonasAsistidasPage() {
   const [generandoPresupuesto, setGenerandoPresupuesto] = useState(false);
 
   const handleOpenPresupuesto = () => {
+    setPresupuestoCliente('');
     setPresupuestoFecha(new Date());
     setPresupuestoCargaHoraria('');
     setPresupuestoTotalSemanal('');
@@ -87,6 +89,7 @@ export default function PersonasAsistidasPage() {
   };
 
   const presupuestoValido =
+    presupuestoCliente.trim() !== '' &&
     !!presupuestoFecha &&
     presupuestoCargaHoraria.trim() !== '' &&
     presupuestoTotalSemanal.trim() !== '' &&
@@ -102,6 +105,7 @@ export default function PersonasAsistidasPage() {
 
       const blob = await pdf(
         <PresupuestoPdfDocument
+          cliente={presupuestoCliente.trim()}
           fecha={presupuestoFecha.toLocaleDateString('es-AR', {
             day: 'numeric',
             month: 'long',
@@ -117,7 +121,8 @@ export default function PersonasAsistidasPage() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Presupuesto_${presupuestoFecha.toLocaleDateString('es-AR').replace(/\//g, '-')}.pdf`;
+      const nombreArchivo = presupuestoCliente.trim().replace(/\s+/g, '_');
+      link.download = `Presupuesto_${nombreArchivo}_${presupuestoFecha.toLocaleDateString('es-AR').replace(/\//g, '-')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -958,6 +963,13 @@ export default function PersonasAsistidasPage() {
 
       <Modal opened={presupuestoModalOpened} onClose={closePresupuestoModal} title="Generar Presupuesto">
         <Stack>
+          <TextInput
+            label="Nombre"
+            required
+            placeholder="Nombre de quien recibe el presupuesto"
+            value={presupuestoCliente}
+            onChange={(e) => setPresupuestoCliente(e.currentTarget.value)}
+          />
           <DateInput
             label="Fecha"
             required
