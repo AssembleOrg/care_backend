@@ -4,13 +4,14 @@ import { Container, Title, Paper, Stack, Group, Text, Select, Button, Card, Badg
 import { DateInput } from '@mantine/dates';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
+import dayjs from 'dayjs';
 import { extractApiErrorMessage, parseApiError } from '../utils/parseApiError';
 import { IconChartBar } from '@tabler/icons-react';
 
 export default function ReportesPage() {
   const [cuidadorId, setCuidadorId] = useState<string>('');
-  const [from, setFrom] = useState<Date | null>(null);
-  const [to, setTo] = useState<Date | null>(null);
+  const [from, setFrom] = useState<string | null>(null);
+  const [to, setTo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
     totalPagado: number;
@@ -43,8 +44,8 @@ export default function ReportesPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ cuidadorId });
-      if (from) params.append('from', from.toISOString());
-      if (to) params.append('to', to.toISOString());
+      if (from) params.append('from', dayjs(from).startOf('day').toISOString());
+      if (to) params.append('to', dayjs(to).endOf('day').toISOString());
       params.append('groupByMonth', 'true');
 
       const response = await fetch(`/api/v1/reportes/saldos?${params}`);
@@ -83,8 +84,8 @@ export default function ReportesPage() {
             onChange={(value) => setCuidadorId(value || '')}
           />
           <Group grow>
-            <DateInput label="Desde" value={from} onChange={(value) => setFrom(value as unknown as Date | null)} locale="es" />
-            <DateInput label="Hasta" value={to} onChange={(value) => setTo(value as unknown as Date | null)} locale="es" />
+            <DateInput label="Desde" value={from} onChange={setFrom} locale="es" clearable />
+            <DateInput label="Hasta" value={to} onChange={setTo} locale="es" clearable />
           </Group>
           <Button onClick={handleSearch} loading={loading} color="fucsia">
             Buscar
@@ -122,7 +123,7 @@ export default function ReportesPage() {
               <Title order={4} mb="md">Agrupación por Mes</Title>
               <Stack gap="xs">
                 {result.agrupacionesPorMes.map((item) => (
-                  <Group key={item.mes} justify="space-between" p="xs" style={{ background: '#f8f9fa', borderRadius: 4 }}>
+                  <Group key={item.mes} justify="space-between" p="xs" style={{ background: 'var(--admin-surface-2)', borderRadius: 4 }}>
                     <Text fw={500}>{item.mes}</Text>
                     <Group gap="lg">
                       <Text>${item.total.toLocaleString()}</Text>

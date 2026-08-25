@@ -19,6 +19,8 @@ import {
   Tooltip,
   Loader,
   Alert,
+  SimpleGrid,
+  Card,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import {
@@ -32,6 +34,7 @@ import {
 import { parseApiError } from '../utils/parseApiError';
 import { formatDate } from '../utils/formatDate';
 import { CuidadorSelect } from '../components/CuidadorPicker';
+import { ViewToggle, useViewMode } from '../components/ViewToggle';
 
 interface Usuario {
   id: string;
@@ -57,6 +60,8 @@ export default function UsuariosPage() {
   const [crearAbierto, setCrearAbierto] = useState(false);
   const [editar, setEditar] = useState<Usuario | null>(null);
   const [password, setPassword] = useState<Usuario | null>(null);
+
+  const [viewMode, setViewMode] = useViewMode('list');
 
   // Form de creación
   const [form, setForm] = useState({ email: '', nombre: '', password: '', rol: 'CUIDADOR', cuidadorId: '' });
@@ -161,6 +166,36 @@ export default function UsuariosPage() {
 
   const cuidadoresSinVincular = usuarios.filter((u) => u.rol === 'CUIDADOR' && !u.cuidadorId);
 
+  const acciones = (u: Usuario) => (
+    <Group gap="xs" wrap="nowrap">
+      <Tooltip label="Editar">
+        <ActionIcon
+          variant="light"
+          onClick={() => {
+            setEditar(u);
+            setFormEdit({ nombre: u.nombre ?? '', rol: u.rol, cuidadorId: u.cuidadorId ?? '' });
+          }}
+        >
+          <IconEdit size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Cambiar contraseña">
+        <ActionIcon variant="light" color="yellow" onClick={() => setPassword(u)}>
+          <IconKey size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label={u.activo ? 'Bloquear ingreso' : 'Desbloquear'}>
+        <ActionIcon
+          variant="light"
+          color={u.activo ? 'red' : 'green'}
+          onClick={() => patch(u, { activo: !u.activo }, u.activo ? 'Usuario bloqueado' : 'Usuario desbloqueado')}
+        >
+          {u.activo ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+        </ActionIcon>
+      </Tooltip>
+    </Group>
+  );
+
   return (
     <Container size="xl" py="xl">
       <Group justify="space-between" mb="xl">
@@ -179,10 +214,49 @@ export default function UsuariosPage() {
       )}
 
       <Paper withBorder p="md">
+        <Group justify="space-between" mb="sm">
+          <Text size="sm" c="dimmed">
+            {usuarios.length} {usuarios.length === 1 ? 'usuario' : 'usuarios'}
+          </Text>
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+        </Group>
         {loading ? (
           <Group justify="center" py="xl">
             <Loader />
           </Group>
+        ) : usuarios.length === 0 ? (
+          <Text c="dimmed" ta="center" py="xl">
+            No hay usuarios cargados.
+          </Text>
+        ) : viewMode === 'cards' ? (
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+            {usuarios.map((u) => (
+              <Card key={u.id} withBorder padding="md">
+                <Group justify="space-between" wrap="nowrap" mb="xs">
+                  <Text fw={600} lineClamp={1}>
+                    {u.nombre || u.email}
+                  </Text>
+                  <Badge color={u.activo ? 'green' : 'red'} variant="light">
+                    {u.activo ? 'Activo' : 'Bloqueado'}
+                  </Badge>
+                </Group>
+                <Text size="sm" c="dimmed" lineClamp={1} mb="xs">
+                  {u.email}
+                </Text>
+                <Group gap="xs" mb="sm">
+                  <Badge color={u.rol === 'ADMIN' ? 'grape' : 'cyan'} variant="light">
+                    {u.rol === 'ADMIN' ? 'Administrador' : 'Cuidador'}
+                  </Badge>
+                  {u.rol === 'CUIDADOR' && (
+                    <Text size="xs" c={u.cuidadorNombre ? 'dimmed' : 'red'}>
+                      {u.cuidadorNombre ? `↳ ${u.cuidadorNombre}` : 'Sin vincular'}
+                    </Text>
+                  )}
+                </Group>
+                {acciones(u)}
+              </Card>
+            ))}
+          </SimpleGrid>
         ) : (
           <Table.ScrollContainer minWidth={720}>
             <Table highlightOnHover>
@@ -214,48 +288,9 @@ export default function UsuariosPage() {
                       </Badge>
                     </Table.Td>
                     <Table.Td>{formatDate(u.createdAt)}</Table.Td>
-                    <Table.Td>
-                      <Group gap="xs">
-                        <Tooltip label="Editar">
-                          <ActionIcon
-                            variant="light"
-                            onClick={() => {
-                              setEditar(u);
-                              setFormEdit({ nombre: u.nombre ?? '', rol: u.rol, cuidadorId: u.cuidadorId ?? '' });
-                            }}
-                          >
-                            <IconEdit size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <Tooltip label="Cambiar contraseña">
-                          <ActionIcon variant="light" color="yellow" onClick={() => setPassword(u)}>
-                            <IconKey size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                        <Tooltip label={u.activo ? 'Bloquear ingreso' : 'Desbloquear'}>
-                          <ActionIcon
-                            variant="light"
-                            color={u.activo ? 'red' : 'green'}
-                            onClick={() =>
-                              patch(u, { activo: !u.activo }, u.activo ? 'Usuario bloqueado' : 'Usuario desbloqueado')
-                            }
-                          >
-                            {u.activo ? <IconLock size={16} /> : <IconLockOpen size={16} />}
-                          </ActionIcon>
-                        </Tooltip>
-                      </Group>
-                    </Table.Td>
+                    <Table.Td>{acciones(u)}</Table.Td>
                   </Table.Tr>
                 ))}
-                {usuarios.length === 0 && (
-                  <Table.Tr>
-                    <Table.Td colSpan={7}>
-                      <Text c="dimmed" ta="center" py="md">
-                        No hay usuarios cargados.
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
-                )}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>

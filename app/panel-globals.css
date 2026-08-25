@@ -418,6 +418,23 @@ body.panel-oscuro .mantine-Button-root[data-variant="subtle"]:hover {
   color: var(--admin-text);
 }
 
+/* Alert: Mantine pinta el fondo/texto con CSS vars inline (--alert-bg, etc.)
+   calculadas del color del tema: variant light = fondo pálido + texto oscuro,
+   ilegible sobre el panel oscuro. Se sobrescriben esas vars (los `!important`
+   ganan al style inline del root). El icono conserva el color del alert como
+   acento. Ámbar de marca para yellow/orange (avisos), rojo del panel para red. */
+body.panel-oscuro .mantine-Alert-root {
+  --alert-bg: var(--admin-surface-2) !important;
+  --alert-bd: 1px solid var(--admin-border-strong) !important;
+  --alert-color: var(--admin-cta) !important;
+  color: var(--admin-text);
+}
+
+body.panel-oscuro .mantine-Alert-title,
+body.panel-oscuro .mantine-Alert-message {
+  color: var(--admin-text);
+}
+
 body.panel-oscuro .mantine-Badge-root {
   color: var(--admin-text);
 }

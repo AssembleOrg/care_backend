@@ -27,6 +27,7 @@ import dayjs from 'dayjs';
 import { parseApiError } from '../utils/parseApiError';
 import { TEXTO_MOTIVO, type MotivoDudoso } from '@/src/domain/gps';
 import { CuidadorMultiSelect } from '../components/CuidadorPicker';
+import { ViewToggle, useViewMode } from '../components/ViewToggle';
 
 interface Fichaje {
   id: string;
@@ -77,6 +78,8 @@ export default function PresentismoPage() {
 
   const [rechazando, setRechazando] = useState<Fichaje | null>(null);
   const [nota, setNota] = useState('');
+
+  const [viewMode, setViewMode] = useViewMode('list');
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -172,7 +175,7 @@ export default function PresentismoPage() {
       </SimpleGrid>
 
       <Paper withBorder p="md" mb="md">
-        <Group grow align="flex-end">
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="sm">
           <CuidadorMultiSelect label="Cuidadores" value={cuidadorIds} onChange={setCuidadorIds} />
           <Select
             label="Estado"
@@ -184,14 +187,108 @@ export default function PresentismoPage() {
           />
           <DateInput label="Desde" value={desde} onChange={(v) => setDesde(v as Date | null)} locale="es" clearable />
           <DateInput label="Hasta" value={hasta} onChange={(v) => setHasta(v as Date | null)} locale="es" clearable />
-        </Group>
+        </SimpleGrid>
       </Paper>
 
       <Paper withBorder p="md">
+        <Group justify="space-between" mb="sm">
+          <Text size="sm" c="dimmed">
+            {fichajes.length} {fichajes.length === 1 ? 'fichaje' : 'fichajes'}
+          </Text>
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+        </Group>
         {loading ? (
           <Group justify="center" py="xl">
             <Loader />
           </Group>
+        ) : fichajes.length === 0 ? (
+          <Text c="dimmed" ta="center" py="xl">
+            No hay fichajes en el período seleccionado.
+          </Text>
+        ) : viewMode === 'cards' ? (
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+            {fichajes.map((f) => {
+              const badge = BADGE_REVISION[f.revision];
+              return (
+                <Card key={f.id} withBorder padding="md">
+                  <Group justify="space-between" mb="xs" wrap="nowrap">
+                    <Text fw={600}>{f.cuidadorNombre}</Text>
+                    <Badge color={badge.color} variant="light">
+                      {badge.label}
+                    </Badge>
+                  </Group>
+                  <Text size="sm" c="dimmed" mb="xs">
+                    {f.personaNombre}
+                  </Text>
+                  <Stack gap={4} mb="sm">
+                    <Text size="sm">Entrada: {dayjs(f.entradaAt).format('DD/MM/YYYY HH:mm')}</Text>
+                    <Text size="sm">
+                      Salida:{' '}
+                      {f.salidaAt ? (
+                        dayjs(f.salidaAt).format('DD/MM/YYYY HH:mm')
+                      ) : (
+                        <Badge color="orange" variant="light" size="sm">
+                          Sin cerrar
+                        </Badge>
+                      )}
+                    </Text>
+                    <Text size="sm">Horas: {f.horas != null ? `${f.horas} h` : '-'}</Text>
+                    <Text size="sm" c={f.entradaEnRango ? undefined : 'red'}>
+                      Distancia entrada: {f.entradaDistanciaM} m
+                    </Text>
+                    {f.salidaDistanciaM != null && (
+                      <Text size="sm" c={f.salidaEnRango ? undefined : 'red'}>
+                        Distancia salida: {f.salidaDistanciaM} m
+                      </Text>
+                    )}
+                    {f.motivosDudosos.length > 0 && (
+                      <Badge color="orange" variant="light" size="sm" w="fit-content">
+                        GPS dudoso
+                      </Badge>
+                    )}
+                    {f.notaRevision && (
+                      <Text size="xs" c="dimmed">
+                        {f.notaRevision}
+                      </Text>
+                    )}
+                  </Stack>
+                  <Group gap="xs" wrap="nowrap">
+                    <Anchor
+                      href={`https://www.openstreetmap.org/?mlat=${f.entradaLat}&mlon=${f.entradaLng}#map=18/${f.entradaLat}/${f.entradaLng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Ver en el mapa dónde marcó la entrada"
+                    >
+                      <IconMapPin size={18} />
+                    </Anchor>
+                    {f.revision === 'PENDIENTE' && (
+                      <>
+                        <Button
+                          size="compact-xs"
+                          color="green"
+                          variant="light"
+                          leftSection={<IconCheck size={14} />}
+                          loading={guardando}
+                          onClick={() => revisar(f, 'APROBADO')}
+                        >
+                          Aprobar
+                        </Button>
+                        <Button
+                          size="compact-xs"
+                          color="red"
+                          variant="light"
+                          leftSection={<IconX size={14} />}
+                          onClick={() => setRechazando(f)}
+                        >
+                          Rechazar
+                        </Button>
+                      </>
+                    )}
+                  </Group>
+                </Card>
+              );
+            })}
+          </SimpleGrid>
         ) : (
           <Table.ScrollContainer minWidth={1100}>
             <Table highlightOnHover>
@@ -317,15 +414,6 @@ export default function PresentismoPage() {
                     </Table.Tr>
                   );
                 })}
-                {fichajes.length === 0 && (
-                  <Table.Tr>
-                    <Table.Td colSpan={8}>
-                      <Text c="dimmed" ta="center" py="md">
-                        No hay fichajes en el período seleccionado.
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
-                )}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>

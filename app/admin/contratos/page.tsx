@@ -13,12 +13,14 @@ import {
     Container,
     Text,
     Table,
-    Badge,
+    Card,
+    SimpleGrid,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
 import { ContratoDTO } from '@/src/application/dto/ContratoDTO';
 import { formatDate } from '../utils/formatDate';
+import { ViewToggle, useViewMode } from '../components/ViewToggle';
 
 export default function ContratosPage() {
     const [isManual, setIsManual] = useState(false);
@@ -28,6 +30,7 @@ export default function ContratosPage() {
     // State for personas and contracts
     const [personas, setPersonas] = useState<any[]>([]);
     const [contratos, setContratos] = useState<ContratoDTO[]>([]);
+    const [viewMode, setViewMode] = useViewMode('list');
 
     const fetchContratos = async () => {
         try {
@@ -217,48 +220,78 @@ export default function ContratosPage() {
             </Paper>
 
             <Paper shadow="xs" p="xl" withBorder mt="xl">
-                <Title order={3} mb="md">Últimos Contratos</Title>
-                <Table>
-                    <Table.Thead>
-                        <Table.Tr>
-                            <Table.Th>Fecha</Table.Th>
-                            <Table.Th>Cliente</Table.Th>
-                            <Table.Th>Dirección</Table.Th>
-                            <Table.Th>Acciones</Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
+                <Group justify="space-between" mb="md">
+                    <Title order={3}>Últimos Contratos</Title>
+                    <ViewToggle value={viewMode} onChange={setViewMode} />
+                </Group>
+                {contratos.length === 0 ? (
+                    <Text c="dimmed" ta="center" py="md">No hay contratos recientes</Text>
+                ) : viewMode === 'cards' ? (
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                         {contratos.map((contrato) => {
                             const persona = personas.find((p: any) => p.value === contrato.idCliente);
                             const nombre = contrato.nombreManual || persona?.label || 'Desconocido';
                             const direccion = contrato.direccionManual || persona?.direccion || '-';
-
                             return (
-                                <Table.Tr key={contrato.id}>
-                                    <Table.Td>{formatDate(contrato.createdAt)}</Table.Td>
-                                    <Table.Td>{nombre}</Table.Td>
-                                    <Table.Td>{direccion}</Table.Td>
-                                    <Table.Td>
-                                        <Button
-                                            component="a"
-                                            href={`/api/v1/contratos/${contrato.id}/pdf`}
-                                            target="_blank"
-                                            size="xs"
-                                            variant="light"
-                                        >
-                                            Descargar
-                                        </Button>
-                                    </Table.Td>
-                                </Table.Tr>
+                                <Card key={contrato.id} withBorder padding="md">
+                                    <Group justify="space-between" wrap="nowrap" mb={4}>
+                                        <Text fw={600} lineClamp={1}>{nombre}</Text>
+                                        <Text size="xs" c="dimmed">{formatDate(contrato.createdAt)}</Text>
+                                    </Group>
+                                    <Text size="sm" c="dimmed" lineClamp={1} mb="sm">{direccion}</Text>
+                                    <Button
+                                        component="a"
+                                        href={`/api/v1/contratos/${contrato.id}/pdf`}
+                                        target="_blank"
+                                        size="xs"
+                                        variant="light"
+                                    >
+                                        Descargar PDF
+                                    </Button>
+                                </Card>
                             );
                         })}
-                        {contratos.length === 0 && (
+                    </SimpleGrid>
+                ) : (
+                    <Table.ScrollContainer minWidth={640}>
+                    <Table>
+                        <Table.Thead>
                             <Table.Tr>
-                                <Table.Td colSpan={4}>No hay contratos recientes</Table.Td>
+                                <Table.Th>Fecha</Table.Th>
+                                <Table.Th>Cliente</Table.Th>
+                                <Table.Th>Dirección</Table.Th>
+                                <Table.Th>Acciones</Table.Th>
                             </Table.Tr>
-                        )}
-                    </Table.Tbody>
-                </Table>
+                        </Table.Thead>
+                        <Table.Tbody>
+                            {contratos.map((contrato) => {
+                                const persona = personas.find((p: any) => p.value === contrato.idCliente);
+                                const nombre = contrato.nombreManual || persona?.label || 'Desconocido';
+                                const direccion = contrato.direccionManual || persona?.direccion || '-';
+
+                                return (
+                                    <Table.Tr key={contrato.id}>
+                                        <Table.Td>{formatDate(contrato.createdAt)}</Table.Td>
+                                        <Table.Td>{nombre}</Table.Td>
+                                        <Table.Td><Text lineClamp={1}>{direccion}</Text></Table.Td>
+                                        <Table.Td>
+                                            <Button
+                                                component="a"
+                                                href={`/api/v1/contratos/${contrato.id}/pdf`}
+                                                target="_blank"
+                                                size="xs"
+                                                variant="light"
+                                            >
+                                                Descargar
+                                            </Button>
+                                        </Table.Td>
+                                    </Table.Tr>
+                                );
+                            })}
+                        </Table.Tbody>
+                    </Table>
+                    </Table.ScrollContainer>
+                )}
             </Paper>
 
         </Container>

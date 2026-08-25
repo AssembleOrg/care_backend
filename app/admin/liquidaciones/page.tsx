@@ -302,35 +302,34 @@ export default function LiquidacionesPage() {
         </Paper>
 
         {/* Resumen */}
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Stack gap="lg">
-            <Group>
-              <IconCalculator size={28} />
-              <Title order={3}>Resumen de Liquidación</Title>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Stack gap="md">
+            <Group gap="xs">
+              <IconCalculator size={22} />
+              <Title order={4}>Resumen de Liquidación</Title>
             </Group>
-            
-            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
-              <div>
-                <Text size="sm" c="dimmed" fw={500} mb={4}>Período</Text>
-                <Text size="md" fw={600}>
-                  {fechaInicio && fechaFin 
-                    ? `${dayjs(fechaInicio).format('DD/MM/YYYY')} - ${dayjs(fechaFin).format('DD/MM/YYYY')}`
-                    : 'No seleccionado'
-                  }
+
+            <SimpleGrid cols={{ base: 3 }} spacing={0} style={{ alignItems: 'stretch' }}>
+              <Stack gap={2} px="sm">
+                <Text size="xs" c="dimmed" fw={500} tt="uppercase">Período</Text>
+                <Text size="sm" fw={600} lh={1.2}>
+                  {fechaInicio && fechaFin
+                    ? `${dayjs(fechaInicio).format('DD/MM/YY')} – ${dayjs(fechaFin).format('DD/MM/YY')}`
+                    : '—'}
                 </Text>
-              </div>
-              <div>
-                <Text size="sm" c="dimmed" fw={500} mb={4}>Horas trabajadas</Text>
-                <Text size="xl" fw={700} c="cyan">
-                  {horasTrabajadas.toFixed(2)} horas
+              </Stack>
+              <Stack gap={2} px="sm" style={{ borderLeft: '1px solid var(--admin-border)' }}>
+                <Text size="xs" c="dimmed" fw={500} tt="uppercase">Horas</Text>
+                <Text size="lg" fw={700} c="cyan" lh={1.2}>
+                  {horasTrabajadas.toFixed(2)}
                 </Text>
-              </div>
-              <div>
-                <Text size="sm" c="dimmed" fw={500} mb={4}>Total a liquidar</Text>
-                <Text size="xl" fw={700} c="fucsia">
-                  ${totalMonto.toFixed(2)}
+              </Stack>
+              <Stack gap={2} px="sm" style={{ borderLeft: '1px solid var(--admin-border)' }}>
+                <Text size="xs" c="dimmed" fw={500} tt="uppercase">Total</Text>
+                <Text size="lg" fw={700} c="fucsia" lh={1.2}>
+                  ${totalMonto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Text>
-              </div>
+              </Stack>
             </SimpleGrid>
 
             <Divider />
